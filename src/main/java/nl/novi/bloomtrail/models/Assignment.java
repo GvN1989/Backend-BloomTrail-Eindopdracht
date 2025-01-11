@@ -1,9 +1,14 @@
 package nl.novi.bloomtrail.models;
 
 import jakarta.persistence.*;
+import nl.novi.bloomtrail.common.Downloadable;
+import nl.novi.bloomtrail.common.Uploadable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
-@Table(name= "assignments")
+@Table(name = "assignments")
 public class Assignment {
 
     @Id
@@ -12,11 +17,13 @@ public class Assignment {
     private String description;
     @Enumerated(EnumType.STRING)
     private Status status;
-    private String upload;
-
     @ManyToOne
     @JoinColumn(name = "session_id", nullable = false)
     private Session session;
+    @OneToMany(mappedBy = "assignment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Upload> uploads = new ArrayList<>();
+
+    private String downloadUrl;
 
     public Integer getAssignmentId() {
         return assignmentId;
@@ -42,18 +49,27 @@ public class Assignment {
         this.status = status;
     }
 
-    public String getUpload() {
-        return upload;
-    }
-
-    public void setUpload(String upload) {
-        this.upload = upload;
-    }
-
     public Session getSession() {
         return session;
     }
+
     public void setSession(Session session) {
         this.session = session;
+    }
+
+    public List<Upload> getUploads() {
+        return uploads;
+    }
+
+    public void setUploads(List<Upload> uploads) {
+        this.uploads = uploads;
+    }
+
+    public String getDownloadUrl() {
+        return downloadUrl;
+    }
+
+    public void setDownloadUrl(String downloadUrl) {
+        this.downloadUrl = downloadUrl;
     }
 }

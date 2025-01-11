@@ -1,9 +1,15 @@
 package nl.novi.bloomtrail.models;
 
 import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.*;
+import org.hibernate.annotations.*;
 
-import java.time.LocalTime;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -14,19 +20,40 @@ public class Session {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long sessionId;
+    @NotBlank
     private String coach;
+    @NotBlank
     private String client;
+
+    @Future
+    @NotNull
     private LocalDate sessionDate;
+    @Future
+    @NotNull
     private LocalTime sessionTime;
+    @NotBlank
     private String location;
+
+    @Size(max = 255)
     private String comment;
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "session_insight_id")
     private SessionInsights sessionInsights;
 
-    @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Assignment> assignments;
+    @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true) //Is the cascadetype sufficient?
+    private List<Assignment> assignments = new ArrayList<>();
+
+    @ManyToOne
+    @JoinColumn(name = "step_id", nullable = false)
+    private Step step;
+
     public Long getSessionId() {
         return sessionId;
     }
@@ -81,6 +108,22 @@ public class Session {
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     public SessionInsights getSessionInsights() {
