@@ -1,10 +1,7 @@
 package nl.novi.bloomtrail.models;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import nl.novi.bloomtrail.common.Downloadable;
-import nl.novi.bloomtrail.common.Uploadable;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -19,9 +16,7 @@ public class StrengthResults {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-    @NotNull
-    private Date testDate;
+    private Long id;
     @CreationTimestamp
     private Date createdAt;
     @UpdateTimestamp
@@ -32,20 +27,20 @@ public class StrengthResults {
     @OneToMany(mappedBy = "strengthResults", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Upload> uploads = new ArrayList<>();
 
-    public Integer getId() {
+    @ManyToMany
+    @JoinTable(
+            name = "strength_results_top_strengths",
+            joinColumns = @JoinColumn(name = "strength_results_id"),
+            inverseJoinColumns = @JoinColumn(name = "managing_strength_id")
+    )
+    private List<ManagingStrength> topStrengths = new ArrayList<>();
+
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
-    }
-
-    public Date getTestDate() {
-        return testDate;
-    }
-
-    public void setTestDate(Date testDate) {
-        this.testDate = testDate;
     }
 
     public Date getCreatedAt() {
@@ -80,4 +75,11 @@ public class StrengthResults {
         this.uploads = uploads;
     }
 
+    public List<ManagingStrength> getTopStrengths() {
+        return topStrengths;
+    }
+
+    public void setTopStrengths(List<ManagingStrength> topStrengths) {
+        this.topStrengths = topStrengths;
+    }
 }

@@ -1,15 +1,17 @@
 package nl.novi.bloomtrail.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class ManagingStrength {
 
     @Id
-    private Integer managingStrengthId;
+    private Long managingStrengthId;
     private String strengthNl;
-    private String strengthEng;
+    private String strengthEn;
     private String contributionDoing;
     private String contributionBeing;
     private String needTask;
@@ -19,11 +21,11 @@ public class ManagingStrength {
     private String operatingBelief;
     private String misManaged;
 
-    public Integer getManagingStrengthId() {
+    public Long getManagingStrengthId() {
         return managingStrengthId;
     }
 
-    public void setManagingStrengthId(Integer managingStrengthId) {
+    public void setManagingStrengthId(Long managingStrengthId) {
         this.managingStrengthId = managingStrengthId;
     }
 
@@ -35,12 +37,12 @@ public class ManagingStrength {
         this.strengthNl = strengthNl;
     }
 
-    public String getStrengthEng() {
-        return strengthEng;
+    public String getStrengthEn() {
+        return strengthEn;
     }
 
-    public void setStrengthEng(String strengthEng) {
-        this.strengthEng = strengthEng;
+    public void setStrengthEn(String strengthEng) {
+        this.strengthEn = strengthEng;
     }
 
     public String getContributionDoing() {

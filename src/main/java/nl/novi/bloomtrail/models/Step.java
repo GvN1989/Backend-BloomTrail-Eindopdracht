@@ -13,7 +13,8 @@ public class Step {
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
     private Integer stepId;
-    private Date stepDate;
+    private Date stepStartDate;
+    private Date stepEndDate;
     private Boolean completed;
     private String goal;
     private Integer sequence;
@@ -34,12 +35,20 @@ public class Step {
         this.stepId = stepId;
     }
 
-    public Date getStepDate() {
-        return stepDate;
+    public Date getStepStartDate() {
+        return stepStartDate;
     }
 
-    public void setStepDate(Date stepDate) {
-        this.stepDate = stepDate;
+    public void setStepStartDate(Date stepStartDate) {
+        this.stepStartDate = stepStartDate;
+    }
+
+    public Date getStepEndDate() {
+        return stepEndDate;
+    }
+
+    public void setStepEndDate(Date stepDate) {
+        this.stepEndDate = stepDate;
     }
 
     public Boolean getCompleted() {

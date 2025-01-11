@@ -21,11 +21,9 @@ public class Upload {
     @JoinColumn(name = "strength_results_id", nullable = true)
     private StrengthResults strengthResults;
 
-    @OneToOne(mappedBy = "clientReflectionUpload")
-    private SessionInsights clientReflectionInsight;
-
-    @OneToOne(mappedBy = "coachNotesUpload")
-    private SessionInsights coachNotesInsight;
+    @ManyToOne
+    @JoinColumn(name = "sessionInsights_id", nullable = true)
+    private SessionInsights sessionInsights;
 
 
     public Long getId() {
@@ -68,19 +66,11 @@ public class Upload {
         this.strengthResults = strengthResults;
     }
 
-    public SessionInsights getClientReflectionInsight() {
-        return clientReflectionInsight;
+    public SessionInsights getSessionInsights() {
+        return sessionInsights;
     }
 
-    public void setClientReflectionInsight(SessionInsights clientReflectionInsight) {
-        this.clientReflectionInsight = clientReflectionInsight;
-    }
-
-    public SessionInsights getCoachNotesInsight() {
-        return coachNotesInsight;
-    }
-
-    public void setCoachNotesInsight(SessionInsights coachNotesInsight) {
-        this.coachNotesInsight = coachNotesInsight;
+    public void setSessionInsights(SessionInsights sessionInsights) {
+        this.sessionInsights = sessionInsights;
     }
 }

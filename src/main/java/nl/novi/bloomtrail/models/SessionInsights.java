@@ -7,6 +7,8 @@ import org.hibernate.annotations.CreationTimestamp;
 
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Entity
@@ -28,13 +30,8 @@ public class SessionInsights {
     @OneToOne(mappedBy = "sessionInsights")
     private Session session;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "client_reflection_upload_id")
-    private Upload clientReflectionUpload;
-
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "coach_notes_upload_id")
-    private Upload coachNotesUpload;
+    @OneToMany(mappedBy = "sessionInsight", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Upload> uploads = new ArrayList<>();
 
     public Long getSessionInsightId() {
         return sessionInsightId;
@@ -87,19 +84,11 @@ public class SessionInsights {
         this.createdAt = createdAt;
     }
 
-    public Upload getClientReflectionUpload() {
-        return clientReflectionUpload;
+    public List<Upload> getUploads() {
+        return uploads;
     }
 
-    public void setClientReflectionUpload(Upload clientReflectionUpload) {
-        this.clientReflectionUpload = clientReflectionUpload;
-    }
-
-    public Upload getCoachNotesUpload() {
-        return coachNotesUpload;
-    }
-
-    public void setCoachNotesUpload(Upload coachNotesUpload) {
-        this.coachNotesUpload = coachNotesUpload;
+    public void setUploads(List<Upload> uploads) {
+        this.uploads = uploads;
     }
 }

@@ -9,7 +9,7 @@ public class StrengthProgram {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer strengthProgrammeId;
+    private Long strengthProgramId;
     private String goal;
     private Date startDate;
     private Date endDate;
@@ -23,12 +23,12 @@ public class StrengthProgram {
 
     private String managingStrengthResultDownload;
 
-    public Integer getStrengthProgrammeId() {
-        return strengthProgrammeId;
+    public Long getStrengthProgramId() {
+        return strengthProgramId;
     }
 
-    public void setStrengthProgrammeId(Integer strengthProgrammeId) {
-        this.strengthProgrammeId = strengthProgrammeId;
+    public void setStrengthProgramId(Long strengthProgrammeId) {
+        this.strengthProgramId = strengthProgrammeId;
     }
 
     public String getGoal() {
