@@ -12,7 +12,7 @@ public class Step {
 
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
-    private Integer stepId;
+    private Long StepId;
     private Date stepStartDate;
     private Date stepEndDate;
     private Boolean completed;
@@ -27,12 +27,12 @@ public class Step {
     @JoinColumn(name = "session_id", nullable = false)
     private List<Session> sessions = new ArrayList<>();
 
-    public Integer getStepId() {
-        return stepId;
+    public Long getStepId() {
+        return StepId;
     }
 
-    public void setStepId(Integer stepId) {
-        this.stepId = stepId;
+    public void setStepId(Long stepId) {
+        this.StepId = stepId;
     }
 
     public Date getStepStartDate() {
@@ -54,7 +54,6 @@ public class Step {
     public Boolean getCompleted() {
         return completed;
     }
-
     public void setCompleted(Boolean completed) {
         this.completed = completed;
     }
@@ -90,4 +89,18 @@ public class Step {
     public void setSessions(List<Session> sessions) {
         this.sessions = sessions;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Step step = (Step) o;
+        return StepId != null && StepId.equals(step.getStepId());
+    }
+
+    @Override
+    public int hashCode() {
+        return StepId != null ? StepId.hashCode() : 0;
+    }
+
 }

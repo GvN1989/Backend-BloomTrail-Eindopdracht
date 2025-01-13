@@ -3,10 +3,8 @@ package nl.novi.bloomtrail.models;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name= "users")
@@ -22,6 +20,10 @@ public class User {
     @NotBlank
     @Column(nullable = false, unique = true)
     private String email;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<StrengthProgram> strengthPrograms = new ArrayList<>();
+
     @OneToMany(
             targetEntity = Authority.class,
             mappedBy = "username",
@@ -80,5 +82,13 @@ public class User {
 
     public void setProfilePicture(String profilePicture) {
         this.profilePicture = profilePicture;
+    }
+
+    public List<StrengthProgram> getStrengthPrograms() {
+        return strengthPrograms;
+    }
+
+    public void setStrengthPrograms(List<StrengthProgram> strengthPrograms) {
+        this.strengthPrograms = strengthPrograms;
     }
 }

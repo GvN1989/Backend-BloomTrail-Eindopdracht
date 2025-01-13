@@ -14,9 +14,14 @@ public class StrengthProgram {
     private Date startDate;
     private Date endDate;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "strength_results_id")
     private StrengthResults strengthResults;
+
 
     @OneToMany(mappedBy = "strengthProgram", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Step> timeline = new ArrayList<>();
@@ -77,5 +82,15 @@ public class StrengthProgram {
     public void setManagingStrengthResultDownload(String managingStrengthResultDownload) {
         this.managingStrengthResultDownload = managingStrengthResultDownload;
     }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+
 
 }

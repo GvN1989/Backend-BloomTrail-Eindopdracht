@@ -141,4 +141,12 @@ public class Session {
     public void setAssignments(List<Assignment> assignments) {
         this.assignments = assignments;
     }
+
+    public Step getStep() {
+        return step;
+    }
+
+    public void setStep(Step step) {
+        this.step = step;
+    }
 }
