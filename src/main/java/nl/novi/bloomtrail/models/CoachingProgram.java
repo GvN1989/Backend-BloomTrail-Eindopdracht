@@ -1,17 +1,34 @@
 package nl.novi.bloomtrail.models;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 import java.util.*;
 
 @Entity
-@Table(name= "Strength_Programs")
-public class StrengthProgram {
+@Table(name= "coaching_programs")
+public class CoachingProgram {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long strengthProgramId;
+    private Long coachingProgramId;
+    @NotBlank
+    @Size(max = 255)
+    private String coachingProgramName;
     private String goal;
+
+    @NotNull
+    @JsonFormat(pattern= "dd-mm-yyy")
+    @Future
     private Date startDate;
+
+    @NotNull
+    @JsonFormat(pattern= "dd-mm-yyy")
+    @Future
     private Date endDate;
 
     @ManyToOne
@@ -28,12 +45,20 @@ public class StrengthProgram {
 
     private String managingStrengthResultDownload;
 
-    public Long getStrengthProgramId() {
-        return strengthProgramId;
+    public Long getCoachingProgramId() {
+        return coachingProgramId;
     }
 
-    public void setStrengthProgramId(Long strengthProgrammeId) {
-        this.strengthProgramId = strengthProgrammeId;
+    public void setCoachingProgramId(Long coachingProgramId) {
+        this.coachingProgramId = coachingProgramId;
+    }
+
+    public String getCoachingProgramName() {
+        return coachingProgramName;
+    }
+
+    public void setCoachingProgramName(String coachingProgramName) {
+        this.coachingProgramName = coachingProgramName;
     }
 
     public String getGoal() {
@@ -43,6 +68,7 @@ public class StrengthProgram {
     public void setGoal(String goal) {
         this.goal = goal;
     }
+
     public List<Step> getTimeline() {
         return timeline;
     }
@@ -82,7 +108,6 @@ public class StrengthProgram {
     public void setManagingStrengthResultDownload(String managingStrengthResultDownload) {
         this.managingStrengthResultDownload = managingStrengthResultDownload;
     }
-
     public User getUser() {
         return user;
     }
@@ -90,7 +115,6 @@ public class StrengthProgram {
     public void setUser(User user) {
         this.user = user;
     }
-
 
 
 }

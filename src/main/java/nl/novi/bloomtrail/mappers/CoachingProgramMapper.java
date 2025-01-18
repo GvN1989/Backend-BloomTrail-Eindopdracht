@@ -1,4 +1,4 @@
 package nl.novi.bloomtrail.mappers;
 
-public class StrengthProgramMapper {
+public class CoachingProgramMapper {
 }

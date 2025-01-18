@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface StepRepository extends JpaRepository <Step, Long> {
 
-    @Query("SELECT s FROM Step s WHERE s.strengthProgram.strengProgramId = :programId")
-    List<Step> findStepsByStrengthProgram(@Param("programId") Long strengthProgramId);
+    @Query("SELECT s FROM Step s WHERE s.coachingProgram.coachingProgramId = :programId")
+    List<Step> findStepsByCoachingProgram(@Param("programId") Long coachingProgramId);
 
 }

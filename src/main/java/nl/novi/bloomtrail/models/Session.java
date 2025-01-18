@@ -1,5 +1,6 @@
 package nl.novi.bloomtrail.models;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Table;
@@ -20,17 +21,26 @@ public class Session {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long sessionId;
+
+    @Column(name = "Session_Name")
+    private String sessionName;
+
     @NotBlank
     private String coach;
+
     @NotBlank
     private String client;
 
+    @JsonFormat(pattern= "dd-mm-yyy")
     @Future
     @NotNull
     private LocalDate sessionDate;
+
+    @JsonFormat(pattern= "dd-mm-yyy")
     @Future
     @NotNull
     private LocalTime sessionTime;
+
     @NotBlank
     private String location;
 
@@ -38,9 +48,13 @@ public class Session {
     private String comment;
 
     @CreationTimestamp
+    @JsonFormat(pattern= "dd-mm-yyy")
+    @Future
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
+    @JsonFormat(pattern= "dd-mm-yyy")
+    @Future
     private LocalDateTime updatedAt;
 
     @OneToOne(cascade = CascadeType.ALL)

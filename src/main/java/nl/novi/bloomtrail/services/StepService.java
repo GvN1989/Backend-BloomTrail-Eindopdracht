@@ -1,11 +1,12 @@
 package nl.novi.bloomtrail.services;
 
 import nl.novi.bloomtrail.exceptions.RecordNotFoundException;
+import nl.novi.bloomtrail.models.Session;
 import nl.novi.bloomtrail.models.Step;
-import nl.novi.bloomtrail.models.StrengthProgram;
+import nl.novi.bloomtrail.models.CoachingProgram;
 import nl.novi.bloomtrail.repositories.SessionRepository;
 import nl.novi.bloomtrail.repositories.StepRepository;
-import nl.novi.bloomtrail.repositories.StrengthProgramRepository;
+import nl.novi.bloomtrail.repositories.CoachingProgramRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,14 +15,14 @@ import java.util.List;
 public class StepService {
     private final StepRepository stepRepository;
 
-    private final StrengthProgramRepository strengthProgramRepository;
+    private final CoachingProgramRepository coachingProgramRepository;
 
-    private final StrengthProgramService strengthProgramService;
+    private final CoachingProgramService coachingProgramService;
 
-    public StepService(StepRepository stepRepository, StrengthProgramRepository strengthProgramRepository, StrengthProgramService strengthProgramService, SessionRepository sessionRepository) {
+    public StepService(StepRepository stepRepository, CoachingProgramRepository coachingProgramRepository, CoachingProgramService coachingProgramService, SessionRepository sessionRepository) {
         this.stepRepository = stepRepository;
-        this.strengthProgramRepository = strengthProgramRepository;
-        this.strengthProgramService = strengthProgramService;
+        this.coachingProgramRepository = coachingProgramRepository;
+        this.coachingProgramService = coachingProgramService;
     }
 
     public List<Step> findAll(){
@@ -34,21 +35,31 @@ public class StepService {
 
     }
 
-    public List<Step> findStepsByStrengthProgram(Long strengthProgramId) {
-        return stepRepository.findStepsByStrengthProgram(strengthProgramId);
+    public List<Step> findStepsByCoachingProgram(Long coachingProgramId) {
+        List<Step> steps= stepRepository.findStepsByCoachingProgram(coachingProgramId);
+        if(steps.isEmpty()) {
+            throw new RecordNotFoundException("No steps found for CoachingProgram with ID: " + coachingProgramId);
+        }
+        return stepRepository.findStepsByCoachingProgram(coachingProgramId);
 
     }
 
-    public Step addStepToProgram(Long strengthProgramId, Step step) {
-        StrengthProgram strengthProgram = strengthProgramRepository.findById(strengthProgramId)
-                .orElseThrow(() -> new RecordNotFoundException("StrengthProgram with ID " + strengthProgramId + " not found"));
+    public List<Session> getSessionsForStep(Long stepId) {
+        Step step = stepRepository.findById(stepId)
+                .orElseThrow(() -> new RecordNotFoundException("Step with ID " + stepId + " not found"));
+        return step.getSessions();
+    }
 
-        validateStepSequence(strengthProgramId, step);
+    public Step addStepToProgram(Long coachingProgramId, Step step) {
+        CoachingProgram coachingProgram = coachingProgramRepository.findById(coachingProgramId)
+                .orElseThrow(() -> new RecordNotFoundException("CoachingProgram with ID " + coachingProgramId + " not found"));
 
-        step.setStrengthProgram(strengthProgram);
+        validateStepSequence(coachingProgramId, step);
+
+        step.setCoachingProgram(coachingProgram);
         stepRepository.save(step);
 
-        strengthProgramService.updateProgramEndDate(strengthProgramId);
+        coachingProgramService.updateProgramEndDate(coachingProgramId);
 
         return step;
     }
@@ -77,8 +88,8 @@ public class StepService {
         stepRepository.deleteById(stepId);
     }
 
-    private void validateStepSequence(Long strengthProgramId, Step newStep) {
-        List<Step> existingSteps = stepRepository.findStepsByStrengthProgram(strengthProgramId);
+    private void validateStepSequence(Long coachingProgramId, Step newStep) {
+        List<Step> existingSteps = stepRepository.findStepsByCoachingProgram(coachingProgramId);
 
         for (Step step : existingSteps) {
             if (step.getSequence().equals(newStep.getSequence())) {
@@ -98,8 +109,4 @@ public class StepService {
         step.setCompleted(isCompleted);
         return stepRepository.save(step);
     }
-
-
-
-    // retrieve or manage sessions per step
 }

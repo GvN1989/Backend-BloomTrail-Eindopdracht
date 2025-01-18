@@ -16,7 +16,7 @@ public class StrengthResults {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long strengthResultsId;
     @CreationTimestamp
     private Date createdAt;
     @UpdateTimestamp
@@ -35,12 +35,12 @@ public class StrengthResults {
     )
     private List<ManagingStrength> topStrengths = new ArrayList<>();
 
-    public Long getId() {
-        return id;
+    public Long getStrengthResultsId() {
+        return strengthResultsId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setStrengthResultsId(Long strengthResultsId) {
+        this.strengthResultsId = strengthResultsId;
     }
 
     public Date getCreatedAt() {

@@ -22,7 +22,7 @@ public class User {
     private String email;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<StrengthProgram> strengthPrograms = new ArrayList<>();
+    private List<CoachingProgram> strengthPrograms = new ArrayList<>();
 
     @OneToMany(
             targetEntity = Authority.class,
@@ -84,11 +84,11 @@ public class User {
         this.profilePicture = profilePicture;
     }
 
-    public List<StrengthProgram> getStrengthPrograms() {
+    public List<CoachingProgram> getStrengthPrograms() {
         return strengthPrograms;
     }
 
-    public void setStrengthPrograms(List<StrengthProgram> strengthPrograms) {
+    public void setStrengthPrograms(List<CoachingProgram> strengthPrograms) {
         this.strengthPrograms = strengthPrograms;
     }
 }

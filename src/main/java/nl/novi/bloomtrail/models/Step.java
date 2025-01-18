@@ -1,27 +1,46 @@
 package nl.novi.bloomtrail.models;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 @Entity
-@Table (name= "steps")
+@Table(name = "steps")
 public class Step {
 
     @Id
-    @GeneratedValue (strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long StepId;
+
+    @NotBlank
+    @Size(max = 255)
+    private String StepName;
+
+    @JsonFormat(pattern = "dd-mm-yyy")
+    @Future
     private Date stepStartDate;
+
+    @JsonFormat(pattern = "dd-mm-yyy")
+    @Future
     private Date stepEndDate;
+
+    @AssertFalse(message = "The value must be false by default")
     private Boolean completed;
+
+    @NotBlank
+    @Size(max = 500)
     private String goal;
+
+    @NotNull
     private Integer sequence;
 
     @ManyToOne
-    @JoinColumn(name = "strength_program_id", nullable = false)
-    private StrengthProgram strengthProgram;
+    @JoinColumn(name = "coaching_program_id", nullable = false)
+    private CoachingProgram coachingProgram;
 
     @OneToMany
     @JoinColumn(name = "session_id", nullable = false)
@@ -54,6 +73,7 @@ public class Step {
     public Boolean getCompleted() {
         return completed;
     }
+
     public void setCompleted(Boolean completed) {
         this.completed = completed;
     }
@@ -74,12 +94,12 @@ public class Step {
         this.sequence = sequence;
     }
 
-    public StrengthProgram getStrengthProgram() {
-        return strengthProgram;
+    public CoachingProgram getCoachingProgram() {
+        return coachingProgram;
     }
 
-    public void setStrengthProgram(StrengthProgram strengthProgram) {
-        this.strengthProgram = strengthProgram;
+    public void setCoachingProgram(CoachingProgram coachingProgram) {
+        this.coachingProgram = coachingProgram;
     }
 
     public List<Session> getSessions() {
@@ -88,6 +108,14 @@ public class Step {
 
     public void setSessions(List<Session> sessions) {
         this.sessions = sessions;
+    }
+
+    public String getStepName() {
+        return StepName;
+    }
+
+    public void setStepName(String stepName) {
+        StepName = stepName;
     }
 
     @Override
