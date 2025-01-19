@@ -1,4 +1,4 @@
 package nl.novi.bloomtrail.models;
 
-public class UploadTest {
+public enum AppointmentStatusTest {
 }

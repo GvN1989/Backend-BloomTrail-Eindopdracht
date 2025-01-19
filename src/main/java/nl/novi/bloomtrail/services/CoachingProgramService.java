@@ -1,5 +1,6 @@
 package nl.novi.bloomtrail.services;
 
+import nl.novi.bloomtrail.dtos.CoachingProgramInputDto;
 import nl.novi.bloomtrail.exceptions.RecordNotFoundException;
 import nl.novi.bloomtrail.models.*;
 import nl.novi.bloomtrail.repositories.*;

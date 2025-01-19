@@ -16,25 +16,15 @@ public class Step {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long StepId;
 
-    @NotBlank
-    @Size(max = 255)
     private String StepName;
 
-    @JsonFormat(pattern = "dd-mm-yyy")
-    @Future
     private Date stepStartDate;
 
-    @JsonFormat(pattern = "dd-mm-yyy")
-    @Future
     private Date stepEndDate;
 
-    @AssertFalse(message = "The value must be false by default")
     private Boolean completed;
 
-    @NotBlank
-    @Size(max = 500)
     private String goal;
-
     @NotNull
     private Integer sequence;
 

@@ -1,27 +1,19 @@
 package nl.novi.bloomtrail.dtos;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.validation.constraints.*;
-import nl.novi.bloomtrail.models.Step;
-
 import java.util.Date;
 
-public class StepInputDto {
+public class StepDto {
+
     private Long StepId;
 
-    @NotBlank
-    @Size(max = 255)
     private String StepName;
 
-    @JsonFormat(pattern = "dd-mm-yyy")
-    @Future
     private Date stepStartDate;
-    @JsonFormat(pattern = "dd-mm-yyy")
-    @Future
+
     private Date stepEndDate;
+
     private Boolean completed;
-    @NotBlank
-    @Size(max = 500)
+
     private String goal;
 
     private Integer sequence;
@@ -81,5 +73,4 @@ public class StepInputDto {
     public void setSequence(Integer sequence) {
         this.sequence = sequence;
     }
-
 }

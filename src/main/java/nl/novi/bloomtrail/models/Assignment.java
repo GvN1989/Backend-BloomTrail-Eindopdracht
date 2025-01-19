@@ -1,27 +1,25 @@
 package nl.novi.bloomtrail.models;
 
 import jakarta.persistence.*;
-import nl.novi.bloomtrail.common.Downloadable;
-import nl.novi.bloomtrail.common.Uploadable;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "assignments")
-public class Assignment implements Uploadable, Downloadable {
+public class Assignment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer assignmentId;
     private String description;
     @Enumerated(EnumType.STRING)
-    private Status status;
+    private FileStatus fileStatus;
     @ManyToOne
     @JoinColumn(name = "session_id", nullable = false)
     private Session session;
     @OneToMany(mappedBy = "assignment", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Upload> uploads = new ArrayList<>();
+    private List<File> files = new ArrayList<>();
 
     private String downloadUrl;
 
@@ -41,12 +39,28 @@ public class Assignment implements Uploadable, Downloadable {
         this.description = description;
     }
 
-    public Status getStatus() {
-        return status;
+    public FileStatus getFileStatus() {
+        return fileStatus;
     }
 
-    public void setStatus(Status status) {
-        this.status = status;
+    public void setFileStatus(FileStatus fileStatus) {
+        this.fileStatus = fileStatus;
+    }
+
+    public List<File> getFiles() {
+        return files;
+    }
+
+    public void setFiles(List<File> files) {
+        this.files = files;
+    }
+
+    public String getDownloadUrl() {
+        return downloadUrl;
+    }
+
+    public void setDownloadUrl(String downloadUrl) {
+        this.downloadUrl = downloadUrl;
     }
 
     public Session getSession() {
@@ -57,42 +71,4 @@ public class Assignment implements Uploadable, Downloadable {
         this.session = session;
     }
 
-    public void setUploads(List<Upload> uploads) {
-        this.uploads = uploads;
-    }
-
-    @Override
-    public String getDownload() {
-        return downloadUrl;
-    }
-
-    @Override
-    public void setDownload(String download) {
-        this.downloadUrl = download;
-    }
-
-    @Override
-    public List<Upload> getUploads() {
-        return uploads;
-    }
-
-    @Override
-    public void addUpload(Upload upload) {
-        uploads.add(upload);
-        upload.setAssignment(this);
-    }
-
-    @Override
-    public void removeUpload(Upload upload) {
-        uploads.remove(upload);
-        upload.setAssignment(null);
-    }
-
-    @Override
-    public String generateDownloadUrl() {
-        return uploads.stream()
-                .map(Upload::getUrl)
-                .findFirst()
-                .orElse("No uploads available");
-    }
 }

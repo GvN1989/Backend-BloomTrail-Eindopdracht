@@ -1,6 +1,6 @@
 package nl.novi.bloomtrail.models;
 
-public enum Status {
+public enum FileStatus {
 
     ASSIGNED,
     NOT_STARTED,

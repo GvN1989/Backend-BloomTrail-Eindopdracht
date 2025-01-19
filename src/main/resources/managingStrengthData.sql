@@ -18,7 +18,7 @@ INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing
 ;Deadlines', 'An accountability process (To keep others accountable and making progress)
 ; Clarity about the objectives for the conversation or activity', ' Too much talk, no enough action
 ; Others not working as hard as you
-; Unclear/missing goals or measure of succes', ' Unclear or unachievable goals or succes measures
+; Unclear/missing goals or measure of success', ' Unclear or unachievable goals or success measures
 ; Falling short of timely completion', 'My feeling of worth, value, or success is equal to what I accomplish; If I don’t achieve, I may feel like I’m falling short of what I’m meant to do or be (like I’m a failure) ; I must work in order for me to feel most good about myself (to experience emotional safety/peace)', ' Become workaholic
 ; Be judgemental of underachievers
 ; Disconnect from and isolate self when others approach tasks differently or less effectively than you think you do
@@ -116,7 +116,7 @@ I must be in control in order for me to feel okay about myself and about my deci
 ; Over;schedule
 ; Judge others who are less able to arrange/organize
 ; Be demanding of others to do what you think is best (without questioning)
-; Demonstrate excessive multi-tasking which leaves balls dropped and things undone
+; Demonstrate excessive multi--tasking which leaves balls dropped and things undone
 ; Be controlling
 ; Not communicating what they see or want to achieve
 ; Doing everything themselves in order to get it done to own standard
@@ -144,7 +144,7 @@ I must be in alignment with my own values and living with purpose, in order for 
 ; Impose your values on others and expect them to behave similarly
 ; Be judgemental of others based on your personal values and what you deem to be ''right''
 ; Show up as stubborn ; set in ways (your view is superior)
-; Demonstrate black/white thinking (no in-between)
+; Demonstrate black/white thinking (no in--between)
 ; Can struggle to see things from someone else''s perspective.
 ; Get very upset in arguments or disagreements');
 INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('7', 'Sturingskracht', 'Command', 'Confidently Take charge
@@ -159,7 +159,7 @@ INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing
 ; To Be heard
 ; Opportunity for exchange of perspectives between people', 'Others to mirror your energy
 ; Debate others To speak their mind and challenge your views
-; bottom-lining (Too much talk is disengaging)
+; bottom--lining (Too much talk is disengaging)
 ; Honesty and directness, no beating around the bush
 ; Feedback from others', 'Being told what to do
 ; Wordy or unclear communication
@@ -176,7 +176,7 @@ If I don''t direct others toward the outcome that is needed (or that I want to c
 I must take charge when it matters in order for me to feel like I''m contributing and adding value (this makes me feel like I''m okay/acceptable)', 'Be demanding of others (expect them to do whatever you think is best)
 ; Show up as argumentative
 ; Go straight to the point without any context
-; Be close-minded
+; Be close--minded
 ; Take unjustified risk
 ; Be dismissing or judgmental of those who seem weak or don''t speak up
 ; Try control others, circumstances, or situations
@@ -208,15 +208,15 @@ I must communicate effectively in order for me to feel like I’m making a diffe
 ; Repeat what others say, when unnecessary
 ; Hijacks a conversation
 ; Will talk until they themselves understand
-; Over-talking or over-explaining
+; Over--talking or over--explaining
 ; Dominating conversations (talking to be heard)
 ; Pretend listening, only to plan a reply
 ; Unconsciously demand attention through talking
-; Use more words than are needed (over-talk)
+; Use more words than are needed (over--talk)
 ; Plan what to say while others are speaking (not listening)
 ; Harshly judge or disengage from others who are ineffective communicators');
 INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('9', 'Competitie', 'Competition', 'Clarify measurement
-; Hold up performance as the no-nonsense, ultimate yardstick
+; Hold up performance as the no--nonsense, ultimate yardstick
 ; Have the spirit of a champion
 ; Focus on the objective
 ; Hold that team wins are as important as individual wins', 'Tenacious
@@ -240,7 +240,7 @@ I must win in order for me to feel safe and good about myself', 'Win at all cost
 ; Show up as self centered
 ; Not quit or slow down, even when wise to do so
 ; Judge others who don''t care about winning (see them as losers)
-; Demonstrate one-upmanship
+; Demonstrate one--upmanship
 ; Be combative
 ; Demean others or thing disparagingly of them');
 INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('10', 'Verbondenheid', 'Connectedness', 'Build bridges between ideas and people
@@ -292,7 +292,7 @@ INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing
 ; Review of previous discussion, conversation at the beginning of a meeting, ongoing dialogue (frame of reference)
 ; Looking back to find the anchor for the present', 'Time to adjust to change
 ; Chance To explore past success patterns or learning within the context of the current challenges/needs (To find An anchor there in order To Move forward)', 'Others launching into conversation without the chance to review or look back to get anchored
-; decision-making which ignores historical data
+; decision--making which ignores historical data
 ; not having the context for a situation
 ; Others’ disregard of past information as relevant or valuable', 'Unfamiliarity ; Lack of history with something new
 ; not knowing or not having the information (particularly as it relates To the past)', 'My feeling of worth, value, or success is equal to the degree to which I am able to see and apply historical information to the present;
@@ -337,7 +337,7 @@ I must maintain my privacy and have adequate deliberation time in order for me t
 ; Show unwillingness to move to action without ''proof'' of success
 ; Judge others who are less deliberative (more vulnerable)
 ; Be standoffish or use the silent treatment as a ''communication'' method
-; Be self-contained and absorbed
+; Be self--contained and absorbed
 ; Be afraid to act
 ; Not trust others with anything');
 INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('14', 'Aanmoediging', 'Developer', 'Develop projects and turning ideas into reality
@@ -346,12 +346,12 @@ INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing
 ; challenge others To grow
 ; Empower others To Be successful
 ; see potential', 'Patient with the inexperienced
-; Non-judgemental
+; Non--judgemental
 ; A cheerleader, encourager', 'To Celebrate small steps
 ; To see progress of self and others
 ; Words of affirmation for your contribution', 'Patience
 ; Encouragement, validation
-; Non-judgement
+; Non--judgement
 ; Excitement about your progress', 'Impatience of others
 ; Judgment
 ; Pressure to grow quickly
@@ -367,14 +367,14 @@ INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing
 ; Create and Establish predictable routines
 ; keep and enforce schedules', 'Precise
 ; accurate
-; Detail-oriented', 'Order
+; Detail--oriented', 'Order
 ; Structure
 ; clear expectations
 ; Systems/processes
 ; schedule
 ; details', 'clear expectations or Rules
 ; Others’ accuracy', 'Chaos (self, others, situation)
-; Rule- breaking and inconsistency
+; Rule-- breaking and inconsistency
 ; Extended big picture, theoretical conversations
 ; When others are not methodical and tidy
 ; Others not following the rules
@@ -397,7 +397,7 @@ INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing
 ; Tender hearted
 ; Compassionate, caring', 'To be listened to/seen/heard
 ; Asking: ''How do you feel about this?'' (rather than ''what do you think?'')
-; Non-judgement
+; Non--judgement
 ; Gentleness
 ; Awareness of your needs', 'Freedom to laugh, cry, vent
 ; Others to just be present with you, feel into the space of what is happening
@@ -415,7 +415,7 @@ I must be discerning or others and helpful in order for me to feel okay about my
 ; Can even Be manipulative and/or manipulated
 ; Paralyzed by emotions of others.');
 INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('17', 'Focus', 'Focus', 'Guide yourself and others toward goals
-; Bring laser-beam energy
+; Bring laser--beam energy
 ; Naturally filter life''s choices
 ; Clarify by naturally focusing on what seems important', 'Destination driven
 ; able To screen out distractions', 'Clear bull''s eye
@@ -448,8 +448,8 @@ INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing
 ; Creative/imaginative
 ; able To Sense what is coming', 'Room to be imaginative and creative
 ; Opportunity to speak about the future (note : the possibilities come alive in the discussion of them)
-; Permission to ask ''What if…..?''', 'To associate with and listen to others who are excited about the unseen possibilities in the future ; ''Futurizing''
-; Non-judgement
+; Permission to ask ''What if.....?''', 'To associate with and listen to others who are excited about the unseen possibilities in the future ; ''Futurizing''
+; Non--judgement
 ; explore and create possibilities', 'Others pragmatism, pessimism
 ; Being misunderstood
 ; Others shortsightedness
@@ -464,7 +464,7 @@ I must be able to envision and create future possibilities in order for me to fe
 ; ''Overtalk'' ideas of possibility without talking into account the reservations or perspectives of others
 ; Be caught in excessive dreaming
 ; Judge those who don''t think ahead very well
-; Hold the view that ''I have it. I must TELL them, give them this brilliant idea''; rather than co-creating with others. ');
+; Hold the view that ''I have it. I must TELL them, give them this brilliant idea''; rather than co--creating with others. ');
 INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('19', 'Harmonie', 'Harmony', 'Help maintain the status quo
 ; Create common ground—seek areas of agreement
 ; Provide a steadying influence
@@ -485,7 +485,7 @@ INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing
 If I am unable to prevent or resolve conflict and maintain a harmonious experience, I may feel frustration or like I’m falling short of what I should be doing;
 I must be able to prevent or resolve conflict and maintain a harmonious experience in order for me to feel okay about myself and others or feel like I’m adding value', 'Could be avoiding conflict, sometimes at all cost.
 ; Could be paralyzed by high conflict environments and sudden changes in dynamics
-; Could avoid the real issues that need to surface, for sake of harmony…. thus creating disharmony in other relationships.
+; Could avoid the real issues that need to surface, for sake of harmony.... thus creating disharmony in other relationships.
 ; Avoid conflict at all costs
 ; Judge those who don’t operate with harmony
 ; Say yes, when no is what is meant (or needed)
@@ -493,7 +493,7 @@ I must be able to prevent or resolve conflict and maintain a harmonious experien
 ; Show up as indecisive
 ; Demonstrate stonewalling rather than be honest/direct
 ; Be unwilling to confront
-; Become a people-pleaser, make/keep everyone happy');
+; Become a people--pleaser, make/keep everyone happy');
 INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('20', 'Ideeënvorming', 'Ideation', 'See beneath the surface
 ; connect the dots
 ; Can Create ideas from nothing
@@ -548,10 +548,10 @@ INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing
 ; Celebrate differences and diversity
 ; Easily adjust to others unique needs and gifts to create fit', 'A strength seeker
 ; Discerning
-; a natural team-builder', 'Flexible Rules
+; a natural team--builder', 'Flexible Rules
 ; Responsive To the needs
 ; expect others To see how To leverage your gifts and talents
-; not having a one-size fits all approach', 'To be seen a unique, valued for your differences
+; not having a one--size fits all approach', 'To be seen a unique, valued for your differences
 ; To have others adjust to your needs and appreciate your contributions. ', 'Others not seeing you as unique or valuing your contributions
 ; Others not seeing your needs
 ; Others not respecting your differences
@@ -633,7 +633,7 @@ INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing
 ; Others unwillingness to take a risk ', 'Same old; stuck in an unchanging rut
 ; Worry about not having the information/knowing', 'My feeling of worth, value, or success is equal to the degree to which I am able to find or provide relevant information, tools, and resources;
 If I am unable to find or provide relevant information, tools, and resources, I may feel frustration or like I’m falling short of what I should be doing;
-Finding or providing relevant information, tools, and resources is what makes me feel good about myself and others or feel like I’m adding value (therefore, I am not okay without this and must try to create this)', 'Can be \'sucked in\'with the learning agenda and miss the practical application as always looking for new learning moments.
+Finding or providing relevant information, tools, and resources is what makes me feel good about myself and others or feel like I’m adding value (therefore, I am not okay without this and must try to create this)', 'Can be 'sucked in' with the learning agenda and miss the practical application as always looking for new learning moments.
 ; Can judge non learners (or non readers) as lazy or even ''stupid''.
 ; Sound like a know it all
 ; Be unwilling to listen to others with varying viewpoints
@@ -772,7 +772,7 @@ Solving problems and fixing what isn’t working is what makes me feel good abou
 ; Be paralyzed by fear of getting it wrong
 ; Have excessive self;criticism or judgment of others
 ; Sabotage a relationship or project so you can fix it');
-INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('31', 'Zelfverzekerdheid', 'Self - Assurance', 'Provide a feeling of quiet reassurance that things are under control
+INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('31', 'Zelfverzekerdheid', 'Self -- Assurance', 'Provide a feeling of quiet reassurance that things are under control
 ; Have an air of authority, a presence
 ; Trust your own judgment
 ; Instill confidence in others', 'Internally confident
@@ -794,7 +794,7 @@ Being seen as competent and in control is what makes me feel good about myself o
 ; Be self focused
 ; Not listen to others or be dismissive of them, uncaring
 ; Be overconfident
-; Be a maverick, unwilling to co-create, blend with others
+; Be a maverick, unwilling to co--create, blend with others
 ; Judgmental of others’ vulnerability, insecurity, or weakness
 ; Want to solve all things or be the answer');
 INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('32', 'Significantie', 'Significance', 'Create Big impact
@@ -816,7 +816,7 @@ INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing
 If I am unable to be seen as strong and creating a meaningful legacy of some sort, I may feel frustration or like I’m falling short and failing;
 Being seen as credible and making a significant difference is what makes me feel good about myself or feel like I’m adding value (therefore, I must try to create this to prove to others that I’m of value)', 'May sacrifice the realistic for the seemingly significant (unrealistic) dream.
 ; May overshoot goals in order to ''be seen''
-; Can be perceived as arrogant and self-serving
+; Can be perceived as arrogant and self--serving
 ; ''Brown nose'' for attention
 ; Find security in external symbols of success, money, cars, clothes, brand
 ; Grandstand
@@ -831,7 +831,7 @@ INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing
 ; Assess/protect from risk
 ; Evaluate from a bigger picture perspective', 'Able to create contingency plans and multiple potential options
 ; Evaluative', 'To know the end goal
-; Autonomy to create mid-course corrections
+; Autonomy to create mid--course corrections
 ; Permission to ask ''what if''
 ; The bigger picture perspective
 ; To know the obstacles, road blocks, barriers
@@ -870,7 +870,7 @@ INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing
 If I am unable to earn others’ friendship, I may feel frustration or like I’m falling short and failing;
 Winning others over is what makes me feel good about myself or feel like I’m adding value, therefore I must make sure others like and approve of me (as my feeling of value is connected to this)', 'Appear fake and/or frivolous
 ; Not match the energy of the individual or the room
-; Show inappropriate light-mindedness
+; Show inappropriate light--mindedness
 ; Judge those who won''t engage with you
 ; Seem to some to be shallow or insincere
 ; Leaver others feeling as if they '' re being ''sold'' something

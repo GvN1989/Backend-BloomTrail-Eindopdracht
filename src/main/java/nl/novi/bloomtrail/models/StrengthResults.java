@@ -17,7 +17,6 @@ public class StrengthResults {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long strengthResultsId;
-
     private String filename;
     @CreationTimestamp
     private Date createdAt;
@@ -25,9 +24,10 @@ public class StrengthResults {
     private Date updatedAt;
     @Size(max = 500)
     private String summary;
+    String managingStrengthPdf;
 
     @OneToMany(mappedBy = "strengthResults", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Upload> uploads = new ArrayList<>();
+    private List<File> files = new ArrayList<>();
 
     @ManyToMany
     @JoinTable(
@@ -69,12 +69,12 @@ public class StrengthResults {
         this.summary = summary;
     }
 
-    public List<Upload> getUploads() {
-        return uploads;
+    public List<File> getUploads() {
+        return files;
     }
 
-    public void setUploads(List<Upload> uploads) {
-        this.uploads = uploads;
+    public void setUploads(List<File> files) {
+        this.files = files;
     }
     public List<ManagingStrength> getTopStrengths() {
         return topStrengths;
@@ -89,5 +89,13 @@ public class StrengthResults {
     }
     public void setFilename(String filename) {
         this.filename = filename;
+    }
+
+    public String getManagingStrengthPdf() {
+        return managingStrengthPdf;
+    }
+
+    public void setManagingStrengthPdf(String managingStrengthPdf) {
+        this.managingStrengthPdf = managingStrengthPdf;
     }
 }

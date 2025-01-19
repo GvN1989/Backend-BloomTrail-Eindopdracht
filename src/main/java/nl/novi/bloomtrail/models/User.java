@@ -15,7 +15,6 @@ public class User {
     @Column(nullable = false, length = 255)
     private String password;
     private String fullName;
-    private String profilePicture;
     @Email
     @NotBlank
     @Column(nullable = false, unique = true)
@@ -54,7 +53,6 @@ public class User {
     public void setApikey(String apikey) { this.apikey = apikey; }
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email;}
-
     public Set<Authority> getAuthorities() { return authorities; }
     public void addAuthority(Authority authority) {
         this.authorities.add(authority);
@@ -74,14 +72,6 @@ public class User {
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
-    }
-
-    public String getProfilePicture() {
-        return profilePicture;
-    }
-
-    public void setProfilePicture(String profilePicture) {
-        this.profilePicture = profilePicture;
     }
 
     public List<CoachingProgram> getStrengthPrograms() {

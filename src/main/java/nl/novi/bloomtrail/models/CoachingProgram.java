@@ -16,19 +16,12 @@ public class CoachingProgram {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long coachingProgramId;
-    @NotBlank
-    @Size(max = 255)
+
     private String coachingProgramName;
     private String goal;
 
-    @NotNull
-    @JsonFormat(pattern= "dd-mm-yyy")
-    @Future
     private Date startDate;
 
-    @NotNull
-    @JsonFormat(pattern= "dd-mm-yyy")
-    @Future
     private Date endDate;
 
     @ManyToOne
@@ -43,7 +36,6 @@ public class CoachingProgram {
     @OneToMany(mappedBy = "strengthProgram", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Step> timeline = new ArrayList<>();
 
-    private String managingStrengthResultDownload;
 
     public Long getCoachingProgramId() {
         return coachingProgramId;
@@ -101,13 +93,6 @@ public class CoachingProgram {
         this.strengthResults = strengthResults;
     }
 
-    public String getManagingStrengthResultDownload() {
-        return managingStrengthResultDownload;
-    }
-
-    public void setManagingStrengthResultDownload(String managingStrengthResultDownload) {
-        this.managingStrengthResultDownload = managingStrengthResultDownload;
-    }
     public User getUser() {
         return user;
     }
