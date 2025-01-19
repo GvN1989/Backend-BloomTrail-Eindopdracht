@@ -2,7 +2,7 @@ package nl.novi.bloomtrail.services;
 
 import nl.novi.bloomtrail.models.SessionInsights;
 import nl.novi.bloomtrail.models.File;
-import nl.novi.bloomtrail.models.UploadContext;
+import nl.novi.bloomtrail.enums.FileContext;
 import nl.novi.bloomtrail.repositories.SessionInsightsRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,7 +24,7 @@ public class SessionInsightsService {
         SessionInsights sessionInsight = sessionInsightsRepository.findById(sessionInsightId)
                 .orElseThrow(() -> new IllegalArgumentException("SessionInsights entity with ID " + sessionInsightId + " not found."));
 
-        fileService.saveUpload(file, UploadContext.SESSION_INSIGHTS, sessionInsight);
+        fileService.saveUpload(file, FileContext.SESSION_INSIGHTS, sessionInsight);
     }
 
     public byte[] downloadFile(String url) {

@@ -6,7 +6,7 @@ import nl.novi.bloomtrail.repositories.StrengthResultsRepository;
 import nl.novi.bloomtrail.repositories.FileRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import nl.novi.bloomtrail.models.UploadContext;
+import nl.novi.bloomtrail.enums.FileContext;
 
 import java.util.List;
 
@@ -25,7 +25,7 @@ public class StrengthResultsService {
         StrengthResults strengthResults = strengthResultsRepository.findById(strengthResultsId)
                 .orElseThrow(() -> new IllegalArgumentException("StrengthResults not found"));
 
-        fileService.saveUpload(file, UploadContext.STRENGTH_RESULTS, strengthResults);
+        fileService.saveUpload(file, FileContext.STRENGTH_RESULTS, strengthResults);
     }
 
     public byte[] downloadFile(String url) {

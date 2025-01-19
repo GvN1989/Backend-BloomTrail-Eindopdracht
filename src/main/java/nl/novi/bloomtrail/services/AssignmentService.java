@@ -2,7 +2,7 @@ package nl.novi.bloomtrail.services;
 
 import nl.novi.bloomtrail.models.Assignment;
 import nl.novi.bloomtrail.models.File;
-import nl.novi.bloomtrail.models.UploadContext;
+import nl.novi.bloomtrail.enums.FileContext;
 import nl.novi.bloomtrail.repositories.AssignmentRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,7 +25,7 @@ public class AssignmentService {
         Assignment assignment = assignmentRepository.findById(assignmentId)
                 .orElseThrow(() -> new IllegalArgumentException("Assignment not found"));
 
-        fileService.saveUpload(file, UploadContext.ASSIGNMENT, assignment);
+        fileService.saveUpload(file, FileContext.ASSIGNMENT, assignment);
     }
 
     public byte[] downloadFile(String url) {

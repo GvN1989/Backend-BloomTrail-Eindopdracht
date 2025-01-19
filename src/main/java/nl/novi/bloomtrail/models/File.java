@@ -2,6 +2,7 @@ package nl.novi.bloomtrail.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import nl.novi.bloomtrail.enums.FileContext;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -23,7 +24,7 @@ public class File {
     private Date updatedAt;
     @Enumerated(EnumType.STRING)
     @NotNull
-    private UploadContext context;
+    private FileContext context;
 
     @ManyToOne
     @JoinColumn(name = "assignment_id", nullable = true)
@@ -94,11 +95,11 @@ public class File {
         this.fileType = fileType;
     }
 
-    public UploadContext getContext() {
+    public FileContext getContext() {
         return context;
     }
 
-    public void setContext(UploadContext context) {
+    public void setContext(FileContext context) {
         this.context = context;
     }
 

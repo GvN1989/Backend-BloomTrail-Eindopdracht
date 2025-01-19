@@ -1,6 +1,6 @@
-package nl.novi.bloomtrail.models;
+package nl.novi.bloomtrail.enums;
 
-public enum UploadContext {
+public enum FileContext {
 
     STRENGTH_RESULTS,
     ASSIGNMENT,

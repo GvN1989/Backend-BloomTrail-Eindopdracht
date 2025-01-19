@@ -1,4 +1,4 @@
-package nl.novi.bloomtrail.models;
+package nl.novi.bloomtrail.utils;
 
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;

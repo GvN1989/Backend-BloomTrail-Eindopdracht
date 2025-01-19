@@ -1,6 +1,4 @@
 package nl.novi.bloomtrail.dtos;
 
-public class AssignmentInputDto {
-
-
+public class AssignmentDtoTest {
 }

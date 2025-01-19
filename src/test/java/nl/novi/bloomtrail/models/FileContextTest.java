@@ -1,4 +1,4 @@
 package nl.novi.bloomtrail.models;
 
-public enum UploadContext {
+public enum FileContextTest {
 }
