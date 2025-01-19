@@ -1,6 +1,7 @@
 package nl.novi.bloomtrail.models;
 
 import jakarta.persistence.*;
+import nl.novi.bloomtrail.enums.FileStatus;
 
 import java.util.ArrayList;
 import java.util.List;

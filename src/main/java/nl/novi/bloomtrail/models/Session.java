@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.*;
+import nl.novi.bloomtrail.enums.SessionStatus;
 import org.hibernate.annotations.*;
 
 import java.time.LocalDate;
@@ -63,7 +64,7 @@ public class Session {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private AppointmentStatus status;
+    private SessionStatus status;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "session_insight_id")

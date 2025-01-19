@@ -1,4 +1,4 @@
-package nl.novi.bloomtrail.models;
+package nl.novi.bloomtrail.enums;
 
 public enum FileStatus {
 

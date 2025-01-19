@@ -3,7 +3,7 @@ package nl.novi.bloomtrail.services;
 import nl.novi.bloomtrail.models.*;
 import org.springframework.stereotype.Service;
 import nl.novi.bloomtrail.repositories.FileRepository;
-import nl.novi.bloomtrail.models.UploadContext;
+import nl.novi.bloomtrail.enums.FileContext;
 import nl.novi.bloomtrail.utils.FileStorageUtil;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,7 +21,7 @@ public class FileService {
         this.fileRepository = fileRepository;
     }
 
-    public File saveUpload(MultipartFile file, UploadContext context, Object parentEntity) {
+    public File saveUpload(MultipartFile file, FileContext context, Object parentEntity) {
         try {
             String fileUrl = FileStorageUtil.saveFileAndGetUrl(file);
 
@@ -43,7 +43,7 @@ public class FileService {
         }
     }
 
-    public List<File> getUploadsByContext(UploadContext context) {
+    public List<File> getUploadsByContext(FileContext context) {
         return fileRepository.findByContext(context);
     }
 
