@@ -11,29 +11,19 @@ public class FileStorageUtil {
 
     private static final String UPLOAD_DIR = "uploads/";
 
-    public static String saveFileAndGetUrl(MultipartFile file) throws IOException {
-        String filename = file.getOriginalFilename();
-        if (filename.isEmpty()) {
-            throw new IllegalArgumentException("Invalid file name");
-        }
-
-        Path uploadDir = Paths.get(UPLOAD_DIR);
-        if (!Files.exists(uploadDir)) {
-            Files.createDirectories(uploadDir);
-        }
-
-        Path filePath = uploadDir.resolve(filename);
-        Files.write(filePath, file.getBytes());
-        return filePath.toAbsolutePath().toString();
-    }
-
-    public static String saveFileToLocalSystem(MultipartFile file) {
+    public static String saveFile(MultipartFile file) {
         try {
+            String filename = file.getOriginalFilename();
+            if (filename.isEmpty()) {
+                throw new IllegalArgumentException("Invalid file name");
+            }
+
             Path uploadDir = Paths.get(UPLOAD_DIR);
             if (!Files.exists(uploadDir)) {
                 Files.createDirectories(uploadDir);
             }
-            Path filePath = uploadDir.resolve(file.getOriginalFilename());
+
+            Path filePath = uploadDir.resolve(filename);
             Files.write(filePath, file.getBytes());
             return filePath.toAbsolutePath().toString();
         } catch (IOException e) {

@@ -1,19 +1,22 @@
 package nl.novi.bloomtrail.services;
 
+import nl.novi.bloomtrail.enums.FileContext;
+import nl.novi.bloomtrail.models.File;
+import nl.novi.bloomtrail.models.User;
 import nl.novi.bloomtrail.repositories.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class UserService {
     private final UserRepository userRepository;
-
+    private final FileService fileService;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, FileService fileService, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.fileService = fileService;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -116,5 +119,34 @@ public class UserService {
 //
 //        return user;
 //    }
+
+    public void uploadProfilePicture(String username, MultipartFile file) {
+        User user = userRepository.findById(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        File profilePicture = fileService.saveUpload(file, FileContext.PROFILE_PICTURE, user);
+        user.setProfilePicture(profilePicture);
+        userRepository.save(user);
+    }
+
+    public byte[] getProfilePicture(String username) {
+        User user = userRepository.findById(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        if (user.getProfilePicture() == null) {
+            throw new IllegalArgumentException("Profile picture not set");
+        }
+
+        return fileService.downloadFile(user.getProfilePicture().getUrl());
+    }
+    public void deleteProfilePicture(String username) {
+        User user = userRepository.findById(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        if (user.getProfilePicture() != null) {
+            fileService.deleteUpload(user.getProfilePicture().getUploadId());
+            user.setProfilePicture(null);
+            userRepository.save(user);
+        }
 
 }

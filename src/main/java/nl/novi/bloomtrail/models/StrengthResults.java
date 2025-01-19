@@ -24,7 +24,7 @@ public class StrengthResults {
     private Date updatedAt;
     @Size(max = 500)
     private String summary;
-    String managingStrengthPdf;
+    private String managingStrengthFile;
 
     @OneToMany(mappedBy = "strengthResults", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<File> files = new ArrayList<>();
@@ -91,11 +91,11 @@ public class StrengthResults {
         this.filename = filename;
     }
 
-    public String getManagingStrengthPdf() {
-        return managingStrengthPdf;
+    public String getManagingStrengthFile() {
+        return managingStrengthFile;
     }
 
-    public void setManagingStrengthPdf(String managingStrengthPdf) {
-        this.managingStrengthPdf = managingStrengthPdf;
+    public void setManagingStrengthFile(String managingStrengthFile) {
+        this.managingStrengthFile = managingStrengthFile;
     }
 }

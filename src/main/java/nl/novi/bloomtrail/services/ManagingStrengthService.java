@@ -33,7 +33,7 @@ public class ManagingStrengthService {
 
         StrengthResults results = new StrengthResults();
         results.setStrengthResultsId(strengthResultsId);
-        results.setManagingStrengthPdf(pdfFilePath);
+        results.setManagingStrengthFile(pdfFilePath);
         strengthResultsRepository.save(results);
     }
 

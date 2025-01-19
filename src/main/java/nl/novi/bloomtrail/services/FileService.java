@@ -22,25 +22,20 @@ public class FileService {
     }
 
     public File saveUpload(MultipartFile file, FileContext context, Object parentEntity) {
-        try {
-            String fileUrl = FileStorageUtil.saveFileAndGetUrl(file);
-
             File upload = new File();
             upload.setFileType(file.getContentType());
-            upload.setUrl(fileUrl);
+            upload.setUrl(FileStorageUtil.saveFile(file));
             upload.setContext(context);
 
-            switch (parentEntity) {
-                case Assignment assignment -> upload.setAssignment(assignment);
-                case StrengthResults strengthResults -> upload.setStrengthResults(strengthResults);
-                case SessionInsights sessionInsights -> upload.setSessionInsights(sessionInsights);
-                default -> throw new IllegalArgumentException("Unsupported upload file type");
-            }
+        switch (parentEntity) {
+            case Assignment assignment -> upload.setAssignment(assignment);
+            case StrengthResults strengthResults -> upload.setStrengthResults(strengthResults);
+            case SessionInsights sessionInsights -> upload.setSessionInsights(sessionInsights);
+            case User user when context == FileContext.PROFILE_PICTURE -> upload.setUser(user);
+            default -> throw new IllegalArgumentException("Unsupported file or context type");
+        }
 
             return fileRepository.save(upload);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to save upload", e);
-        }
     }
 
     public List<File> getUploadsByContext(FileContext context) {
