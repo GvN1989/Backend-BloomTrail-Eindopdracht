@@ -1,7 +1,6 @@
 package nl.novi.bloomtrail.services;
 
 import nl.novi.bloomtrail.exceptions.RecordNotFoundException;
-import nl.novi.bloomtrail.models.Session;
 import nl.novi.bloomtrail.models.Step;
 import nl.novi.bloomtrail.models.CoachingProgram;
 import nl.novi.bloomtrail.repositories.SessionRepository;
@@ -42,12 +41,6 @@ public class StepService {
         }
         return stepRepository.findStepsByCoachingProgram(coachingProgramId);
 
-    }
-
-    public List<Session> getSessionsForStep(Long stepId) {
-        Step step = stepRepository.findById(stepId)
-                .orElseThrow(() -> new RecordNotFoundException("Step with ID " + stepId + " not found"));
-        return step.getSessions();
     }
 
     public Step addStepToProgram(Long coachingProgramId, Step step) {

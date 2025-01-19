@@ -9,7 +9,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "assignments")
-public class Assignment {
+public class Assignment implements Uploadable, Downloadable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -57,19 +57,42 @@ public class Assignment {
         this.session = session;
     }
 
-    public List<Upload> getUploads() {
-        return uploads;
-    }
-
     public void setUploads(List<Upload> uploads) {
         this.uploads = uploads;
     }
 
-    public String getDownloadUrl() {
+    @Override
+    public String getDownload() {
         return downloadUrl;
     }
 
-    public void setDownloadUrl(String downloadUrl) {
-        this.downloadUrl = downloadUrl;
+    @Override
+    public void setDownload(String download) {
+        this.downloadUrl = download;
+    }
+
+    @Override
+    public List<Upload> getUploads() {
+        return uploads;
+    }
+
+    @Override
+    public void addUpload(Upload upload) {
+        uploads.add(upload);
+        upload.setAssignment(this);
+    }
+
+    @Override
+    public void removeUpload(Upload upload) {
+        uploads.remove(upload);
+        upload.setAssignment(null);
+    }
+
+    @Override
+    public String generateDownloadUrl() {
+        return uploads.stream()
+                .map(Upload::getUrl)
+                .findFirst()
+                .orElse("No uploads available");
     }
 }

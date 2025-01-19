@@ -42,21 +42,21 @@ public class CoachingProgramService {
                 .orElseThrow(()-> new RecordNotFoundException("CoachingProgram with id: " + coachingProgramId + "not found"));
     }
 
-    //   public CoachingProgram saveCoachingProgram (CoachingProgramInputDto inputDto) {
-//        CoachingProgram coachingProgram= CoachingProgramMapper.toCoachingProgramEntity(inputDto);
-//        return coachingProgramRepository.save(coachingProgram);
-//    }
+       public CoachingProgram saveCoachingProgram (CoachingProgramInputDto inputDto) {
+        CoachingProgram coachingProgram= CoachingProgramMapper.toCoachingProgramEntity(inputDto);
+        return coachingProgramRepository.save(coachingProgram);
+    }
 
-//    public CoachingProgram updateCoachingProgram (Long coachingProgramId, CoachingProgramInputDto inputDto) {
-//
-//        if (!coachingProgramRepository.existsById(coachingProgramId)) {
-//            throw new RecordNotFoundException("No coachingProgram found with ID " + coachingProgramId);
-//        }
-//
-//        CoachingProgram coachingProgram = CoachingProgramMapper.toCoachingProgramEntity(inputDto);
-//        coachingProgram.setCoachingProgramId(coachingProgramId);
-//        return coachingProgramRepository.save(coachingProgram);
-//    }
+    public CoachingProgram updateCoachingProgram (Long coachingProgramId, CoachingProgramInputDto inputDto) {
+
+        if (!coachingProgramRepository.existsById(coachingProgramId)) {
+            throw new RecordNotFoundException("No coachingProgram found with ID " + coachingProgramId);
+        }
+
+        CoachingProgram coachingProgram = CoachingProgramMapper.toCoachingProgramEntity(inputDto);
+        coachingProgram.setCoachingProgramId(coachingProgramId);
+        return coachingProgramRepository.save(coachingProgram);
+    }
 
     public void deleteCoachingProgram (Long coachingProgramId) {
         if (!coachingProgramRepository.existsById(coachingProgramId)) {

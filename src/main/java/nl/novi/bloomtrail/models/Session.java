@@ -57,6 +57,14 @@ public class Session {
     @Future
     private LocalDateTime updatedAt;
 
+    @OneToOne
+    @JoinColumn(name = "id_canceler")
+    private User canceler;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private AppointmentStatus status;
+
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "session_insight_id")
     private SessionInsights sessionInsights;

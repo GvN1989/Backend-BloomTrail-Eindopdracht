@@ -17,6 +17,8 @@ public class StrengthResults {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long strengthResultsId;
+
+    private String filename;
     @CreationTimestamp
     private Date createdAt;
     @UpdateTimestamp
@@ -74,12 +76,18 @@ public class StrengthResults {
     public void setUploads(List<Upload> uploads) {
         this.uploads = uploads;
     }
-
     public List<ManagingStrength> getTopStrengths() {
         return topStrengths;
     }
 
     public void setTopStrengths(List<ManagingStrength> topStrengths) {
         this.topStrengths = topStrengths;
+    }
+
+    public String getFilename() {
+        return filename;
+    }
+    public void setFilename(String filename) {
+        this.filename = filename;
     }
 }

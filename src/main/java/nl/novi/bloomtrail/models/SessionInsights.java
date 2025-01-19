@@ -3,6 +3,8 @@ package nl.novi.bloomtrail.models;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import nl.novi.bloomtrail.common.Downloadable;
+import nl.novi.bloomtrail.common.Uploadable;
 import org.hibernate.annotations.CreationTimestamp;
 
 
@@ -12,7 +14,7 @@ import java.util.List;
 
 
 @Entity
-public class SessionInsights {
+public class SessionInsights implements Uploadable, Downloadable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,6 +34,8 @@ public class SessionInsights {
 
     @OneToMany(mappedBy = "sessionInsight", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Upload> uploads = new ArrayList<>();
+
+    private String downloadUrl;
 
     public Long getSessionInsightId() {
         return sessionInsightId;
@@ -84,11 +88,43 @@ public class SessionInsights {
         this.createdAt = createdAt;
     }
 
+
+    public void setUploads(List<Upload> uploads) {
+        this.uploads = uploads;
+    }
+
+    @Override
+    public String getDownload() {
+        return downloadUrl;
+    }
+
+    @Override
+    public void setDownload(String download) {
+        this.downloadUrl = download;
+    }
+
+    @Override
     public List<Upload> getUploads() {
         return uploads;
     }
 
-    public void setUploads(List<Upload> uploads) {
-        this.uploads = uploads;
+    @Override
+    public void addUpload(Upload upload) {
+        uploads.add(upload);
+        upload.setSessionInsights(this);
+    }
+
+    @Override
+    public void removeUpload(Upload upload) {
+        uploads.remove(upload);
+        upload.setSessionInsights(null);
+    }
+
+    @Override
+    public String generateDownloadUrl() {
+        return uploads.stream()
+                .map(Upload::getUrl)
+                .findFirst()
+                .orElse("No uploads available");
     }
 }
