@@ -38,6 +38,8 @@ public class File {
     @JoinColumn(name = "sessionInsights_id", nullable = true)
     private SessionInsights sessionInsights;
 
+    @OneToOne(mappedBy = "upload", cascade = CascadeType.ALL)
+    private User user;
 
     public Long getUploadId() {
         return uploadId;
@@ -116,4 +118,11 @@ public class File {
         }
     }
 
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 }

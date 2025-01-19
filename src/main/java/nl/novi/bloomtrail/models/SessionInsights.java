@@ -27,13 +27,13 @@ public class SessionInsights {
     private String author;
     @CreationTimestamp
     private LocalDateTime createdAt;
+    private String description;
+
     @OneToOne(mappedBy = "sessionInsights")
     private Session session;
 
     @OneToMany(mappedBy = "sessionInsight", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<File> files = new ArrayList<>();
-
-    private String downloadUrl;
 
     public Long getSessionInsightId() {
         return sessionInsightId;
@@ -86,5 +86,19 @@ public class SessionInsights {
         this.createdAt = createdAt;
     }
 
+    public String getDescription() {
+        return description;
+    }
 
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public List<File> getFiles() {
+        return files;
+    }
+
+    public void setFiles(List<File> files) {
+        this.files = files;
+    }
 }

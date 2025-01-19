@@ -31,6 +31,10 @@ public class User {
             fetch = FetchType.EAGER)
     private Set<Authority> authorities = new HashSet<>();
 
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "upload_id")
+    private File profilePicture;
+
     @Column(nullable = false)
     private boolean enabled = true;
 
@@ -80,5 +84,13 @@ public class User {
 
     public void setStrengthPrograms(List<CoachingProgram> strengthPrograms) {
         this.strengthPrograms = strengthPrograms;
+    }
+
+    public File getProfilePicture() {
+        return profilePicture;
+    }
+
+    public void setProfilePicture(File profilePicture) {
+        this.profilePicture = profilePicture;
     }
 }
