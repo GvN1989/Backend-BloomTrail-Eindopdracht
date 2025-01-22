@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -23,11 +22,14 @@ public class CoachingProgramService {
 
     private final EntityValidationHelper validationHelper;
 
+    private final StepRepository stepRepository;
 
-    public CoachingProgramService(CoachingProgramRepository coachingProgramRepository, StrengthResultsRepository strengthResultsRepository, EntityValidationHelper validationHelper) {
+
+    public CoachingProgramService(CoachingProgramRepository coachingProgramRepository, StrengthResultsRepository strengthResultsRepository, EntityValidationHelper validationHelper, StepRepository stepRepository) {
         this.coachingProgramRepository = coachingProgramRepository;
         this.strengthResultsRepository = strengthResultsRepository;
         this.validationHelper = validationHelper;
+        this.stepRepository = stepRepository;
     }
 
     public List<CoachingProgram> findByUser(String username) {
@@ -147,13 +149,9 @@ public class CoachingProgramService {
             }
         }
     }
-
-    public List<Session> getAllSessionsInCoachingProgram(Long coachingId) {
-        CoachingProgram coachingProgram = findById(coachingId);
-
-        return coachingProgram.getTimeline().stream()
-                .flatMap(step -> step.getSessions().stream())
-                .collect(Collectors.toList());
+    public List<Step> getStepsByCoachingProgram(Long coachingProgramId) {
+        CoachingProgram coachingProgram = validationHelper.validateCoachingProgram(coachingProgramId);
+        return stepRepository.findStepsByCoachingProgram(coachingProgramId);
     }
 
     public List<CoachingProgram> getProgramsByCoach(String coachUsername) {

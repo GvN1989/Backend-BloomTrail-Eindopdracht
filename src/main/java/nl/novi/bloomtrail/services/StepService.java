@@ -1,11 +1,17 @@
 package nl.novi.bloomtrail.services;
 
+import nl.novi.bloomtrail.dtos.StepInputDto;
 import nl.novi.bloomtrail.exceptions.RecordNotFoundException;
+import nl.novi.bloomtrail.mappers.StepMapper;
+import nl.novi.bloomtrail.models.Assignment;
+import nl.novi.bloomtrail.models.Session;
 import nl.novi.bloomtrail.models.Step;
 import nl.novi.bloomtrail.models.CoachingProgram;
+import nl.novi.bloomtrail.repositories.AssignmentRepository;
 import nl.novi.bloomtrail.repositories.SessionRepository;
 import nl.novi.bloomtrail.repositories.StepRepository;
 import nl.novi.bloomtrail.repositories.CoachingProgramRepository;
+import nl.novi.bloomtrail.helper.EntityValidationHelper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,14 +20,11 @@ import java.util.List;
 public class StepService {
     private final StepRepository stepRepository;
 
-    private final CoachingProgramRepository coachingProgramRepository;
+    private final EntityValidationHelper validationHelper;
 
-    private final CoachingProgramService coachingProgramService;
-
-    public StepService(StepRepository stepRepository, CoachingProgramRepository coachingProgramRepository, CoachingProgramService coachingProgramService, SessionRepository sessionRepository) {
+    public StepService(StepRepository stepRepository, EntityValidationHelper validationHelper) {
         this.stepRepository = stepRepository;
-        this.coachingProgramRepository = coachingProgramRepository;
-        this.coachingProgramService = coachingProgramService;
+        this.validationHelper = validationHelper;
     }
 
     public List<Step> findAll(){
@@ -29,11 +32,9 @@ public class StepService {
     }
 
     public Step findById(Long stepId){
-        return stepRepository.findById(stepId)
-                .orElseThrow(()-> new RecordNotFoundException("Step with id: " + stepId + "not found"));
+        return validationHelper.validateStep(stepId);
 
     }
-
     public List<Step> findStepsByCoachingProgram(Long coachingProgramId) {
         List<Step> steps= stepRepository.findStepsByCoachingProgram(coachingProgramId);
         if(steps.isEmpty()) {
@@ -43,43 +44,42 @@ public class StepService {
 
     }
 
-    public Step addStepToProgram(Long coachingProgramId, Step step) {
-        CoachingProgram coachingProgram = coachingProgramRepository.findById(coachingProgramId)
-                .orElseThrow(() -> new RecordNotFoundException("CoachingProgram with ID " + coachingProgramId + " not found"));
+    public Step addStepToProgram(StepInputDto inputDto) {
+        CoachingProgram coachingProgram = validationHelper.validateCoachingProgram(inputDto.getCoachingProgramId());
+        List<Session> sessions = validationHelper.validateSessions(inputDto.getSessionIds());
+        List<Assignment> assignments = validationHelper.validateAssignments(inputDto.getAssignmentIds());
 
-        validateStepSequence(coachingProgramId, step);
+        Step step = StepMapper.toStepEntity(inputDto, coachingProgram, sessions, assignments);
 
-        step.setCoachingProgram(coachingProgram);
-        stepRepository.save(step);
-
-        coachingProgramService.updateProgramEndDate(coachingProgramId);
-
-        return step;
-    }
-
-    public Step saveStep (StepInputDto inputDto) {
-        Step step= StepMapper.toStepEntity(inputDto);
         return stepRepository.save(step);
     }
+
 
     public Step updateStep (Long stepId, StepInputDto inputDto) {
 
-        if (!stepRepository.existsById(stepId)) {
-            throw new RecordNotFoundException("No step found with ID " + stepId);
-        }
+        Step existingStep = validationHelper.validateStep(stepId);
 
-        Step step = Step.toStepEntity(inputDto);
-        step.setStepId(stepId);
-        return stepRepository.save(step);
+        CoachingProgram coachingProgram = validationHelper.validateCoachingProgram(inputDto.getCoachingProgramId());
+        List<Session> sessions = validationHelper.validateSessions(inputDto.getSessionIds());
+        List<Assignment> assignments = validationHelper.validateAssignments(inputDto.getAssignmentIds());
+
+        existingStep.setStepName(inputDto.getStepName());
+        existingStep.setStepStartDate(inputDto.getStepStartDate());
+        existingStep.setStepEndDate(inputDto.getStepEndDate());
+        existingStep.setCompleted(inputDto.getCompleted());
+        existingStep.setStepGoal(inputDto.getStepGoal());
+        existingStep.setSequence(inputDto.getSequence());
+        existingStep.setCoachingProgram(coachingProgram);
+        existingStep.setSession(sessions);
+        existingStep.setAssignment(assignments);
+
+        return stepRepository.save(existingStep);
     }
 
     public void deleteStep (Long stepId) {
-        if (!stepRepository.existsById(stepId)) {
-            throw new RecordNotFoundException("No step found with ID " + stepId);
+        Step step = validationHelper.validateStep(stepId);
+        stepRepository.delete(step);
         }
-
-        stepRepository.deleteById(stepId);
-    }
 
     private void validateStepSequence(Long coachingProgramId, Step newStep) {
         List<Step> existingSteps = stepRepository.findStepsByCoachingProgram(coachingProgramId);

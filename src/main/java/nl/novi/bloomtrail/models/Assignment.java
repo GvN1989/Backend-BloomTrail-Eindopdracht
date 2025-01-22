@@ -19,6 +19,10 @@ public class Assignment {
     @ManyToOne
     @JoinColumn(name = "session_id", nullable = false)
     private Session session;
+
+    @ManyToOne
+    @JoinColumn(name = "step_id", nullable = false)
+    private Step step;
     @OneToMany(mappedBy = "assignment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<File> files = new ArrayList<>();
 
@@ -72,4 +76,11 @@ public class Assignment {
         this.session = session;
     }
 
+    public Step getStep() {
+        return step;
+    }
+
+    public void setStep(Step step) {
+        this.step = step;
+    }
 }
