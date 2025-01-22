@@ -20,8 +20,11 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CoachingProgram> strengthPrograms = new ArrayList<>();
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CoachingProgram> clientPrograms = new ArrayList<>();
+
+    @OneToMany(mappedBy = "coach", cascade = CascadeType.ALL)
+    private List<CoachingProgram> coachingPrograms = new ArrayList<>();
 
     @OneToMany(
             targetEntity = Authority.class,
@@ -78,12 +81,20 @@ public class User {
         this.fullName = fullName;
     }
 
-    public List<CoachingProgram> getStrengthPrograms() {
-        return strengthPrograms;
+    public List<CoachingProgram> getClientPrograms() {
+        return clientPrograms;
     }
 
-    public void setStrengthPrograms(List<CoachingProgram> strengthPrograms) {
-        this.strengthPrograms = strengthPrograms;
+    public void setClientPrograms(List<CoachingProgram> clientPrograms) {
+        this.clientPrograms = clientPrograms;
+    }
+
+    public List<CoachingProgram> getCoachingPrograms() {
+        return coachingPrograms;
+    }
+
+    public void setCoachingPrograms(List<CoachingProgram> coachingPrograms) {
+        this.coachingPrograms = coachingPrograms;
     }
 
     public File getProfilePicture() {

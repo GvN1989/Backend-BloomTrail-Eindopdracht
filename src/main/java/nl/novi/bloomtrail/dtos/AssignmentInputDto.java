@@ -52,16 +52,4 @@ public class AssignmentInputDto {
         this.sessionId = sessionId;
     }
 
-    public Assignment toAssignment(Session session){
-
-        Assignment assignment= new Assignment();
-
-        assignment.setSession(session);
-        assignment.setDescription(description);
-        assignment.setFileStatus(fileStatus);
-
-        return assignment;
-
-    }
-
 }

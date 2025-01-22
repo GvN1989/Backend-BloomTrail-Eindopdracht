@@ -2,9 +2,12 @@ package nl.novi.bloomtrail.services;
 
 import nl.novi.bloomtrail.dtos.CoachingProgramInputDto;
 import nl.novi.bloomtrail.exceptions.RecordNotFoundException;
+import nl.novi.bloomtrail.mappers.CoachingProgramMapper;
+import nl.novi.bloomtrail.helper.EntityValidationHelper;
 import nl.novi.bloomtrail.models.*;
 import nl.novi.bloomtrail.repositories.*;
 import org.springframework.stereotype.Service;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -18,16 +21,13 @@ public class CoachingProgramService {
 
     private final StrengthResultsRepository strengthResultsRepository;
 
-    private final UserRepository userRepository;
-
-    private final StepRepository stepRepository;
+    private final EntityValidationHelper validationHelper;
 
 
-    public CoachingProgramService(CoachingProgramRepository coachingProgramRepository, StrengthResultsRepository strengthResultsRepository, UserRepository userRepository, StepRepository stepRepository) {
+    public CoachingProgramService(CoachingProgramRepository coachingProgramRepository, StrengthResultsRepository strengthResultsRepository, EntityValidationHelper validationHelper) {
         this.coachingProgramRepository = coachingProgramRepository;
         this.strengthResultsRepository = strengthResultsRepository;
-        this.stepRepository = stepRepository;
-        this.userRepository = userRepository;
+        this.validationHelper = validationHelper;
     }
 
     public List<CoachingProgram> findByUser(String username) {
@@ -38,52 +38,56 @@ public class CoachingProgramService {
         return programs;
     }
 
-    public CoachingProgram findById(Long coachingProgramId){
-        return coachingProgramRepository.findById(coachingProgramId)
-                .orElseThrow(()-> new RecordNotFoundException("CoachingProgram with id: " + coachingProgramId + "not found"));
+    public CoachingProgram findById(Long coachingProgramId) {
+        return validationHelper.validateCoachingProgram(coachingProgramId);
     }
 
-       public CoachingProgram saveCoachingProgram (CoachingProgramInputDto inputDto) {
-        CoachingProgram coachingProgram= CoachingProgramMapper.toCoachingProgramEntity(inputDto);
+    public CoachingProgram saveCoachingProgram(CoachingProgramInputDto inputDto) {
+
+        User client = validationHelper.validateUser(inputDto.getClientUsername());
+        User coach = validationHelper.validateUser(inputDto.getCoachUsername());
+
+        CoachingProgram coachingProgram = CoachingProgramMapper.toCoachingProgramEntity(inputDto, client, coach);
         return coachingProgramRepository.save(coachingProgram);
     }
 
-    public CoachingProgram updateCoachingProgram (Long coachingProgramId, CoachingProgramInputDto inputDto) {
+    public CoachingProgram updateCoachingProgram(Long coachingProgramId, CoachingProgramInputDto inputDto) {
+        CoachingProgram coachingProgram = validationHelper.validateCoachingProgram(coachingProgramId);
 
-        if (!coachingProgramRepository.existsById(coachingProgramId)) {
-            throw new RecordNotFoundException("No coachingProgram found with ID " + coachingProgramId);
-        }
+        User client = validationHelper.validateUser(inputDto.getClientUsername());
+        User coach = validationHelper.validateUser(inputDto.getCoachUsername());
 
-        CoachingProgram coachingProgram = CoachingProgramMapper.toCoachingProgramEntity(inputDto);
-        coachingProgram.setCoachingProgramId(coachingProgramId);
-        return coachingProgramRepository.save(coachingProgram);
-    }
-
-    public void deleteCoachingProgram (Long coachingProgramId) {
-        if (!coachingProgramRepository.existsById(coachingProgramId)) {
-            throw new RecordNotFoundException("No coaching program found with ID " + coachingProgramId);
-        }
-
-        coachingProgramRepository.deleteById(coachingProgramId); }
-
-    public CoachingProgram assignUserToCoachingProgram (Long coachingId, String username) {
-
-        CoachingProgram coachingProgram = findById(coachingId);
-
-        User user = userRepository.findById(username)
-                .orElseThrow(() -> new RecordNotFoundException( "User with " + username + " not found"));
-
-        coachingProgram.setUser(user);
+        coachingProgram.setCoachingProgramName(inputDto.getCoachingProgramName());
+        coachingProgram.setGoal(inputDto.getGoal());
+        coachingProgram.setStartDate(inputDto.getStartDate());
+        coachingProgram.setEndDate(inputDto.getEndDate());
+        coachingProgram.setClient(client);
+        coachingProgram.setCoach(coach);
 
         return coachingProgramRepository.save(coachingProgram);
     }
 
-    public CoachingProgram assignStepToCoachingProgram (Long coachingId, Long stepId) {
+    public void deleteCoachingProgram(Long coachingProgramId) {
+        CoachingProgram coachingProgram = validationHelper.validateCoachingProgram(coachingProgramId);
+        coachingProgramRepository.delete(coachingProgram);
+    }
 
-        CoachingProgram coachingProgram = findById(coachingId);
+    public CoachingProgram assignClientAndCoachToCoachingProgram(Long coachingProgramId, String clientUsername, String coachUsername) {
 
-        Step step = stepRepository.findById(stepId)
-                .orElseThrow(() -> new RecordNotFoundException( "Step with " + stepId  + " not found"));
+        CoachingProgram coachingProgram = validationHelper.validateCoachingProgram(coachingProgramId);
+        User client = validationHelper.validateUser(clientUsername);
+        User coach = validationHelper.validateUser(coachUsername);
+
+        coachingProgram.setClient(client);
+        coachingProgram.setCoach(coach);
+
+        return coachingProgramRepository.save(coachingProgram);
+    }
+
+    public CoachingProgram assignStepToCoachingProgram(Long coachingProgramId, Long stepId) {
+
+        CoachingProgram coachingProgram = validationHelper.validateCoachingProgram(coachingProgramId);
+        Step step = validationHelper.validateStep(stepId);
 
         List<Step> timeline = coachingProgram.getTimeline();
 
@@ -143,12 +147,18 @@ public class CoachingProgramService {
             }
         }
     }
+
     public List<Session> getAllSessionsInCoachingProgram(Long coachingId) {
         CoachingProgram coachingProgram = findById(coachingId);
 
         return coachingProgram.getTimeline().stream()
                 .flatMap(step -> step.getSessions().stream())
                 .collect(Collectors.toList());
+    }
+
+    public List<CoachingProgram> getProgramsByCoach(String coachUsername) {
+        User coach = validationHelper.validateUser(coachUsername);
+        return coach.getCoachingPrograms();
     }
 
 }

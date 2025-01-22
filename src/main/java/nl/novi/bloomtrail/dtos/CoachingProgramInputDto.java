@@ -7,9 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 
 public class CoachingProgramInputDto {
 
@@ -30,6 +28,9 @@ public class CoachingProgramInputDto {
     @JsonFormat(pattern= "dd-mm-yyy")
     @Future
     private Date endDate;
+
+    private String clientUsername;
+    private String coachUsername;
 
 
     public Long getCoachingProgramId() {
@@ -72,4 +73,19 @@ public class CoachingProgramInputDto {
         this.endDate = endDate;
     }
 
+    public String getClientUsername() {
+        return clientUsername;
+    }
+
+    public void setClientUsername(String clientUsername) {
+        this.clientUsername = clientUsername;
+    }
+
+    public String getCoachUsername() {
+        return coachUsername;
+    }
+
+    public void setCoachUsername(String coachUsername) {
+        this.coachUsername = coachUsername;
+    }
 }

@@ -16,22 +16,20 @@ public class CoachingProgram {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long coachingProgramId;
-
     private String coachingProgramName;
     private String goal;
-
     private Date startDate;
-
     private Date endDate;
-
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "client_id", nullable = false)
+    private User Client;
+    @ManyToOne
+    @JoinColumn(name = "coach_id", nullable = false)
+    private User Coach;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "strength_results_id")
     private StrengthResults strengthResults;
-
 
     @OneToMany(mappedBy = "strengthProgram", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Step> timeline = new ArrayList<>();
@@ -93,13 +91,19 @@ public class CoachingProgram {
         this.strengthResults = strengthResults;
     }
 
-    public User getUser() {
-        return user;
+    public User getClient() {
+        return Client;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setClient(User client) {
+        Client = client;
     }
 
+    public User getCoach() {
+        return Coach;
+    }
 
+    public void setCoach(User coach) {
+        Coach = coach;
+    }
 }

@@ -3,10 +3,11 @@ package nl.novi.bloomtrail.services;
 import nl.novi.bloomtrail.dtos.AssignmentInputDto;
 import nl.novi.bloomtrail.helper.EntityValidationHelper;
 import nl.novi.bloomtrail.models.Assignment;
+import nl.novi.bloomtrail.models.Session;
 import nl.novi.bloomtrail.models.File;
+import nl.novi.bloomtrail.mappers.AssignmentMapper;
 import nl.novi.bloomtrail.enums.FileContext;
 import nl.novi.bloomtrail.repositories.AssignmentRepository;
-import nl.novi.bloomtrail.repositories.SessionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,7 +21,7 @@ public class AssignmentService {
     private final EntityValidationHelper validationHelper;
 
 
-    public AssignmentService(AssignmentRepository assignmentRepository, SessionRepository sessionRepository, FileService fileService, EntityValidationHelper entityValidationHelper, EntityValidationHelper validationHelper) {
+    public AssignmentService(AssignmentRepository assignmentRepository, FileService fileService, EntityValidationHelper entityValidationHelper, EntityValidationHelper validationHelper) {
         this.assignmentRepository = assignmentRepository;
         this.fileService = fileService;
         this.validationHelper = validationHelper;
@@ -41,7 +42,9 @@ public class AssignmentService {
     }
 
     public Assignment createAssignment(AssignmentInputDto dto) {
-        Assignment assignment = dto.toAssignment(validationHelper.validateSession(dto.getSessionId()));
+        Session session = validationHelper.validateSession(dto.getSessionId());
+
+        Assignment assignment = AssignmentMapper.toAssignmentEntity(dto, session);
 
         return assignmentRepository.save(assignment);
     }

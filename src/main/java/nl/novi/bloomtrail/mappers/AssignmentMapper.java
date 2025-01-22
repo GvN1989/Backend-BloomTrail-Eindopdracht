@@ -31,7 +31,7 @@ public class AssignmentMapper {
 
     }
 
-    public static Assignment toAssignment(AssignmentInputDto inputDto, Session session) {
+    public static Assignment toAssignmentEntity(AssignmentInputDto inputDto, Session session) {
         Assignment assignment = new Assignment();
 
         assignment.setSession(session);
