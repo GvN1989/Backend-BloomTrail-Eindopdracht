@@ -1,6 +1,5 @@
 package nl.novi.bloomtrail.models;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
@@ -24,7 +23,7 @@ public class Step {
 
     private Boolean completed;
 
-    private String goal;
+    private String StepGoal;
     @NotNull
     private Integer sequence;
 
@@ -68,12 +67,12 @@ public class Step {
         this.completed = completed;
     }
 
-    public String getGoal() {
-        return goal;
+    public String getStepGoal() {
+        return StepGoal;
     }
 
-    public void setGoal(String goal) {
-        this.goal = goal;
+    public void setStepGoal(String goal) {
+        this.StepGoal = goal;
     }
 
     public Integer getSequence() {

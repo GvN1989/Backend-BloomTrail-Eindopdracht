@@ -22,7 +22,7 @@ public class StepInputDto {
     private Boolean completed;
     @NotBlank
     @Size(max = 500)
-    private String goal;
+    private String stepGoal;
 
     private Integer sequence;
 
@@ -66,12 +66,12 @@ public class StepInputDto {
         this.completed = completed;
     }
 
-    public String getGoal() {
-        return goal;
+    public String getStepGoal() {
+        return stepGoal;
     }
 
-    public void setGoal(String goal) {
-        this.goal = goal;
+    public void setStepGoal(String stepGoal) {
+        this.stepGoal = stepGoal;
     }
 
     public Integer getSequence() {
