@@ -12,7 +12,7 @@ public class Assignment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer assignmentId;
+    private Long assignmentId;
     private String description;
     @Enumerated(EnumType.STRING)
     private FileStatus fileStatus;
@@ -24,11 +24,11 @@ public class Assignment {
 
     private String downloadUrl;
 
-    public Integer getAssignmentId() {
+    public Long getAssignmentId() {
         return assignmentId;
     }
 
-    public void setAssignmentId(Integer assignmentId) {
+    public void setAssignmentId(Long assignmentId) {
         this.assignmentId = assignmentId;
     }
 
