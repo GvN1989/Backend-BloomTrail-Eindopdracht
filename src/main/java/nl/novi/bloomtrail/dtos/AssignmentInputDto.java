@@ -15,7 +15,7 @@ public class AssignmentInputDto {
     private String description;
 
     @NotNull(message = "FileStatus is required")
-    private FileStatus fileStatus;
+    private String fileStatus;
 
     @NotNull(message = "SessionId is required")
     private Long sessionId;
@@ -36,11 +36,11 @@ public class AssignmentInputDto {
         this.description = description;
     }
 
-    public FileStatus getFileStatus() {
+    public String getFileStatus() {
         return fileStatus;
     }
 
-    public void setFileStatus(FileStatus fileStatus) {
+    public void setFileStatus(String fileStatus) {
         this.fileStatus = fileStatus;
     }
 

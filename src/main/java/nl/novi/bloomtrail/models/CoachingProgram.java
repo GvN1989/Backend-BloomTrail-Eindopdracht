@@ -1,11 +1,6 @@
 package nl.novi.bloomtrail.models;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Future;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 
 import java.util.*;
 
@@ -27,11 +22,11 @@ public class CoachingProgram {
     @JoinColumn(name = "coach_id", nullable = false)
     private User Coach;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "strength_results_id")
-    private StrengthResults strengthResults;
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "results_id")
+    private List <StrengthResults> strengthResults;
 
-    @OneToMany(mappedBy = "strengthProgram", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "coaching_program", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Step> timeline = new ArrayList<>();
 
 
@@ -83,13 +78,6 @@ public class CoachingProgram {
         this.endDate = endDate;
     }
 
-    public StrengthResults getStrengthResults() {
-        return strengthResults;
-    }
-
-    public void setStrengthResults(StrengthResults strengthResults) {
-        this.strengthResults = strengthResults;
-    }
 
     public User getClient() {
         return Client;
@@ -105,5 +93,13 @@ public class CoachingProgram {
 
     public void setCoach(User coach) {
         Coach = coach;
+    }
+
+    public List<StrengthResults> getStrengthResults() {
+        return strengthResults;
+    }
+
+    public void setStrengthResults(List<StrengthResults> strengthResults) {
+        this.strengthResults = strengthResults;
     }
 }

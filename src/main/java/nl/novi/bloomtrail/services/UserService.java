@@ -144,7 +144,7 @@ public class UserService {
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         if (user.getProfilePicture() != null) {
-            fileService.deleteUpload(user.getProfilePicture().getUploadId());
+            fileService.deleteUpload(user.getProfilePicture().getFileId());
             user.setProfilePicture(null);
             userRepository.save(user);
         }

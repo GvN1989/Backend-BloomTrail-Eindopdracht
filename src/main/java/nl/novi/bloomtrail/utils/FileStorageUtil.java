@@ -11,6 +11,7 @@ public class FileStorageUtil {
 
     private static final String UPLOAD_DIR = "uploads/";
 
+
     public static String saveFile(MultipartFile file) {
         try {
             String filename = file.getOriginalFilename();
@@ -25,6 +26,21 @@ public class FileStorageUtil {
 
             Path filePath = uploadDir.resolve(filename);
             Files.write(filePath, file.getBytes());
+            return filePath.toAbsolutePath().toString();
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to save file", e);
+        }
+    }
+
+    public static String saveFile(byte[] fileData, String fileName) {
+        try {
+            Path uploadDir = Paths.get(UPLOAD_DIR);
+            if (!Files.exists(uploadDir)) {
+                Files.createDirectories(uploadDir);
+            }
+
+            Path filePath = uploadDir.resolve(fileName);
+            Files.write(filePath, fileData);
             return filePath.toAbsolutePath().toString();
         } catch (IOException e) {
             throw new RuntimeException("Failed to save file", e);

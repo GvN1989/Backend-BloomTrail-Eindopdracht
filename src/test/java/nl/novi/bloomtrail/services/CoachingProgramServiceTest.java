@@ -473,7 +473,7 @@ public class CoachingProgramServiceTest {
         mockCoachingProgram.setCoachingProgramId(coachingProgramId);
 
         StrengthResults mockStrengthResults = new StrengthResults();
-        mockStrengthResults.setStrengthResultsId(strengthResultsId);
+        mockStrengthResults.setResultsId(strengthResultsId);
 
         Mockito.when(coachingProgramRepository.findById(coachingProgramId)).thenReturn(Optional.of(mockCoachingProgram));
         Mockito.when(strengthResultsRepository.findById(strengthResultsId)).thenReturn(Optional.of(mockStrengthResults));

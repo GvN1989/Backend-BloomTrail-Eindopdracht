@@ -23,7 +23,8 @@ public class CoachingProgramMapper {
 
         if (coachingProgram.getStrengthResults() != null) {
             dto.setStrengthResultUrls(
-                    coachingProgram.getStrengthResults().getUploads().stream()
+                    coachingProgram.getStrengthResults().stream()
+                            .flatMap(strengthResult -> strengthResult.getFiles().stream())
                             .map(File::getUrl)
                             .collect(Collectors.toList())
             );

@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface StrengthResultsRepository extends JpaRepository <StrengthResults, Long> {
 
+
+
 }

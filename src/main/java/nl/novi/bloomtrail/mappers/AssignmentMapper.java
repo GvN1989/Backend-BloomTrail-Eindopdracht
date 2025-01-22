@@ -2,6 +2,8 @@ package nl.novi.bloomtrail.mappers;
 
 import nl.novi.bloomtrail.dtos.AssignmentDto;
 import nl.novi.bloomtrail.dtos.AssignmentInputDto;
+import nl.novi.bloomtrail.enums.FileStatus;
+import nl.novi.bloomtrail.enums.SessionStatus;
 import nl.novi.bloomtrail.models.Assignment;
 import nl.novi.bloomtrail.models.File;
 import nl.novi.bloomtrail.models.Session;
@@ -22,7 +24,7 @@ public class AssignmentMapper {
         if(assignment.getFiles() != null && !assignment.getFiles().isEmpty()) {
             dto.setUploadsIds(
                     assignment.getFiles().stream()
-                            .map(File::getUploadId)
+                            .map(File::getFileId)
                             .collect(Collectors.toList())
             );
         }
@@ -36,7 +38,14 @@ public class AssignmentMapper {
 
         assignment.setSession(session);
         assignment.setDescription(inputDto.getDescription());
-        assignment.setFileStatus(inputDto.getFileStatus());
+
+        if (inputDto.getFileStatus() != null) {
+            try {
+                assignment.setFileStatus(FileStatus.valueOf(inputDto.getFileStatus().toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                throw new RuntimeException("Invalid status value: " + inputDto.getFileStatus());
+            }
+        }
 
         return assignment;
 

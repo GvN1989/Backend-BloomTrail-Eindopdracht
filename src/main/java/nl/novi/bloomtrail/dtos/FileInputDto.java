@@ -1,21 +1,10 @@
 package nl.novi.bloomtrail.dtos;
 
-import nl.novi.bloomtrail.enums.FileContext;
+public class FileInputDto {
 
-public class FileDto {
-
-    private Long fileId;
     private String fileType;
     private String url;
     private String context;
-
-    public Long getFileId() {
-        return fileId;
-    }
-
-    public void setFileId(Long fileId) {
-        this.fileId = fileId;
-    }
 
     public String getFileType() {
         return fileType;

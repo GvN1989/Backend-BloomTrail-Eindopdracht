@@ -1,6 +1,8 @@
 package nl.novi.bloomtrail.services;
 
+import nl.novi.bloomtrail.dtos.SessionInputDto;
 import nl.novi.bloomtrail.exceptions.RecordNotFoundException;
+import nl.novi.bloomtrail.mappers.SessionMapper;
 import nl.novi.bloomtrail.models.CoachingProgram;
 import nl.novi.bloomtrail.models.Session;
 import nl.novi.bloomtrail.models.Step;
@@ -50,20 +52,22 @@ public class SessionService {
         }
 
         return steps.stream()
-                .flatMap(step -> step.getSessions().stream())
+                .flatMap(step -> step.getSession().stream())
                 .collect(Collectors.toList());
     }
     public List<Session> getSessionsForStep(Long stepId) {
         Step step = stepRepository.findById(stepId)
                 .orElseThrow(() -> new RecordNotFoundException("Step with ID " + stepId + " not found"));
-        return step.getSessions();
+        return step.getSession();
     }
 
-    public Session addSessionToStep(Long stepId, Session session) {
-        Step step = stepRepository.findById(stepId)
-                .orElseThrow(() -> new RecordNotFoundException("Step with ID " + stepId + " not found"));
+    public Session addSessionToStep(SessionInputDto inputDto) {
+        Step step = stepRepository.findById(inputDto.getStepId())
+                .orElseThrow(() -> new IllegalArgumentException("Step not found"));
 
-        boolean hasConflict = step.getSessions().stream()
+        Session session = SessionMapper.toSessionEntity(inputDto, step);
+
+        boolean hasConflict = step.getSession().stream()
                 .anyMatch(existingSession ->
                         existingSession.getSessionDate().equals(session.getSessionDate()) &&
                                 existingSession.getSessionTime().equals(session.getSessionTime())

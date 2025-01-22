@@ -2,7 +2,7 @@ package nl.novi.bloomtrail.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import nl.novi.bloomtrail.enums.FileContext;
 import org.hibernate.annotations.CreationTimestamp;
 
 
@@ -12,24 +12,23 @@ import java.util.List;
 
 
 @Entity
-public class SessionInsights {
+public class SessionInsight {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long sessionInsightId;
-    @Size(max = 500)
-    @NotBlank
-    private String clientReflection;
-    @Size(max = 500)
-    @NotBlank
-    private String coachNotes;
     @NotBlank
     private String author;
     @CreationTimestamp
     private LocalDateTime createdAt;
     private String description;
 
-    @OneToOne(mappedBy = "sessionInsights")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "file_context", nullable = false)
+    private FileContext fileContext;
+
+    @ManyToOne
+    @JoinColumn(name = "session_id", nullable = false)
     private Session session;
 
     @OneToMany(mappedBy = "sessionInsight", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -41,22 +40,6 @@ public class SessionInsights {
 
     public void setSessionInsightId(Long sessionInsightId) {
         this.sessionInsightId = sessionInsightId;
-    }
-
-    public String getClientReflection() {
-        return clientReflection;
-    }
-
-    public void setClientReflection(String clientReflection) {
-        this.clientReflection = clientReflection;
-    }
-
-    public String getCoachNotes() {
-        return coachNotes;
-    }
-
-    public void setCoachNotes(String coachNotes) {
-        this.coachNotes = coachNotes;
     }
 
     public String getAuthor() {
@@ -73,9 +56,6 @@ public class SessionInsights {
 
     public void setSession(Session session) {
         this.session = session;
-        if (session != null && session.getSessionInsights() != this) {
-            session.setSessionInsights(this);
-        }
     }
 
     public LocalDateTime getCreatedAt() {
@@ -101,4 +81,14 @@ public class SessionInsights {
     public void setFiles(List<File> files) {
         this.files = files;
     }
+
+    public FileContext getFileContext() {
+        return fileContext;
+    }
+
+    public void setFileContext(FileContext fileContext) {
+        this.fileContext = fileContext;
+    }
+
+
 }

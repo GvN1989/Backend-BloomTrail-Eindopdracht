@@ -21,16 +21,31 @@ public class FileService {
         this.fileRepository = fileRepository;
     }
 
-    public File saveUpload(MultipartFile file, FileContext context, Object parentEntity) {
+    public File saveFile(MultipartFile file, FileContext context, Object parentEntity) {
+        return saveFile(FileStorageUtil.saveFile(file), context, parentEntity, file.getContentType());
+    }
+
+    public File saveFile(byte[] fileData, String fileName, FileContext context) {
+            String fileUrl = FileStorageUtil.saveFile(fileData, fileName);
+
+            File file = new File();
+            file.setFileType("application/pdf");
+            file.setUrl(fileUrl);
+            file.setContext(context);
+
+            return fileRepository.save(file);
+    }
+
+    private File saveFile(String url, FileContext context, Object parentEntity, String fileType) {
             File upload = new File();
-            upload.setFileType(file.getContentType());
-            upload.setUrl(FileStorageUtil.saveFile(file));
+            upload.setFileType(fileType);
+            upload.setUrl(url);
             upload.setContext(context);
 
         switch (parentEntity) {
             case Assignment assignment -> upload.setAssignment(assignment);
             case StrengthResults strengthResults -> upload.setStrengthResults(strengthResults);
-            case SessionInsights sessionInsights -> upload.setSessionInsights(sessionInsights);
+            case SessionInsight sessionInsight -> upload.setSessionInsights(sessionInsight);
             case User user when context == FileContext.PROFILE_PICTURE -> upload.setUser(user);
             default -> throw new IllegalArgumentException("Unsupported file or context type");
         }
@@ -51,7 +66,7 @@ public class FileService {
         return switch(parentEntity) {
             case Assignment assignment -> fileRepository.findByAssignment(assignment);
             case StrengthResults strengthResults -> fileRepository.findByStrengthResults(strengthResults);
-            case SessionInsights sessionInsights -> fileRepository.findBySessionInsights(sessionInsights);
+            case SessionInsight sessionInsight -> fileRepository.findBySessionInsights(sessionInsight);
             default -> throw new IllegalArgumentException("Unsupported file type");
         };
     }

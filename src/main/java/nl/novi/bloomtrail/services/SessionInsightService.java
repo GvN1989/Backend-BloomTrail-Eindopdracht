@@ -1,6 +1,6 @@
 package nl.novi.bloomtrail.services;
 
-import nl.novi.bloomtrail.models.SessionInsights;
+import nl.novi.bloomtrail.models.SessionInsight;
 import nl.novi.bloomtrail.models.File;
 import nl.novi.bloomtrail.enums.FileContext;
 import nl.novi.bloomtrail.repositories.SessionInsightsRepository;
@@ -11,12 +11,12 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @Service
-public class SessionInsightsService {
+public class SessionInsightService {
 
     private final SessionInsightsRepository sessionInsightsRepository;
     private final FileService fileService;
 
-    public SessionInsightsService(SessionInsightsRepository sessionInsightsRepository, FileService fileService) {
+    public SessionInsightService(SessionInsightsRepository sessionInsightsRepository, FileService fileService) {
         this.sessionInsightsRepository = sessionInsightsRepository;
         this.fileService = fileService;
     }
@@ -26,7 +26,7 @@ public class SessionInsightsService {
     }
 
     public List<File> getSessionInsightsFiles(Long sessionInsightId, FileContext context) {
-        SessionInsights sessionInsight = sessionInsightsRepository.findById(sessionInsightId)
+        SessionInsight sessionInsight = sessionInsightsRepository.findById(sessionInsightId)
                 .orElseThrow(() -> new IllegalArgumentException("SessionInsights entity with ID " + sessionInsightId + " not found."));
 
         List<File> allFiles = fileService.getUploadsForParentEntity(sessionInsight);
@@ -36,28 +36,18 @@ public class SessionInsightsService {
                 .toList();
     }
 
-    public void uploadClientReflectionFile(MultipartFile multipartFile,  Long sessionInsightId) {
-        SessionInsights sessionInsights = sessionInsightsRepository.findById(sessionInsightId)
+    public void uploadClientReflectionFile(MultipartFile file,  Long sessionInsightId) {
+        SessionInsight sessionInsight = sessionInsightsRepository.findById(sessionInsightId)
                 .orElseThrow(() -> new IllegalArgumentException("SessionInsight not found"));
 
-        File file = new File();
-        file.setContext(FileContext.SESSION_INSIGHTS_CLIENT_REFLECTION);
-        file.setUrl(FileStorageUtil.saveFile(multipartFile));
-        file.setSessionInsights(sessionInsights);
-
-        fileService.processUpload(file);
+        fileService.saveFile(file, FileContext.SESSION_INSIGHTS_CLIENT_REFLECTION, sessionInsight);
     }
 
-    public void uploadCoachNotesFile(MultipartFile multipartFile, Long sessionInsightId) {
-        SessionInsights sessionInsights = sessionInsightsRepository.findById(sessionInsightId)
+    public void uploadCoachNotesFile(MultipartFile file, Long sessionInsightId) {
+        SessionInsight sessionInsight = sessionInsightsRepository.findById(sessionInsightId)
                 .orElseThrow(() -> new IllegalArgumentException("SessionInsight not found"));
 
-        File file = new File();
-        file.setContext(FileContext.SESSION_INSIGHTS_COACH_NOTES);
-        file.setUrl(FileStorageUtil.saveFile(multipartFile));
-        file.setSessionInsights(sessionInsights);
-
-        fileService.processUpload(file);
+        fileService.saveFile(file, FileContext.SESSION_INSIGHTS_COACH_NOTES, sessionInsight);
     }
 
 

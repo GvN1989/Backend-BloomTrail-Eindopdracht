@@ -13,20 +13,28 @@ public class StepInputDto {
     @NotBlank(message = "Step name is mandatory")
     @Size(max = 255)
     private String StepName;
+
     @JsonFormat(pattern = "dd-mm-yyy")
     @Future
     private Date stepStartDate;
+
     @JsonFormat(pattern = "dd-mm-yyy")
     @Future
     private Date stepEndDate;
+
     private Boolean completed;
+
     @NotBlank(message = "Step must have a goal description")
     @Size(max = 500)
     private String stepGoal;
+
     private Integer sequence;
+
     @NotNull(message = "CoachingProgram ID is required")
     private Long coachingProgramId;
+
     private List<Long> sessionIds;
+
     private List<Long> assignmentIds;
 
     public Long getStepId() {

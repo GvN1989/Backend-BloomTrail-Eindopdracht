@@ -16,7 +16,7 @@ public class StrengthResults {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long strengthResultsId;
+    private Long resultsId;
     private String filename;
     @CreationTimestamp
     private Date createdAt;
@@ -24,25 +24,23 @@ public class StrengthResults {
     private Date updatedAt;
     @Size(max = 500)
     private String summary;
-    private String managingStrengthFile;
+    private String strengthResultsFilePath;
+    @ElementCollection
+    private List<String> topStrengthNames;
 
     @OneToMany(mappedBy = "strengthResults", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<File> files = new ArrayList<>();
 
-    @ManyToMany
-    @JoinTable(
-            name = "strength_results_top_strengths",
-            joinColumns = @JoinColumn(name = "strength_results_id"),
-            inverseJoinColumns = @JoinColumn(name = "managing_strength_id")
-    )
-    private List<ManagingStrength> topStrengths = new ArrayList<>();
+    @ManyToOne
+    @JoinColumn(name = "coaching_program", nullable = false)
+    private CoachingProgram coachingProgram;
 
-    public Long getStrengthResultsId() {
-        return strengthResultsId;
+    public Long getResultsId() {
+        return resultsId;
     }
 
-    public void setStrengthResultsId(Long strengthResultsId) {
-        this.strengthResultsId = strengthResultsId;
+    public void setResultsId(Long strengthResultsId) {
+        this.resultsId = strengthResultsId;
     }
 
     public Date getCreatedAt() {
@@ -76,13 +74,6 @@ public class StrengthResults {
     public void setUploads(List<File> files) {
         this.files = files;
     }
-    public List<ManagingStrength> getTopStrengths() {
-        return topStrengths;
-    }
-
-    public void setTopStrengths(List<ManagingStrength> topStrengths) {
-        this.topStrengths = topStrengths;
-    }
 
     public String getFilename() {
         return filename;
@@ -91,11 +82,27 @@ public class StrengthResults {
         this.filename = filename;
     }
 
-    public String getManagingStrengthFile() {
-        return managingStrengthFile;
+    public String getStrengthResultsFilePath() {
+        return strengthResultsFilePath;
     }
 
-    public void setManagingStrengthFile(String managingStrengthFile) {
-        this.managingStrengthFile = managingStrengthFile;
+    public void setStrengthResultsFilePath(String strengthResultsFilePath) {
+        this.strengthResultsFilePath = strengthResultsFilePath;
+    }
+
+    public List<String> getTopStrengthNames() {
+        return topStrengthNames;
+    }
+
+    public void setTopStrengthNames(List<String> topStrengthNames) {
+        this.topStrengthNames = topStrengthNames;
+    }
+
+    public List<File> getFiles() {
+        return files;
+    }
+
+    public void setFiles(List<File> files) {
+        this.files = files;
     }
 }

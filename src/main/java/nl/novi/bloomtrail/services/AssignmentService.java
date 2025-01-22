@@ -29,7 +29,7 @@ public class AssignmentService {
 
     public void uploadFileForAssignment(MultipartFile file, Long assignmentId) {
         Assignment assignment = validationHelper.validateAssignment(assignmentId);
-        fileService.saveUpload(file, FileContext.ASSIGNMENT, assignment);
+        fileService.saveFile(file, FileContext.ASSIGNMENT, assignment);
     }
 
     public byte[] downloadFile(String url) {
