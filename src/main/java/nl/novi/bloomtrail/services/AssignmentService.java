@@ -15,14 +15,12 @@ import java.util.List;
 
 @Service
 public class AssignmentService {
-
     private final AssignmentRepository assignmentRepository;
     private final FileService fileService;
     private final EntityValidationHelper validationHelper;
     private final DownloadService downloadService;
 
-
-    public AssignmentService(AssignmentRepository assignmentRepository, FileService fileService, EntityValidationHelper entityValidationHelper, EntityValidationHelper validationHelper, DownloadService downloadService) {
+    public AssignmentService(AssignmentRepository assignmentRepository, FileService fileService, EntityValidationHelper validationHelper, DownloadService downloadService) {
         this.assignmentRepository = assignmentRepository;
         this.fileService = fileService;
         this.validationHelper = validationHelper;

@@ -114,4 +114,13 @@ public class EntityValidationHelper {
                 .orElseThrow(() -> new EntityNotFoundException("StrengthResults", sessionInsightId));
 
     }
+
+    public List<SessionInsight> validateSessionInsights(List<Long> sessionInsightIds) {
+        if (sessionInsightIds == null || sessionInsightIds.isEmpty()) {
+            return List.of();
+        }
+        return sessionInsightIds.stream()
+                .map(this::validateSessionInsight)
+                .collect(Collectors.toList());
+    }
 }

@@ -3,7 +3,6 @@ package nl.novi.bloomtrail.services;
 import nl.novi.bloomtrail.dtos.UserDto;
 import nl.novi.bloomtrail.exceptions.UsernameNotFoundException;
 import nl.novi.bloomtrail.models.Authority;
-import nl.novi.bloomtrail.services.UserService;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,7 +19,6 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final UserService userService;
 
     public CustomUserDetailsService(UserService userService) {
-
         this.userService = userService;
     }
 
