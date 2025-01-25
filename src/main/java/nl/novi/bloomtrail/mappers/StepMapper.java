@@ -13,16 +13,17 @@ import java.util.stream.Collectors;
 public class StepMapper {
 
     public static StepDto toStepDto(Step step) {
-        StepDto stepDto = new StepDto();
-        stepDto.setStepId(step.getStepId());
-        stepDto.setStepName(step.getStepName());
-        stepDto.setCompleted(step.getCompleted());
-        stepDto.setStepStartDate(step.getStepStartDate());
-        stepDto.setStepEndDate(step.getStepEndDate());
-        stepDto.setCoachingProgramId(step.getCoachingProgram() != null ? step.getCoachingProgram().getCoachingProgramId() : null);
+        StepDto dto = new StepDto();
+
+        dto.setStepId(step.getStepId());
+        dto.setStepName(step.getStepName());
+        dto.setCompleted(step.getCompleted());
+        dto.setStepStartDate(step.getStepStartDate());
+        dto.setStepEndDate(step.getStepEndDate());
+        dto.setCoachingProgramId(step.getCoachingProgram() != null ? step.getCoachingProgram().getCoachingProgramId() : null);
 
         if (step.getSession() != null) {
-            stepDto.setSessionIds(
+            dto.setSessionIds(
                     step.getSession().stream()
                             .map(Session::getSessionId)
                             .collect(Collectors.toList())
@@ -30,14 +31,14 @@ public class StepMapper {
         }
 
         if (step.getAssignment() != null) {
-            stepDto.setAssignmentIds(
+            dto.setAssignmentIds(
                     step.getAssignment().stream()
                             .map(Assignment::getAssignmentId)
                             .collect(Collectors.toList())
             );
         }
 
-        return stepDto;
+        return dto;
     }
 
     public static Step toStepEntity (StepInputDto inputDto, CoachingProgram coachingProgramId, List<Session> sessions, List<Assignment> assignments) {

@@ -19,12 +19,14 @@ public class AssignmentService {
     private final AssignmentRepository assignmentRepository;
     private final FileService fileService;
     private final EntityValidationHelper validationHelper;
+    private final DownloadService downloadService;
 
 
-    public AssignmentService(AssignmentRepository assignmentRepository, FileService fileService, EntityValidationHelper entityValidationHelper, EntityValidationHelper validationHelper) {
+    public AssignmentService(AssignmentRepository assignmentRepository, FileService fileService, EntityValidationHelper entityValidationHelper, EntityValidationHelper validationHelper, DownloadService downloadService) {
         this.assignmentRepository = assignmentRepository;
         this.fileService = fileService;
         this.validationHelper = validationHelper;
+        this.downloadService = downloadService;
     }
 
     public void uploadFileForAssignment(MultipartFile file, Long assignmentId) {
@@ -32,21 +34,32 @@ public class AssignmentService {
         fileService.saveFile(file, FileContext.ASSIGNMENT, assignment);
     }
 
-    public byte[] downloadFile(String url) {
-        return fileService.downloadFile(url);
-    }
-
     public List<File> getUploadsForAssignment(Long assignmentId) {
         Assignment assignment = validationHelper.validateAssignment(assignmentId);
         return fileService.getUploadsForParentEntity(assignment);
     }
 
-    public Assignment createAssignment(AssignmentInputDto dto) {
+    public Assignment createAssignment(AssignmentInputDto dto, MultipartFile file) {
         Session session = validationHelper.validateSession(dto.getSessionId());
-
         Assignment assignment = AssignmentMapper.toAssignmentEntity(dto, session);
+
+        if (file != null && !file.isEmpty()) {
+            fileService.saveFile(file, FileContext.ASSIGNMENT, assignment);
+        }
 
         return assignmentRepository.save(assignment);
     }
+
+    public void deleteAssignment(Long assignmentId) {
+        Assignment assignment = validationHelper.validateAssignment(assignmentId);
+        fileService.deleteFilesForParentEntity(assignment);
+        assignmentRepository.delete(assignment);
+    }
+
+    public byte[] downloadAssignmentFile(Long assignmentId) {
+        Assignment assignment = validationHelper.validateAssignment(assignmentId);
+        return downloadService.downloadFilesForParentEntity(assignment);
+    }
+
 
 }

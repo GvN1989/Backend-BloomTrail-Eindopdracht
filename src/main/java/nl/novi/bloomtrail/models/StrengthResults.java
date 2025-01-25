@@ -27,10 +27,8 @@ public class StrengthResults {
     private String strengthResultsFilePath;
     @ElementCollection
     private List<String> topStrengthNames;
-
     @OneToMany(mappedBy = "strengthResults", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<File> files = new ArrayList<>();
-
     @ManyToOne
     @JoinColumn(name = "coaching_program", nullable = false)
     private CoachingProgram coachingProgram;
@@ -104,5 +102,13 @@ public class StrengthResults {
 
     public void setFiles(List<File> files) {
         this.files = files;
+    }
+
+    public CoachingProgram getCoachingProgram() {
+        return coachingProgram;
+    }
+
+    public void setCoachingProgram(CoachingProgram coachingProgram) {
+        this.coachingProgram = coachingProgram;
     }
 }

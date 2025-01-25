@@ -1,17 +1,14 @@
 package nl.novi.bloomtrail.dtos;
 
-import nl.novi.bloomtrail.enums.FileStatus;
-
 import java.util.List;
 
 public class AssignmentDto {
 
     private Long assignmentId;
     private String description;
-    private FileStatus fileStatus;
+    private String fileStatus;
     private Long sessionId;
     private List<Long> uploadsIds;;
-    private String downloadUrl;
 
 
     public Long getAssignmentId() {
@@ -30,11 +27,11 @@ public class AssignmentDto {
         this.description = description;
     }
 
-    public FileStatus getFileStatus() {
+    public String getFileStatus() {
         return fileStatus;
     }
 
-    public void setFileStatus(FileStatus fileStatus) {
+    public void setFileStatus(String fileStatus) {
         this.fileStatus = fileStatus;
     }
 
@@ -54,11 +51,4 @@ public class AssignmentDto {
         this.uploadsIds = uploadsIds;
     }
 
-    public String getDownloadUrl() {
-        return downloadUrl;
-    }
-
-    public void setDownloadUrl(String downloadUrl) {
-        this.downloadUrl = downloadUrl;
-    }
 }

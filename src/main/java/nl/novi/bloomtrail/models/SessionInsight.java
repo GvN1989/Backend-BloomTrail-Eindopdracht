@@ -22,7 +22,6 @@ public class SessionInsight {
     @CreationTimestamp
     private LocalDateTime createdAt;
     private String description;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "file_context", nullable = false)
     private FileContext fileContext;

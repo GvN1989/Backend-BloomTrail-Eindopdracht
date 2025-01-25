@@ -33,7 +33,7 @@ public class SessionInputDto {
     @Future
     private LocalDateTime updatedAt;
     @NotNull
-    private String status;
+    private SessionStatus status;
     private List<Long> sessionInsightsId;
     private List<Long> assignmentId;
     private Long StepId;
@@ -118,11 +118,11 @@ public class SessionInputDto {
         this.updatedAt = updatedAt;
     }
 
-    public String getStatus() {
+    public SessionStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(SessionStatus status) {
         this.status = status;
     }
 

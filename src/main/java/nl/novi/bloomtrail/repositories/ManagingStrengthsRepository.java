@@ -13,7 +13,7 @@ public interface ManagingStrengthsRepository extends JpaRepository<ManagingStren
 
     @Query("SELECT m FROM ManagingStrength m WHERE m.strengthId IN :strengthIds")
     List<ManagingStrength> findByIdIn(@Param("strengthIds") List<Long> strengthIds);
-    List<ManagingStrength> findTop15ByUserIdOrderByRank(Long userId);
+    List<ManagingStrength> findTop15ByUsernameOrderByRank(String username);
 
 }
 

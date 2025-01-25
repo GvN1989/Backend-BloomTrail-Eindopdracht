@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
@@ -79,10 +80,21 @@ public class FileService {
         }
     }
 
-    public void deleteUpload(Long uploadId) {
-        File file = fileRepository.findById(uploadId)
-                .orElseThrow(() -> new RuntimeException("Upload not found"));
-        fileRepository.delete(file);
+    public void deleteFilesForParentEntity(Object parentEntity) {
+        if (parentEntity == null) {
+            throw new IllegalArgumentException("Parent entity cannot be null");
+        }
+
+        List<File> files = getUploadsForParentEntity(parentEntity);
+
+        files.forEach(file -> {
+            Path filePath = Paths.get(file.getUrl());
+            try {
+                Files.deleteIfExists(filePath);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to delete file: " + file.getUrl(), e);
+            }
+        });
     }
 
 }

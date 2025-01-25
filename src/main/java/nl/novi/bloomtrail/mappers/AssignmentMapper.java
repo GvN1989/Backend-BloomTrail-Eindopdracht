@@ -2,11 +2,10 @@ package nl.novi.bloomtrail.mappers;
 
 import nl.novi.bloomtrail.dtos.AssignmentDto;
 import nl.novi.bloomtrail.dtos.AssignmentInputDto;
-import nl.novi.bloomtrail.enums.FileStatus;
-import nl.novi.bloomtrail.enums.SessionStatus;
 import nl.novi.bloomtrail.models.Assignment;
 import nl.novi.bloomtrail.models.File;
 import nl.novi.bloomtrail.models.Session;
+
 
 import java.util.stream.Collectors;
 
@@ -17,7 +16,7 @@ public class AssignmentMapper {
 
         dto.setAssignmentId(assignment.getAssignmentId());
         dto.setDescription(assignment.getDescription());
-        dto.setFileStatus(assignment.getFileStatus());
+        dto.setFileStatus(assignment.getFileStatus() != null ? assignment.getFileStatus().toString() : null);
         dto.setSessionId(assignment.getSession() != null ? assignment.getSession().getSessionId() : null);
         dto.setDownloadUrl(assignment.getDownloadUrl());
 
@@ -34,22 +33,14 @@ public class AssignmentMapper {
     }
 
     public static Assignment toAssignmentEntity(AssignmentInputDto inputDto, Session session) {
+
         Assignment assignment = new Assignment();
 
         assignment.setSession(session);
         assignment.setDescription(inputDto.getDescription());
-
-        if (inputDto.getFileStatus() != null) {
-            try {
-                assignment.setFileStatus(FileStatus.valueOf(inputDto.getFileStatus().toUpperCase()));
-            } catch (IllegalArgumentException e) {
-                throw new RuntimeException("Invalid status value: " + inputDto.getFileStatus());
-            }
-        }
+        assignment.setFileStatus(inputDto.getFileStatus());
 
         return assignment;
 
     }
-
-
 }

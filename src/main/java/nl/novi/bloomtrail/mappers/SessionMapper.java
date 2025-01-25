@@ -67,14 +67,7 @@ public class SessionMapper {
         session.setStep(step);
         session.setSessionInsights(sessionInsights);
         session.setAssignments(assignments);
-
-        if (inputDto.getStatus() != null) {
-            try {
-                session.setStatus(SessionStatus.valueOf(inputDto.getStatus().toUpperCase()));
-            } catch (IllegalArgumentException e) {
-                throw new RuntimeException("Invalid status value: " + inputDto.getStatus());
-            }
-        }
+        session.setStatus(inputDto.getStatus());
 
         return session;
 

@@ -1,4 +1,4 @@
 package nl.novi.bloomtrail.dtos;
 
-public class SessionInsightsDto {
+public class UserInputDto {
 }

@@ -29,7 +29,6 @@ public class Session {
     private String coach;
     @NotBlank
     private String client;
-
     @NotNull
     private LocalDate sessionDate;
     @NotNull
