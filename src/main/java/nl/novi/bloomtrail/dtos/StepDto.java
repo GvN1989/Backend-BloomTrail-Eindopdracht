@@ -1,6 +1,7 @@
 package nl.novi.bloomtrail.dtos;
 
 import java.util.Date;
+import java.util.List;
 
 public class StepDto {
 
@@ -14,9 +15,13 @@ public class StepDto {
 
     private Boolean completed;
 
-    private String goal;
+    private String stepGoal;
 
     private Integer sequence;
+
+    private Long coachingProgramId;
+    private List<Long> sessionIds;
+    private List<Long> assignmentIds;
 
     public Long getStepId() {
         return StepId;
@@ -58,12 +63,12 @@ public class StepDto {
         this.completed = completed;
     }
 
-    public String getGoal() {
-        return goal;
+    public String getStepGoal() {
+        return stepGoal;
     }
 
-    public void setGoal(String goal) {
-        this.goal = goal;
+    public void setStepGoal(String stepGoal) {
+        this.stepGoal = stepGoal;
     }
 
     public Integer getSequence() {
@@ -72,5 +77,29 @@ public class StepDto {
 
     public void setSequence(Integer sequence) {
         this.sequence = sequence;
+    }
+
+    public Long getCoachingProgramId() {
+        return coachingProgramId;
+    }
+
+    public void setCoachingProgramId(Long coachingProgramId) {
+        this.coachingProgramId = coachingProgramId;
+    }
+
+    public List<Long> getSessionIds() {
+        return sessionIds;
+    }
+
+    public void setSessionIds(List<Long> sessionIds) {
+        this.sessionIds = sessionIds;
+    }
+
+    public List<Long> getAssignmentIds() {
+        return assignmentIds;
+    }
+
+    public void setAssignmentIds(List<Long> assignmentIds) {
+        this.assignmentIds = assignmentIds;
     }
 }

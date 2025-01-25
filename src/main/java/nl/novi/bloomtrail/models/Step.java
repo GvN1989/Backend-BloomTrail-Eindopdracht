@@ -1,6 +1,5 @@
 package nl.novi.bloomtrail.models;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
@@ -24,7 +23,7 @@ public class Step {
 
     private Boolean completed;
 
-    private String goal;
+    private String StepGoal;
     @NotNull
     private Integer sequence;
 
@@ -34,7 +33,11 @@ public class Step {
 
     @OneToMany
     @JoinColumn(name = "session_id", nullable = false)
-    private List<Session> sessions = new ArrayList<>();
+    private List<Session> session = new ArrayList<>();
+
+    @OneToMany
+    @JoinColumn(name = "assignment_id", nullable = false)
+    private List<Assignment> assignment = new ArrayList<>();
 
     public Long getStepId() {
         return StepId;
@@ -68,12 +71,12 @@ public class Step {
         this.completed = completed;
     }
 
-    public String getGoal() {
-        return goal;
+    public String getStepGoal() {
+        return StepGoal;
     }
 
-    public void setGoal(String goal) {
-        this.goal = goal;
+    public void setStepGoal(String goal) {
+        this.StepGoal = goal;
     }
 
     public Integer getSequence() {
@@ -92,12 +95,20 @@ public class Step {
         this.coachingProgram = coachingProgram;
     }
 
-    public List<Session> getSessions() {
-        return sessions;
+    public List<Session> getSession() {
+        return session;
     }
 
-    public void setSessions(List<Session> sessions) {
-        this.sessions = sessions;
+    public void setSession(List<Session> session) {
+        this.session = session;
+    }
+
+    public List<Assignment> getAssignment() {
+        return assignment;
+    }
+
+    public void setAssignment(List<Assignment> assignment) {
+        this.assignment = assignment;
     }
 
     public String getStepName() {

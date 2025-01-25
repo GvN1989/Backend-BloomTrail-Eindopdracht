@@ -2,102 +2,77 @@ package nl.novi.bloomtrail.services;
 
 import nl.novi.bloomtrail.dtos.CoachingProgramInputDto;
 import nl.novi.bloomtrail.exceptions.RecordNotFoundException;
+import nl.novi.bloomtrail.mappers.CoachingProgramMapper;
+import nl.novi.bloomtrail.helper.EntityValidationHelper;
 import nl.novi.bloomtrail.models.*;
 import nl.novi.bloomtrail.repositories.*;
 import org.springframework.stereotype.Service;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
-
 
 @Service
 public class CoachingProgramService {
 
     private final CoachingProgramRepository coachingProgramRepository;
-
     private final StrengthResultsRepository strengthResultsRepository;
-
-    private final UserRepository userRepository;
-
+    private final EntityValidationHelper validationHelper;
     private final StepRepository stepRepository;
 
-
-    public CoachingProgramService(CoachingProgramRepository coachingProgramRepository, StrengthResultsRepository strengthResultsRepository, UserRepository userRepository, StepRepository stepRepository) {
+    public CoachingProgramService(CoachingProgramRepository coachingProgramRepository, StrengthResultsRepository strengthResultsRepository, EntityValidationHelper validationHelper, StepRepository stepRepository) {
         this.coachingProgramRepository = coachingProgramRepository;
         this.strengthResultsRepository = strengthResultsRepository;
+        this.validationHelper = validationHelper;
         this.stepRepository = stepRepository;
-        this.userRepository = userRepository;
     }
 
     public List<CoachingProgram> findByUser(String username) {
-        List<CoachingProgram> programs = coachingProgramRepository.findByUsername(username);
-        if (programs.isEmpty()) {
-            throw new RecordNotFoundException("No CoachingPrograms found for user with username: " + username);
-        }
-        return programs;
+        return validationHelper.validateCoachingProgramsByUser(username);
     }
 
-    public CoachingProgram findById(Long coachingProgramId){
-        return coachingProgramRepository.findById(coachingProgramId)
-                .orElseThrow(()-> new RecordNotFoundException("CoachingProgram with id: " + coachingProgramId + "not found"));
+    public CoachingProgram findById(Long coachingProgramId) {
+        return validationHelper.validateCoachingProgram(coachingProgramId);
     }
 
-       public CoachingProgram saveCoachingProgram (CoachingProgramInputDto inputDto) {
-        CoachingProgram coachingProgram= CoachingProgramMapper.toCoachingProgramEntity(inputDto);
+    public CoachingProgram saveCoachingProgram(CoachingProgramInputDto inputDto) {
+
+        User client = validationHelper.validateUser(inputDto.getClientUsername());
+        User coach = validationHelper.validateUser(inputDto.getCoachUsername());
+
+        CoachingProgram coachingProgram = CoachingProgramMapper.toCoachingProgramEntity(inputDto, client, coach);
         return coachingProgramRepository.save(coachingProgram);
     }
 
-    public CoachingProgram updateCoachingProgram (Long coachingProgramId, CoachingProgramInputDto inputDto) {
+    public CoachingProgram updateCoachingProgram(Long coachingProgramId, CoachingProgramInputDto inputDto) {
+        CoachingProgram coachingProgram = validationHelper.validateCoachingProgram(coachingProgramId);
 
-        if (!coachingProgramRepository.existsById(coachingProgramId)) {
-            throw new RecordNotFoundException("No coachingProgram found with ID " + coachingProgramId);
-        }
+        User client = validationHelper.validateUser(inputDto.getClientUsername());
+        User coach = validationHelper.validateUser(inputDto.getCoachUsername());
 
-        CoachingProgram coachingProgram = CoachingProgramMapper.toCoachingProgramEntity(inputDto);
-        coachingProgram.setCoachingProgramId(coachingProgramId);
-        return coachingProgramRepository.save(coachingProgram);
-    }
-
-    public void deleteCoachingProgram (Long coachingProgramId) {
-        if (!coachingProgramRepository.existsById(coachingProgramId)) {
-            throw new RecordNotFoundException("No coaching program found with ID " + coachingProgramId);
-        }
-
-        coachingProgramRepository.deleteById(coachingProgramId); }
-
-    public CoachingProgram assignUserToCoachingProgram (Long coachingId, String username) {
-
-        CoachingProgram coachingProgram = findById(coachingId);
-
-        User user = userRepository.findById(username)
-                .orElseThrow(() -> new RecordNotFoundException( "User with " + username + " not found"));
-
-        coachingProgram.setUser(user);
+        coachingProgram.setCoachingProgramName(inputDto.getCoachingProgramName());
+        coachingProgram.setGoal(inputDto.getGoal());
+        coachingProgram.setStartDate(inputDto.getStartDate());
+        coachingProgram.setEndDate(inputDto.getEndDate());
+        coachingProgram.setClient(client);
+        coachingProgram.setCoach(coach);
 
         return coachingProgramRepository.save(coachingProgram);
     }
 
-    public CoachingProgram assignStepToCoachingProgram (Long coachingId, Long stepId) {
+    public void deleteCoachingProgram(Long coachingProgramId) {
+        CoachingProgram coachingProgram = validationHelper.validateCoachingProgram(coachingProgramId);
+        coachingProgramRepository.delete(coachingProgram);
+    }
 
-        CoachingProgram coachingProgram = findById(coachingId);
+    public CoachingProgram assignStepToCoachingProgram(Long coachingProgramId, Long stepId) {
 
-        Step step = stepRepository.findById(stepId)
-                .orElseThrow(() -> new RecordNotFoundException( "Step with " + stepId  + " not found"));
+        CoachingProgram coachingProgram = validationHelper.validateCoachingProgram(coachingProgramId);
+        Step step = validationHelper.validateStep(stepId);
 
-        List<Step> timeline = coachingProgram.getTimeline();
+        validationHelper.validateStepAssignment(coachingProgram, step);
 
-        if (timeline.contains(step)) {
-            throw new IllegalArgumentException("Step is already part of the timeline.");
-        }
-
-        boolean stepNameExists = timeline.stream()
-                .anyMatch(existingStep -> existingStep.getStepName().equalsIgnoreCase(step.getStepName()));
-        if (stepNameExists) {
-            throw new IllegalArgumentException("A step with the name '" + step.getStepName() + "' already exists in the timeline.");
-        }
-        timeline.add(step);
-        coachingProgram.setTimeline(timeline);
+        coachingProgram.getTimeline().add(step);
         return coachingProgramRepository.save(coachingProgram);
     }
 
@@ -117,18 +92,22 @@ public class CoachingProgramService {
         return (double) completedSteps / timeline.size() * 100;
     }
 
-    public CoachingProgram assignCoachingResultsToCoachingProgram(Long coachingId, Long strengthResultsId) {
-        CoachingProgram coachingProgram = findById(coachingId);
-        StrengthResults strengthResults = strengthResultsRepository.findById(strengthResultsId)
-                .orElseThrow(() -> new RecordNotFoundException("CoachingResults with ID " + strengthResultsId + " not found"));
+    public CoachingProgram assignStrengthResultsToCoachingProgram(Long coachingProgramId, List<Long> strengthResultsIds) {
+        CoachingProgram coachingProgram = validationHelper.validateCoachingProgram(coachingProgramId);
+        List<StrengthResults> strengthResultsList = strengthResultsRepository.findAllById(strengthResultsIds);
 
-        coachingProgram.setStrengthResults(strengthResults);
+        if (strengthResultsList.isEmpty()) {
+            throw new RecordNotFoundException("No StrengthResults found for the provided IDs: " + strengthResultsIds);
+        }
 
-        return coachingProgramRepository.save(coachingProgram);
+        strengthResultsList.forEach(strengthResults -> strengthResults.setCoachingProgram(coachingProgram));
+        strengthResultsRepository.saveAll(strengthResultsList);
+
+        return coachingProgram;
     }
 
-    public void updateProgramEndDate(Long coachingId) {
-        CoachingProgram coachingProgram = findById(coachingId);
+    public void updateProgramEndDate(Long coachingProgramId) {
+        CoachingProgram coachingProgram = validationHelper.validateCoachingProgram(coachingProgramId);
 
         List<Step> steps = coachingProgram.getTimeline();
         if (!steps.isEmpty()) {
@@ -143,12 +122,14 @@ public class CoachingProgramService {
             }
         }
     }
-    public List<Session> getAllSessionsInCoachingProgram(Long coachingId) {
-        CoachingProgram coachingProgram = findById(coachingId);
+    public List<Step> getStepsByCoachingProgram(Long coachingProgramId) {
+        CoachingProgram coachingProgram = validationHelper.validateCoachingProgram(coachingProgramId);
+        return stepRepository.findStepsByCoachingProgram(coachingProgramId);
+    }
 
-        return coachingProgram.getTimeline().stream()
-                .flatMap(step -> step.getSessions().stream())
-                .collect(Collectors.toList());
+    public List<CoachingProgram> getProgramsByCoach(String coachUsername) {
+        User coach = validationHelper.validateUser(coachUsername);
+        return coach.getCoachingPrograms();
     }
 
 }

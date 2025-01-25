@@ -1,6 +1,5 @@
 package nl.novi.bloomtrail.models;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Table;
@@ -24,51 +23,31 @@ public class Session {
     private Long sessionId;
 
     @Column(name = "Session_Name")
+    @NotBlank
     private String sessionName;
-
     @NotBlank
     private String coach;
-
     @NotBlank
     private String client;
-
-    @JsonFormat(pattern= "dd-mm-yyy")
-    @Future
     @NotNull
     private LocalDate sessionDate;
-
-    @JsonFormat(pattern= "dd-mm-yyy")
-    @Future
     @NotNull
     private LocalTime sessionTime;
-
     @NotBlank
     private String location;
-
-    @Size(max = 255)
     private String comment;
-
     @CreationTimestamp
-    @JsonFormat(pattern= "dd-mm-yyy")
-    @Future
     private LocalDateTime createdAt;
-
     @UpdateTimestamp
-    @JsonFormat(pattern= "dd-mm-yyy")
-    @Future
     private LocalDateTime updatedAt;
-
-    @OneToOne
-    @JoinColumn(name = "id_canceler")
-    private User canceler;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
+    @NotNull
     private SessionStatus status;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "session_insight_id")
-    private SessionInsights sessionInsights;
+    @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SessionInsight> sessionInsights = new ArrayList<>();
 
     @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true) //Is the cascadetype sufficient?
     private List<Assignment> assignments = new ArrayList<>();
@@ -149,11 +128,27 @@ public class Session {
         this.updatedAt = updatedAt;
     }
 
-    public SessionInsights getSessionInsights() {
+    public String getSessionName() {
+        return sessionName;
+    }
+
+    public void setSessionName(String sessionName) {
+        this.sessionName = sessionName;
+    }
+
+    public SessionStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(SessionStatus status) {
+        this.status = status;
+    }
+
+    public List<SessionInsight> getSessionInsights() {
         return sessionInsights;
     }
 
-    public void setSessionInsights(SessionInsights sessionInsights) {
+    public void setSessionInsights(List<SessionInsight> sessionInsights) {
         this.sessionInsights = sessionInsights;
     }
 

@@ -12,23 +12,23 @@ public class Assignment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer assignmentId;
+    private Long assignmentId;
     private String description;
     @Enumerated(EnumType.STRING)
     private FileStatus fileStatus;
     @ManyToOne
     @JoinColumn(name = "session_id", nullable = false)
     private Session session;
+    @ManyToOne
+    @JoinColumn(name = "step_id", nullable = false)
+    private Step step;
     @OneToMany(mappedBy = "assignment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<File> files = new ArrayList<>();
-
-    private String downloadUrl;
-
-    public Integer getAssignmentId() {
+    public Long getAssignmentId() {
         return assignmentId;
     }
 
-    public void setAssignmentId(Integer assignmentId) {
+    public void setAssignmentId(Long assignmentId) {
         this.assignmentId = assignmentId;
     }
 
@@ -56,14 +56,6 @@ public class Assignment {
         this.files = files;
     }
 
-    public String getDownloadUrl() {
-        return downloadUrl;
-    }
-
-    public void setDownloadUrl(String downloadUrl) {
-        this.downloadUrl = downloadUrl;
-    }
-
     public Session getSession() {
         return session;
     }
@@ -72,4 +64,11 @@ public class Assignment {
         this.session = session;
     }
 
+    public Step getStep() {
+        return step;
+    }
+
+    public void setStep(Step step) {
+        this.step = step;
+    }
 }
