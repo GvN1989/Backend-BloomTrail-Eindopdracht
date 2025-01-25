@@ -2,8 +2,11 @@ package nl.novi.bloomtrail.enums;
 
 public enum FileContext {
 
-    STRENGTH_RESULTS,
+    SESSION_INSIGHTS_CLIENT_REFLECTION,
+    SESSION_INSIGHTS_COACH_NOTES,
+    STRENGTH_RESULTS ,
     ASSIGNMENT,
-    SESSION_INSIGHTS
+    PROFILE_PICTURE
 
 }
+

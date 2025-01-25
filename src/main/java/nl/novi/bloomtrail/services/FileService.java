@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
@@ -21,26 +22,36 @@ public class FileService {
         this.fileRepository = fileRepository;
     }
 
-    public File saveUpload(MultipartFile file, FileContext context, Object parentEntity) {
-        try {
-            String fileUrl = FileStorageUtil.saveFileAndGetUrl(file);
+    public File saveFile(MultipartFile file, FileContext context, Object parentEntity) {
+        return saveFile(FileStorageUtil.saveFile(file), context, parentEntity, file.getContentType());
+    }
 
+    public File saveFile(byte[] fileData, String fileName, FileContext context) {
+            String fileUrl = FileStorageUtil.saveFile(fileData, fileName);
+
+            File file = new File();
+            file.setFileType("application/pdf");
+            file.setUrl(fileUrl);
+            file.setContext(context);
+
+            return fileRepository.save(file);
+    }
+
+    private File saveFile(String url, FileContext context, Object parentEntity, String fileType) {
             File upload = new File();
-            upload.setFileType(file.getContentType());
-            upload.setUrl(fileUrl);
+            upload.setFileType(fileType);
+            upload.setUrl(url);
             upload.setContext(context);
 
-            switch (parentEntity) {
-                case Assignment assignment -> upload.setAssignment(assignment);
-                case StrengthResults strengthResults -> upload.setStrengthResults(strengthResults);
-                case SessionInsights sessionInsights -> upload.setSessionInsights(sessionInsights);
-                default -> throw new IllegalArgumentException("Unsupported upload file type");
-            }
+        switch (parentEntity) {
+            case Assignment assignment -> upload.setAssignment(assignment);
+            case StrengthResults strengthResults -> upload.setStrengthResults(strengthResults);
+            case SessionInsight sessionInsight -> upload.setSessionInsights(sessionInsight);
+            case User user when context == FileContext.PROFILE_PICTURE -> upload.setUser(user);
+            default -> throw new IllegalArgumentException("Unsupported file or context type");
+        }
 
             return fileRepository.save(upload);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to save upload", e);
-        }
     }
 
     public List<File> getUploadsByContext(FileContext context) {
@@ -56,7 +67,7 @@ public class FileService {
         return switch(parentEntity) {
             case Assignment assignment -> fileRepository.findByAssignment(assignment);
             case StrengthResults strengthResults -> fileRepository.findByStrengthResults(strengthResults);
-            case SessionInsights sessionInsights -> fileRepository.findBySessionInsights(sessionInsights);
+            case SessionInsight sessionInsight -> fileRepository.findBySessionInsights(sessionInsight);
             default -> throw new IllegalArgumentException("Unsupported file type");
         };
     }
@@ -69,10 +80,21 @@ public class FileService {
         }
     }
 
-    public void deleteUpload(Long uploadId) {
-        File file = fileRepository.findById(uploadId)
-                .orElseThrow(() -> new RuntimeException("Upload not found"));
-        fileRepository.delete(file);
+    public void deleteFilesForParentEntity(Object parentEntity) {
+        if (parentEntity == null) {
+            throw new IllegalArgumentException("Parent entity cannot be null");
+        }
+
+        List<File> files = getUploadsForParentEntity(parentEntity);
+
+        files.forEach(file -> {
+            Path filePath = Paths.get(file.getUrl());
+            try {
+                Files.deleteIfExists(filePath);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to delete file: " + file.getUrl(), e);
+            }
+        });
     }
 
 }

@@ -15,7 +15,7 @@ import java.util.Date;
 public class File {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long uploadId;
+    private Long fileId;
     private String fileType;
     private String url;
     @CreationTimestamp
@@ -36,15 +36,17 @@ public class File {
 
     @ManyToOne
     @JoinColumn(name = "sessionInsights_id", nullable = true)
-    private SessionInsights sessionInsights;
+    private SessionInsight sessionInsight;
 
+    @OneToOne(mappedBy = "upload", cascade = CascadeType.ALL)
+    private User user;
 
-    public Long getUploadId() {
-        return uploadId;
+    public Long getFileId() {
+        return fileId;
     }
 
-    public void setUploadId(Long uploadId) {
-        this.uploadId = uploadId;
+    public void setFileId(Long uploadId) {
+        this.fileId = uploadId;
     }
 
     public String getUrl() {
@@ -71,12 +73,12 @@ public class File {
         this.strengthResults = strengthResults;
     }
 
-    public SessionInsights getSessionInsights() {
-        return sessionInsights;
+    public SessionInsight getSessionInsights() {
+        return sessionInsight;
     }
 
-    public void setSessionInsights(SessionInsights sessionInsights) {
-        this.sessionInsights = sessionInsights;
+    public void setSessionInsights(SessionInsight sessionInsight) {
+        this.sessionInsight = sessionInsight;
     }
 
     public Date getCreatedAt() {
@@ -109,11 +111,18 @@ public class File {
         int relationCount = 0;
         if (assignment != null) relationCount++;
         if (strengthResults != null) relationCount++;
-        if (sessionInsights != null) relationCount++;
+        if (sessionInsight != null) relationCount++;
 
         if (relationCount > 1) {
             throw new IllegalStateException("Upload can only belong to one context: Assignment, StrengthResults, or SessionInsights");
         }
     }
 
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 }

@@ -1,4 +1,10 @@
 package nl.novi.bloomtrail.controllers;
 
-public class GlobalExceptionHandlerTest {
+
+
+public class UserController {
+
+
+
+
 }

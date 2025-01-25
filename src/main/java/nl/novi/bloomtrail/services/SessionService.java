@@ -1,14 +1,12 @@
 package nl.novi.bloomtrail.services;
 
+import nl.novi.bloomtrail.dtos.SessionInputDto;
 import nl.novi.bloomtrail.exceptions.RecordNotFoundException;
-import nl.novi.bloomtrail.models.CoachingProgram;
-import nl.novi.bloomtrail.models.Session;
-import nl.novi.bloomtrail.models.Step;
-import nl.novi.bloomtrail.models.User;
+import nl.novi.bloomtrail.helper.EntityValidationHelper;
+import nl.novi.bloomtrail.mappers.SessionMapper;
+import nl.novi.bloomtrail.models.*;
 import nl.novi.bloomtrail.repositories.CoachingProgramRepository;
 import nl.novi.bloomtrail.repositories.SessionRepository;
-import nl.novi.bloomtrail.repositories.StepRepository;
-import nl.novi.bloomtrail.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,23 +16,17 @@ import java.util.stream.Collectors;
 public class SessionService {
 
     private final SessionRepository sessionRepository;
-
-    private final StepRepository stepRepository;
-
-    private final UserRepository userRepository;
-
     private final CoachingProgramRepository coachingProgramRepository;
+    private final EntityValidationHelper validationHelper;
 
-    public SessionService(SessionRepository sessionRepository, StepRepository stepRepository, UserRepository userRepository, CoachingProgramRepository coachingProgramRepository) {
+    public SessionService(SessionRepository sessionRepository, CoachingProgramRepository coachingProgramRepository, EntityValidationHelper validationHelper) {
         this.sessionRepository = sessionRepository;
-        this.stepRepository = stepRepository;
-        this.userRepository = userRepository;
         this.coachingProgramRepository = coachingProgramRepository;
+        this.validationHelper = validationHelper;
     }
 
     public List<Session> getSessionsForUser(String username) {
-        User user = userRepository.findById(username)
-                .orElseThrow(() -> new RecordNotFoundException("User with username " + username + "not found"));
+        User user = validationHelper.validateUser(username);
 
         List<CoachingProgram> programs = coachingProgramRepository.findByUsername(username);
         if (programs.isEmpty()) {
@@ -43,27 +35,31 @@ public class SessionService {
 
         List<Step> steps = programs.stream()
                 .flatMap(program -> program.getTimeline().stream())
-                .collect(Collectors.toList());
+                .toList();
 
         if (steps.isEmpty()) {
             throw new RecordNotFoundException("The user with username " + username + " does not have any steps");
         }
 
         return steps.stream()
-                .flatMap(step -> step.getSessions().stream())
+                .flatMap(step -> step.getSession().stream())
                 .collect(Collectors.toList());
     }
     public List<Session> getSessionsForStep(Long stepId) {
-        Step step = stepRepository.findById(stepId)
-                .orElseThrow(() -> new RecordNotFoundException("Step with ID " + stepId + " not found"));
-        return step.getSessions();
+        Step step = validationHelper.validateStep(stepId);
+        return step.getSession();
     }
 
-    public Session addSessionToStep(Long stepId, Session session) {
-        Step step = stepRepository.findById(stepId)
-                .orElseThrow(() -> new RecordNotFoundException("Step with ID " + stepId + " not found"));
+    public Session addSessionToStep(SessionInputDto inputDto) {
+        Step step = validationHelper.validateStep(inputDto.getStepId());
 
-        boolean hasConflict = step.getSessions().stream()
+        List<SessionInsight> sessionInsights = validationHelper.validateSessionInsights(inputDto.getSessionInsightsId());
+        List<Assignment> assignments = validationHelper.validateAssignments(inputDto.getAssignmentId());
+
+
+        Session session = SessionMapper.toSessionEntity(inputDto, step, sessionInsights, assignments);
+
+        boolean hasConflict = step.getSession().stream()
                 .anyMatch(existingSession ->
                         existingSession.getSessionDate().equals(session.getSessionDate()) &&
                                 existingSession.getSessionTime().equals(session.getSessionTime())
@@ -89,7 +85,6 @@ public class SessionService {
 
         return sessionRepository.save(session);
     }
-
 
     public void deleteSession (Long sessionId) {
         if (!sessionRepository.existsById(sessionId)) {

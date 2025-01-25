@@ -6,17 +6,14 @@ import java.util.List;
 public class CoachingProgramDto {
 
     private Long coachingProgramId;
-
     private String coachingProgramName;
     private String goal;
-
     private Date startDate;
-
     private Date endDate;
-
     private List<String> strengthResultUrls;
-
     private List<StepDto> timeline;
+    private String clientUsername;
+    private String coachUsername;
 
     public Long getCoachingProgramId() {
         return coachingProgramId;
@@ -72,5 +69,21 @@ public class CoachingProgramDto {
 
     public void setTimeline(List<StepDto> timeline) {
         this.timeline = timeline;
+    }
+
+    public String getClientUsername() {
+        return clientUsername;
+    }
+
+    public void setClientUsername(String clientUsername) {
+        this.clientUsername = clientUsername;
+    }
+
+    public String getCoachUsername() {
+        return coachUsername;
+    }
+
+    public void setCoachUsername(String coachUsername) {
+        this.coachUsername = coachUsername;
     }
 }
