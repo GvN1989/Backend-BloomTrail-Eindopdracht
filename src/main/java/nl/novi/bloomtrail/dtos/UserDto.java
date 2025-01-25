@@ -24,9 +24,10 @@ public class UserDto {
     private String apikey;
     @Email(message = "Email must be valid")
     private String email;
-
     @JsonSerialize
     public Set<Authority> authorities;
+
+    private String profilePictureUrl;
 
     private List<CoachingProgramDto> coachingPrograms;
 
@@ -77,7 +78,19 @@ public class UserDto {
     public void setAuthorities(Set<Authority> authorities) {
         this.authorities = authorities;
     }
+
+    public List<CoachingProgramDto> getCoachingPrograms() {
+        return coachingPrograms;
+    }
     public void setCoachingPrograms(List<CoachingProgramDto> coachingPrograms) {
         this.coachingPrograms = coachingPrograms;
+    }
+
+    public String getProfilePictureUrl() {
+        return profilePictureUrl;
+    }
+
+    public void setProfilePictureUrl(String profilePictureUrl) {
+        this.profilePictureUrl = profilePictureUrl;
     }
 }
