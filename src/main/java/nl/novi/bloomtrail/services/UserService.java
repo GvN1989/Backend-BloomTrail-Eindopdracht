@@ -26,13 +26,15 @@ import java.util.stream.Stream;
 public class UserService {
     private final UserRepository userRepository;
     private final FileService fileService;
+    private final DownloadService downloadService;
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
     private final EntityValidationHelper validationHelper;
 
-    public UserService(UserRepository userRepository, FileService fileService, EntityValidationHelper validationHelper) {
+    public UserService(UserRepository userRepository, FileService fileService, DownloadService downloadService, EntityValidationHelper validationHelper) {
         this.userRepository = userRepository;
         this.fileService = fileService;
+        this.downloadService = downloadService;
         this.validationHelper = validationHelper;
     }
 
@@ -136,29 +138,6 @@ public class UserService {
         return user;
     }
 
-    public List<CoachingProgramRoleDto> findCoachingProgramsByUser(String username) {
-        List<CoachingProgram> asCoach = userRepository.findCoachingProgramsAsCoach(username);
-        List<CoachingProgram> asClient = userRepository.findCoachingProgramsAsClient(username);
-
-        return Stream.concat(
-                        asCoach.stream().map(program -> mapToRoleDto(program, "Coach")),
-                        asClient.stream().map(program -> mapToRoleDto(program, "Client"))
-                )
-                .distinct()
-                .toList();
-    }
-
-    private CoachingProgramRoleDto mapToRoleDto(CoachingProgram program, String role) {
-        return new CoachingProgramRoleDto(
-                program.getCoachingProgramId(),
-                program.getCoachingProgramName(),
-                program.getGoal(),
-                program.getStartDate(),
-                program.getEndDate(),
-                role
-        );
-    }
-
     public void uploadProfilePicture(String username, MultipartFile file) {
         User user = validationHelper.validateUser(username);
 
@@ -174,7 +153,7 @@ public class UserService {
             throw new IllegalArgumentException("Profile picture not set");
         }
 
-        return fileService.downloadFile(user.getProfilePicture().getUrl());
+        return downloadService.downloadFile(user.getProfilePicture().getUrl());
     }
     public void deleteProfilePicture(String username) {
         User user = validationHelper.validateUser(username);
