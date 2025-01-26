@@ -5,13 +5,16 @@ import nl.novi.bloomtrail.dtos.AuthorityInputDto;
 import nl.novi.bloomtrail.dtos.UserDto;
 import nl.novi.bloomtrail.services.UserService;
 import org.apache.coyote.BadRequestException;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.net.URI;
+import java.net.URLConnection;
 import java.util.List;
 @RestController
 @RequestMapping(value="/users")
@@ -103,6 +106,36 @@ public class UserController {
     public ResponseEntity<Object> deleteUserAuthority(@PathVariable("username") String username, @PathVariable("authority") String authority) {
         userService.removeAuthority(username, authority);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{username}/profile-picture")
+    public ResponseEntity<String> uploadProfilePicture(
+            @PathVariable String username,
+            @RequestPart("file") MultipartFile file) {
+        userService.uploadProfilePicture(username, file);
+        return ResponseEntity.ok("Profile picture uploaded successfully for user: " + username);
+    }
+
+    @GetMapping("/{username}/profile-picture")
+    public ResponseEntity<byte[]> getProfilePicture(@PathVariable String username) throws IOException {
+        byte[] profilePicture = userService.getProfilePicture(username);
+
+        String fileType = URLConnection.guessContentTypeFromStream(new ByteArrayInputStream(profilePicture));
+        MediaType mediaType = fileType != null ? MediaType.parseMediaType(fileType) : MediaType.APPLICATION_OCTET_STREAM;
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.IMAGE_JPEG);
+        headers.setContentDisposition(ContentDisposition.inline().filename("profile-picture.jpg").build());
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(profilePicture);
+    }
+
+    @DeleteMapping("/{username}/profile-picture")
+    public ResponseEntity<String> deleteProfilePicture(@PathVariable String username) {
+        userService.deleteProfilePicture(username);
+        return ResponseEntity.ok("Profile picture deleted successfully for user: " + username);
     }
 
 

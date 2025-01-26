@@ -28,12 +28,12 @@ public class CoachingProgramService {
         this.stepRepository = stepRepository;
     }
 
-    public List<SimpleCoachingProgramDto> getCoachingProgramDetails() {
-        return coachingProgramRepository.findAllCoachingProgramDetails();
-    }
-
     public CoachingProgram findById(Long coachingProgramId) {
         return validationHelper.validateCoachingProgram(coachingProgramId);
+    }
+
+    public List<SimpleCoachingProgramDto> getCoachingProgramDetails() {
+        return coachingProgramRepository.findAllCoachingProgramDetails();
     }
 
     public List<CoachingProgram> getCoachingProgramsByCoach(String coachUsername) {
@@ -117,16 +117,26 @@ public class CoachingProgramService {
         CoachingProgram coachingProgram = validationHelper.validateCoachingProgram(coachingProgramId);
 
         List<Step> steps = coachingProgram.getTimeline();
-        if (!steps.isEmpty()) {
-            Date latestEndDate = steps.stream()
-                    .map(Step::getStepEndDate)
-                    .filter(Objects::nonNull)
-                    .max(Date::compareTo)
-                    .orElse(coachingProgram.getEndDate());
-            if (latestEndDate.after(coachingProgram.getEndDate())) {
-                coachingProgram.setEndDate(latestEndDate);
-                coachingProgramRepository.save(coachingProgram);
-            }
+        if (steps == null || steps.isEmpty()) {
+            coachingProgram.setEndDate(null);
+            coachingProgramRepository.save(coachingProgram);
+            return;
+        }
+
+        Date latestEndDate = steps.stream()
+                .map(Step::getStepEndDate)
+                .filter(Objects::nonNull)
+                .max(Date::compareTo)
+                .orElse(null);
+
+        if (latestEndDate == null) {
+            throw new IllegalStateException("No valid step end dates found.");
+        }
+
+        Date currentEndDate = coachingProgram.getEndDate();
+        if (currentEndDate == null || latestEndDate.after(currentEndDate)) {
+            coachingProgram.setEndDate(latestEndDate);
+            coachingProgramRepository.save(coachingProgram);
         }
     }
 

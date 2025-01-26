@@ -6,6 +6,7 @@ import jakarta.validation.constraints.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "steps")
@@ -13,7 +14,7 @@ public class Step {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long StepId;
+    private Long stepId;
 
     private String StepName;
 
@@ -40,11 +41,11 @@ public class Step {
     private List<Assignment> assignment = new ArrayList<>();
 
     public Long getStepId() {
-        return StepId;
+        return stepId;
     }
 
     public void setStepId(Long stepId) {
-        this.StepId = stepId;
+        this.stepId = stepId;
     }
 
     public Date getStepStartDate() {
@@ -124,12 +125,12 @@ public class Step {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Step step = (Step) o;
-        return StepId != null && StepId.equals(step.getStepId());
+        return Objects.equals(stepId, step.stepId);
     }
 
     @Override
     public int hashCode() {
-        return StepId != null ? StepId.hashCode() : 0;
+        return Objects.hash(stepId);
     }
 
 }

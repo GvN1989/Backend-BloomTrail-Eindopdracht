@@ -38,9 +38,9 @@ public class SessionMapper {
 
         }
 
-        if (session.getAssignments() != null) {
+        if (session.getAssignment() != null) {
             dto.setAssignmentId(
-                    session.getAssignments().stream()
+                    session.getAssignment().stream()
                             .map(Assignment::getAssignmentId)
                             .collect(Collectors.toList())
             );
@@ -65,7 +65,7 @@ public class SessionMapper {
         session.setComment(inputDto.getComment());
         session.setStep(step);
         session.setSessionInsights(sessionInsights);
-        session.setAssignments(assignments);
+        session.setAssignment(assignments);
         session.setStatus(inputDto.getStatus());
 
         return session;
