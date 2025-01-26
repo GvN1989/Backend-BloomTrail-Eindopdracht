@@ -1,9 +1,11 @@
 package nl.novi.bloomtrail.services;
 
+import nl.novi.bloomtrail.dtos.CoachingProgramRoleDto;
 import nl.novi.bloomtrail.dtos.UserDto;
 import nl.novi.bloomtrail.enums.FileContext;
 import nl.novi.bloomtrail.exceptions.UsernameNotFoundException;
 import nl.novi.bloomtrail.models.Authority;
+import nl.novi.bloomtrail.models.CoachingProgram;
 import nl.novi.bloomtrail.models.File;
 import nl.novi.bloomtrail.models.User;
 import nl.novi.bloomtrail.repositories.UserRepository;
@@ -18,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 @Service
 public class UserService {
@@ -131,6 +134,29 @@ public class UserService {
         user.setEmail(userDto.getEmail());
 
         return user;
+    }
+
+    public List<CoachingProgramRoleDto> findCoachingProgramsByUser(String username) {
+        List<CoachingProgram> asCoach = userRepository.findCoachingProgramsAsCoach(username);
+        List<CoachingProgram> asClient = userRepository.findCoachingProgramsAsClient(username);
+
+        return Stream.concat(
+                        asCoach.stream().map(program -> mapToRoleDto(program, "Coach")),
+                        asClient.stream().map(program -> mapToRoleDto(program, "Client"))
+                )
+                .distinct()
+                .toList();
+    }
+
+    private CoachingProgramRoleDto mapToRoleDto(CoachingProgram program, String role) {
+        return new CoachingProgramRoleDto(
+                program.getCoachingProgramId(),
+                program.getCoachingProgramName(),
+                program.getGoal(),
+                program.getStartDate(),
+                program.getEndDate(),
+                role
+        );
     }
 
     public void uploadProfilePicture(String username, MultipartFile file) {

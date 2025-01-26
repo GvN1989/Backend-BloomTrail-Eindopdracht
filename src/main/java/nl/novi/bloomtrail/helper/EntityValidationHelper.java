@@ -53,25 +53,41 @@ public class EntityValidationHelper {
 
     public Step validateStep (Long StepId) {
         return stepRepository.findById(StepId)
-                .orElseThrow(() -> new EntityNotFoundException("Step" , StepId));
+                .orElseThrow(() -> new EntityNotFoundException("Step with ID" , StepId));
+    }
+
+
+    public List<Step> validateSteps (List<Long> stepIds) {
+        if (stepIds == null || stepIds.isEmpty()) {
+            return List.of();
+        }
+        return stepIds.stream()
+                .map(this::validateStep)
+                .collect(Collectors.toList());
     }
 
     public List<Session> validateSessions(List<Long> sessionIds) {
         if (sessionIds == null || sessionIds.isEmpty()) {
             return List.of();
         }
-        return sessionIds.stream()
-                .map(this::validateSession)
-                .collect(Collectors.toList());
+
+        List<Session> sessions = sessionRepository.findAllById(sessionIds);
+        if (sessions.size() != sessionIds.size()) {
+            throw new RecordNotFoundException("Some session IDs are invalid: " + sessionIds);
+        }
+        return sessions;
     }
 
     public List<Assignment> validateAssignments(List<Long> assignmentIds) {
         if (assignmentIds == null || assignmentIds.isEmpty()) {
             return List.of();
         }
-        return assignmentIds.stream()
-                .map(this::validateAssignment)
-                .collect(Collectors.toList());
+        List<Assignment> assignments = assignmentRepository.findAllById(assignmentIds);
+        if (assignments.size() != assignmentIds.size()) {
+            throw new RecordNotFoundException("Some assignment IDs are invalid: " + assignmentIds);
+        }
+
+        return assignments;
     }
     public void validateStepAssignment(CoachingProgram coachingProgram, Step step) {
         List<Step> timeline = coachingProgram.getTimeline();
@@ -85,14 +101,6 @@ public class EntityValidationHelper {
         if (stepNameExists) {
             throw new IllegalArgumentException("A step with the name '" + step.getStepName() + "' already exists in the timeline.");
         }
-    }
-
-    public List<CoachingProgram> validateCoachingProgramsByUser(String username) {
-        List<CoachingProgram> programs = coachingProgramRepository.findByUsername(username);
-        if (programs.isEmpty()) {
-            throw new RecordNotFoundException("No CoachingPrograms found for user with username: " + username);
-        }
-        return programs;
     }
 
     public StrengthResults validateStrengthResult(Long resultId) {
@@ -122,5 +130,17 @@ public class EntityValidationHelper {
         return sessionInsightIds.stream()
                 .map(this::validateSessionInsight)
                 .collect(Collectors.toList());
+    }
+    public void validateSessionDateAndTime(Step step, Session session) {
+        boolean hasConflict = step.getSession().stream()
+                .anyMatch(existingSession ->
+                        existingSession.getSessionDate().equals(session.getSessionDate()) &&
+                                existingSession.getSessionTime().equals(session.getSessionTime())
+                );
+
+        if (hasConflict) {
+            throw new IllegalArgumentException("A session already exists for the same date and time: "
+                    + session.getSessionDate() + " " + session.getSessionTime());
+        }
     }
 }

@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 public class CoachingProgramMapper {
 
-    public static CoachingProgramDto coachingProgramDto(CoachingProgram coachingProgram){
+    public static CoachingProgramDto toCoachingProgramDto(CoachingProgram coachingProgram){
         CoachingProgramDto dto = new CoachingProgramDto();
 
         dto.setCoachingProgramId(coachingProgram.getCoachingProgramId());

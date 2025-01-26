@@ -2,7 +2,6 @@ package nl.novi.bloomtrail.mappers;
 
 import nl.novi.bloomtrail.dtos.SessionDto;
 import nl.novi.bloomtrail.dtos.SessionInputDto;
-import nl.novi.bloomtrail.enums.SessionStatus;
 import nl.novi.bloomtrail.models.Assignment;
 import nl.novi.bloomtrail.models.Session;
 import nl.novi.bloomtrail.models.SessionInsight;

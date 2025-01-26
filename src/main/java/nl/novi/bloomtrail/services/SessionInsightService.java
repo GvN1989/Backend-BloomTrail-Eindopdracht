@@ -1,6 +1,8 @@
 package nl.novi.bloomtrail.services;
 
 import nl.novi.bloomtrail.helper.EntityValidationHelper;
+import nl.novi.bloomtrail.models.Assignment;
+import nl.novi.bloomtrail.models.Session;
 import nl.novi.bloomtrail.models.SessionInsight;
 import nl.novi.bloomtrail.models.File;
 import nl.novi.bloomtrail.enums.FileContext;
@@ -8,6 +10,7 @@ import nl.novi.bloomtrail.repositories.SessionInsightsRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -25,13 +28,18 @@ public class SessionInsightService {
         this.downloadService = downloadService;
     }
 
-    public List<File> getSessionInsightsFiles(Long sessionInsightId, FileContext context) {
-        SessionInsight sessionInsight = validationHelper.validateSessionInsight(sessionInsightId);
-        List<File> allFiles = fileService.getUploadsForParentEntity(sessionInsight);
+    public List<SessionInsight> getSessionInsightsByContext(Long sessionId, FileContext context) {
+        Session session = validationHelper.validateSession(sessionId);
 
-        return allFiles.stream()
-                .filter(file -> file.getContext() == context)
+        return session.getSessionInsights().stream()
+                .filter(insight -> insight.getFileContext() == context)
                 .toList();
+    }
+
+    public List<SessionInsight> getSessionInsightsBySession(Long sessionId) {
+        Session session = validationHelper.validateSession(sessionId);
+
+        return session.getSessionInsights();
     }
 
     public void uploadClientReflectionFile(MultipartFile file,  Long sessionInsightId) {
@@ -50,9 +58,11 @@ public class SessionInsightService {
         sessionInsightsRepository.delete(sessionInsight);
     }
 
-    public byte[] downloadSessionInsightFile(Long sessionInsightId) {
+    public byte[] downloadSessionInsightFiles(Long sessionInsightId, FileContext context) throws IOException {
         SessionInsight sessionInsight = validationHelper.validateSessionInsight(sessionInsightId);
-        return downloadService.downloadFilesForParentEntity(sessionInsight);
+        return downloadService.downloadSessionInsightFiles(sessionInsightId, context);
     }
+
+
 
 }
