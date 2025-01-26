@@ -58,15 +58,15 @@ public class StrengthResultsService {
         return fileService.saveFile(file, FileContext.STRENGTH_RESULTS, strengthResults);
     }
 
-    public StrengthResults createStrengthResultsReport(String userId) {
-        List<ManagingStrength> topStrengths = managingStrengthsRepository.findTop15ByUsernameOrderByRank(userId);
+    public StrengthResults createStrengthResultsReport(String username) {
+        List<ManagingStrength> topStrengths = managingStrengthsRepository.findTop15ByUsernameOrderByRank(username);
 
         if (topStrengths.isEmpty()) {
-            throw new IllegalArgumentException("No strengths found for user with ID: " + userId);
+            throw new IllegalArgumentException("No strengths found for user with username: " + username);
         }
 
         byte[] pdfData = pdfGeneratorService.createPdf(topStrengths);
-        String pdfFileName = "strength-results-" + userId + "-" + System.currentTimeMillis() + ".pdf";
+        String pdfFileName = "strength-results-" + username + "-" + System.currentTimeMillis() + ".pdf";
         File savedFile = fileService.saveFile(pdfData, pdfFileName, FileContext.STRENGTH_RESULTS);
         String savedFileUrl= savedFile.getUrl();
 
