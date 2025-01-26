@@ -21,7 +21,6 @@ public class Session {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long sessionId;
-
     @Column(name = "Session_Name")
     @NotBlank
     private String sessionName;
@@ -49,8 +48,8 @@ public class Session {
     @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SessionInsight> sessionInsights = new ArrayList<>();
 
-    @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true) //Is the cascadetype sufficient?
-    private List<Assignment> assignments = new ArrayList<>();
+    @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Assignment> assignment = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "step_id", nullable = false)
@@ -152,12 +151,12 @@ public class Session {
         this.sessionInsights = sessionInsights;
     }
 
-    public List<Assignment> getAssignments() {
-        return assignments;
+    public List<Assignment> getAssignment() {
+        return assignment;
     }
 
-    public void setAssignments(List<Assignment> assignments) {
-        this.assignments = assignments;
+    public void setAssignment(List<Assignment> assignments) {
+        this.assignment = assignment;
     }
 
     public Step getStep() {
@@ -167,4 +166,5 @@ public class Session {
     public void setStep(Step step) {
         this.step = step;
     }
+
 }

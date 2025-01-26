@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import nl.novi.bloomtrail.helper.EntityValidationHelper;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -96,9 +97,8 @@ public class StrengthResultsService {
         return strengthResultsRepository.findByCoachingProgram(coachingProgram);
     }
 
-    public byte[] downloadStrengthResultFile(Long resultsId) {
-        StrengthResults strengthResults = validationHelper.validateStrengthResult(resultsId);
-        return downloadService.downloadFilesForParentEntity(strengthResults);
+    public byte[] downloadStrengthResults(Long strengthResultsId, boolean includeReport) throws IOException {
+        return downloadService.downloadStrengthResults(strengthResultsId, includeReport);
     }
 
 }

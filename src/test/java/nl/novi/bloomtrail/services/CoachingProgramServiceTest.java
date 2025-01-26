@@ -346,7 +346,7 @@ public class CoachingProgramServiceTest {
         Long coachingProgramId = 6L;
 
         CoachingProgram mockCoachingProgram = new CoachingProgram();
-        mockCoachingProgram.setCoachingProgramId (coachingProgramId);
+        mockCoachingProgram.setCoachingProgramId(coachingProgramId);
 
         Step step1 = new Step();
         step1.setStepId(1L);
@@ -401,7 +401,7 @@ public class CoachingProgramServiceTest {
         Long coachingProgramId = 6L;
 
         CoachingProgram mockCoachingProgram = new CoachingProgram();
-        mockCoachingProgram.setCoachingProgramId (coachingProgramId);
+        mockCoachingProgram.setCoachingProgramId(coachingProgramId);
 
         Step step1 = new Step();
         step1.setStepId(1L);

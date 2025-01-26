@@ -19,13 +19,10 @@ public class User {
     @NotBlank
     @Column(nullable = false, unique = true)
     private String email;
-
-    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CoachingProgram> clientPrograms = new ArrayList<>();
-
-    @OneToMany(mappedBy = "coach", cascade = CascadeType.ALL)
-    private List<CoachingProgram> coachingPrograms = new ArrayList<>();
-
+    @Column(nullable = false)
+    private boolean enabled = true;
+    @Column
+    private String apikey;
     @OneToMany(
             targetEntity = Authority.class,
             mappedBy = "username",
@@ -37,12 +34,6 @@ public class User {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "upload_id")
     private File profilePicture;
-
-    @Column(nullable = false)
-    private boolean enabled = true;
-
-    @Column
-    private String apikey;
 
     public String getUsername() { return username; }
     public void setUsername(String username) {
@@ -79,22 +70,6 @@ public class User {
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
-    }
-
-    public List<CoachingProgram> getClientPrograms() {
-        return clientPrograms;
-    }
-
-    public void setClientPrograms(List<CoachingProgram> clientPrograms) {
-        this.clientPrograms = clientPrograms;
-    }
-
-    public List<CoachingProgram> getCoachingPrograms() {
-        return coachingPrograms;
-    }
-
-    public void setCoachingPrograms(List<CoachingProgram> coachingPrograms) {
-        this.coachingPrograms = coachingPrograms;
     }
 
     public File getProfilePicture() {

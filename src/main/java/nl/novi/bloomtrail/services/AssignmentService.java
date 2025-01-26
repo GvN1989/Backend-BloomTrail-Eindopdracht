@@ -7,10 +7,12 @@ import nl.novi.bloomtrail.models.Session;
 import nl.novi.bloomtrail.models.File;
 import nl.novi.bloomtrail.mappers.AssignmentMapper;
 import nl.novi.bloomtrail.enums.FileContext;
+import nl.novi.bloomtrail.models.Step;
 import nl.novi.bloomtrail.repositories.AssignmentRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -25,6 +27,16 @@ public class AssignmentService {
         this.fileService = fileService;
         this.validationHelper = validationHelper;
         this.downloadService = downloadService;
+    }
+
+    public List<Assignment> getAssignmentsByStep(Long stepId) {
+        Step step = validationHelper.validateStep(stepId);
+        return step.getAssignment();
+    }
+
+    public List<Assignment> getAssignmentsBySession(Long sessionId) {
+        Session session = validationHelper.validateSession(sessionId);
+        return session.getAssignment();
     }
 
     public void uploadFileForAssignment(MultipartFile file, Long assignmentId) {
@@ -54,10 +66,8 @@ public class AssignmentService {
         assignmentRepository.delete(assignment);
     }
 
-    public byte[] downloadAssignmentFile(Long assignmentId) {
+    public byte[] downloadAssignmentFiles(Long assignmentId) throws IOException {
         Assignment assignment = validationHelper.validateAssignment(assignmentId);
-        return downloadService.downloadFilesForParentEntity(assignment);
+        return downloadService.downloadFilesForEntity(assignment);
     }
-
-
 }

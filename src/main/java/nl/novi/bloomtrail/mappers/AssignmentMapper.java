@@ -18,7 +18,6 @@ public class AssignmentMapper {
         dto.setDescription(assignment.getDescription());
         dto.setFileStatus(assignment.getFileStatus() != null ? assignment.getFileStatus().toString() : null);
         dto.setSessionId(assignment.getSession() != null ? assignment.getSession().getSessionId() : null);
-        dto.setDownloadUrl(assignment.getDownloadUrl());
 
         if(assignment.getFiles() != null && !assignment.getFiles().isEmpty()) {
             dto.setUploadsIds(

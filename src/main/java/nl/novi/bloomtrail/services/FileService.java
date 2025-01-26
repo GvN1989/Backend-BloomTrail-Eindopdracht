@@ -1,8 +1,8 @@
 package nl.novi.bloomtrail.services;
 
 import nl.novi.bloomtrail.models.*;
+import nl.novi.bloomtrail.repositories.*;
 import org.springframework.stereotype.Service;
-import nl.novi.bloomtrail.repositories.FileRepository;
 import nl.novi.bloomtrail.enums.FileContext;
 import nl.novi.bloomtrail.utils.FileStorageUtil;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,6 +17,7 @@ import java.util.List;
 public class FileService {
 
     private final FileRepository fileRepository;
+
 
     public FileService(FileRepository fileRepository) {
         this.fileRepository = fileRepository;
@@ -38,20 +39,20 @@ public class FileService {
     }
 
     private File saveFile(String url, FileContext context, Object parentEntity, String fileType) {
-            File upload = new File();
-            upload.setFileType(fileType);
-            upload.setUrl(url);
-            upload.setContext(context);
+        File file = new File();
+        file.setUrl(url);
+        file.setContext(context);
+        file.setFileType(fileType);
 
         switch (parentEntity) {
-            case Assignment assignment -> upload.setAssignment(assignment);
-            case StrengthResults strengthResults -> upload.setStrengthResults(strengthResults);
-            case SessionInsight sessionInsight -> upload.setSessionInsights(sessionInsight);
-            case User user when context == FileContext.PROFILE_PICTURE -> upload.setUser(user);
-            default -> throw new IllegalArgumentException("Unsupported file or context type");
+            case Assignment assignment -> file.setAssignment(assignment);
+            case StrengthResults strengthResults -> file.setStrengthResults(strengthResults);
+            case SessionInsight sessionInsight -> file.setSessionInsights(sessionInsight);
+            case User user when context == FileContext.PROFILE_PICTURE -> file.setUser(user);
+            case null, default -> throw new IllegalArgumentException("Unsupported parent entity type or context");
         }
 
-            return fileRepository.save(upload);
+        return fileRepository.save(file);
     }
 
     public List<File> getUploadsByContext(FileContext context) {
@@ -64,7 +65,7 @@ public class FileService {
             throw new IllegalArgumentException("Parent entity cannot be null");
         }
 
-        return switch(parentEntity) {
+        return switch (parentEntity) {
             case Assignment assignment -> fileRepository.findByAssignment(assignment);
             case StrengthResults strengthResults -> fileRepository.findByStrengthResults(strengthResults);
             case SessionInsight sessionInsight -> fileRepository.findBySessionInsights(sessionInsight);
@@ -72,7 +73,7 @@ public class FileService {
         };
     }
 
-    public byte[] downloadFile(String url) {
+    private byte[] readFileFromStorage(String url) {
         try {
             return Files.readAllBytes(Paths.get(url));
         } catch (IOException e) {
@@ -95,6 +96,8 @@ public class FileService {
                 throw new RuntimeException("Failed to delete file: " + file.getUrl(), e);
             }
         });
+
+        fileRepository.deleteAll(files);
     }
 
 }

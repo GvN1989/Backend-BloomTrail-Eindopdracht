@@ -15,6 +15,9 @@ public class CoachingProgram {
     private String goal;
     private Date startDate;
     private Date endDate;
+
+    @Column(nullable = false)
+    private double progress = 0.0;
     @ManyToOne
     @JoinColumn(name = "client_id", nullable = false)
     private User Client;
@@ -101,5 +104,13 @@ public class CoachingProgram {
 
     public void setStrengthResults(List<StrengthResults> strengthResults) {
         this.strengthResults = strengthResults;
+    }
+
+    public double getProgress() {
+        return progress;
+    }
+
+    public void setProgress(double progress) {
+        this.progress = progress;
     }
 }
