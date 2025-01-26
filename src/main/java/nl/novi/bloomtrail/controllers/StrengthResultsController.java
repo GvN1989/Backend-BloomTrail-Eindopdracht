@@ -1,10 +1,6 @@
 package nl.novi.bloomtrail.controllers;
 
-import jakarta.validation.Valid;
-import nl.novi.bloomtrail.dtos.StrengthResultsDto;
-import nl.novi.bloomtrail.dtos.StrengthResultsInputDto;
 import nl.novi.bloomtrail.helper.EntityValidationHelper;
-import nl.novi.bloomtrail.models.File;
 import nl.novi.bloomtrail.models.StrengthResults;
 import nl.novi.bloomtrail.services.DownloadService;
 import nl.novi.bloomtrail.services.StrengthResultsService;
@@ -12,9 +8,10 @@ import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import nl.novi.bloomtrail.mappers.StrengthResultsMapper;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 
@@ -34,54 +31,6 @@ public class StrengthResultsController {
         this.downloadService = downloadService;
     }
 
-    @PostMapping
-    public ResponseEntity<StrengthResultsDto> addStrengthResultsEntry(
-            @RequestBody @Valid StrengthResultsInputDto inputDto
-    ) {
-        StrengthResults strengthResults = strengthResultsService.addStrengthResultsEntry(inputDto);
-        StrengthResultsDto responseDto = StrengthResultsMapper.toStrengthResultDto(strengthResults);
-
-        return ResponseEntity.ok(responseDto);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<StrengthResultsDto> modifyStrengthResultsEntry(
-            @PathVariable("id") Long resultsId,
-            @RequestBody @Valid StrengthResultsInputDto inputDto
-    ) {
-        StrengthResults updatedStrengthResults = strengthResultsService.modifyStrengthResultsEntry(resultsId, inputDto);
-        StrengthResultsDto responseDto = StrengthResultsMapper.toStrengthResultDto(updatedStrengthResults);
-
-        return ResponseEntity.ok(responseDto);
-    }
-
-    @PostMapping("/{id}/upload")
-    public ResponseEntity<String> uploadFileToStrengthResults(
-            @PathVariable("id") Long resultsId,
-            @RequestPart("file") MultipartFile file
-    ) {
-        File uploadedFile = strengthResultsService.uploadFileToStrengthResults(file, resultsId);
-        return ResponseEntity.ok("File uploaded successfully: " + uploadedFile.getUrl());
-    }
-
-    @PostMapping("/report")
-    public ResponseEntity<StrengthResultsDto> createStrengthResultsReport(
-            @RequestParam("username") String username
-    ) {
-        StrengthResults strengthResults = strengthResultsService.createStrengthResultsReport(username);
-        StrengthResultsDto responseDto = StrengthResultsMapper.toStrengthResultDto(strengthResults);
-
-        return ResponseEntity.ok(responseDto);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteStrengthResultsEntry(
-            @PathVariable("id") Long resultsId
-    ) {
-        strengthResultsService.deleteStrengthResultsEntry(resultsId);
-        return ResponseEntity.noContent().build();
-    }
-
 
     @GetMapping("/{id}/report")
     public ResponseEntity<byte[]> downloadStrengthResultsReport(@PathVariable("id") Long strengthResultsId) throws IOException {
@@ -96,7 +45,7 @@ public class StrengthResultsController {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
         headers.setContentDisposition(ContentDisposition.attachment()
-                .filename("strength_results_" + strengthResultsId + "report.pdf")
+                .filename("strength_results_report.pdf")
                 .build());
 
         return ResponseEntity.ok()
