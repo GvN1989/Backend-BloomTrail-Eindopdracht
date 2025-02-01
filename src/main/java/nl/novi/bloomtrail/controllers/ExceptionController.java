@@ -3,6 +3,7 @@ package nl.novi.bloomtrail.controllers;
 import jakarta.validation.ConstraintViolationException;
 import nl.novi.bloomtrail.exceptions.EntityNotFoundException;
 import nl.novi.bloomtrail.exceptions.MappingException;
+import nl.novi.bloomtrail.exceptions.RecordNotFoundException;
 import nl.novi.bloomtrail.exceptions.ValidationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,16 @@ import java.util.Map;
 
 @RestControllerAdvice
     public class ExceptionController {
+
+        @ExceptionHandler(value = RecordNotFoundException.class)
+        public ResponseEntity <Object> exception(RecordNotFoundException exception) {
+            return new ResponseEntity<>(exception.getMessage(),HttpStatus.NOT_FOUND);
+        }
+
+        @ExceptionHandler(value = IndexOutOfBoundsException.class)
+        public ResponseEntity<Object> exception (IndexOutOfBoundsException exception) {
+            return new ResponseEntity<> ("Dit id staat niet in de database", HttpStatus.NOT_FOUND);
+        }
 
         @ExceptionHandler(MethodArgumentNotValidException.class)
         public ResponseEntity<?> handleValidationException(MethodArgumentNotValidException ex) {
@@ -43,6 +54,11 @@ import java.util.Map;
         @ExceptionHandler(MappingException.class)
         public ResponseEntity<String> handleMappingException(MappingException ex) {
             return ResponseEntity.internalServerError().body(ex.getMessage());
+        }
+
+        @ExceptionHandler(Exception.class)
+        public ResponseEntity<Object> handleGlobalException (Exception exception) {
+            return new ResponseEntity<>("An unexptected error occured" + exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
     }

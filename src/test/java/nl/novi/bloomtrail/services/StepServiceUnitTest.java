@@ -133,6 +133,24 @@ public class StepServiceUnitTest {
     }
     @Tag("unit")
     @Test
+    void addStepToProgram_ShouldThrowException_WhenStartDateIsNull() {
+        CoachingProgram mockCoachingProgram = new CoachingProgram();
+        mockCoachingProgram.setCoachingProgramId(1L);
+
+        mockStepInputDto.setStepStartDate(null);
+        mockStepInputDto.setStepEndDate(null);
+
+        when(validationHelper.validateCoachingProgram(1L)).thenReturn(mockCoachingProgram);
+
+        Exception exception = Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            stepService.addStepToProgram(mockStepInputDto);
+        });
+
+        assertEquals("Step start date and end date cannot be null.", exception.getMessage());
+    }
+
+    @Tag("unit")
+    @Test
     void testUpdateStep_Success() {
         mockStepInputDto.setStepName("Updated Step");
 

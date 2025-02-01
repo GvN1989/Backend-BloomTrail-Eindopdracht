@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/sessionInsight")
+@RequestMapping("/session-insights")
 public class SessionInsightController {
 
     private final SessionInsightService sessionInsightService;
