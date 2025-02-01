@@ -1,5 +1,6 @@
 package nl.novi.bloomtrail.controllers;
 
+import nl.novi.bloomtrail.dtos.StrengthResultsInputDto;
 import nl.novi.bloomtrail.helper.EntityValidationHelper;
 import nl.novi.bloomtrail.models.StrengthResults;
 import nl.novi.bloomtrail.services.DownloadService;
@@ -8,12 +9,10 @@ import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/strength-results")
@@ -31,13 +30,13 @@ public class StrengthResultsController {
         this.downloadService = downloadService;
     }
 
-
     @GetMapping("/{id}/report")
     public ResponseEntity<byte[]> downloadStrengthResultsReport(@PathVariable("id") Long strengthResultsId) throws IOException {
         StrengthResults strengthResults = validationHelper.validateStrengthResult(strengthResultsId);
 
         if (strengthResults.getStrengthResultsFilePath() == null) {
-            throw new IllegalArgumentException("No report available for StrengthResults ID: " + strengthResultsId);
+            throw new IllegalArgumentException("No report available for StrengthResults ID: " + strengthResultsId +
+            ". You can generate a new report using POST /strength-results/{userId}/generate-report.");
         }
 
         byte[] fileData = downloadService.downloadFile(strengthResults.getStrengthResultsFilePath());
@@ -81,6 +80,44 @@ public class StrengthResultsController {
         return ResponseEntity.ok()
                 .headers(headers)
                 .body(zipData);
+    }
+
+    @PostMapping
+    public ResponseEntity<StrengthResults> addStrengthResults(@RequestBody StrengthResultsInputDto inputDto) {
+        StrengthResults strengthResults = strengthResultsService.addStrengthResultsEntry(inputDto);
+        return ResponseEntity.ok(strengthResults);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<StrengthResults> modifyStrengthResults(
+            @PathVariable("id") Long strengthResultsId,
+            @RequestBody StrengthResultsInputDto inputDto) {
+        StrengthResults updatedStrengthResults = strengthResultsService.modifyStrengthResultsEntry(strengthResultsId, inputDto);
+        return ResponseEntity.ok(updatedStrengthResults);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteStrengthResults(@PathVariable("id") Long strengthResultsId) {
+        strengthResultsService.deleteStrengthResultsEntry(strengthResultsId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{userId}/generate-report")
+    public ResponseEntity<StrengthResults> generateStrengthResultsReport(@PathVariable("userId") String userId) {
+        StrengthResults strengthResults = strengthResultsService.createStrengthResultsReport(userId);
+        return ResponseEntity.ok(strengthResults);
+    }
+
+    @GetMapping("/coaching-program/{programId}")
+    public ResponseEntity<List<StrengthResults>> getStrengthResultsByCoachingProgram(@PathVariable("programId") Long programId) {
+        List<StrengthResults> results = strengthResultsService.getStrengthResultsByCoachingProgram(programId);
+        return ResponseEntity.ok(results);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<StrengthResults> getStrengthResults(@PathVariable("id") Long strengthResultsId) {
+        StrengthResults strengthResults = validationHelper.validateStrengthResult(strengthResultsId);
+        return ResponseEntity.ok(strengthResults);
     }
 
 }

@@ -20,6 +20,7 @@ public class Session {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "session_id", unique = true, nullable = false)
     private Long sessionId;
     @Column(name = "Session_Name")
     @NotBlank
@@ -52,7 +53,7 @@ public class Session {
     private List<Assignment> assignment = new ArrayList<>();
 
     @ManyToOne
-    @JoinColumn(name = "step_id", nullable = false)
+    @JoinColumn(name = "step_id", insertable = false, updatable = false)
     private Step step;
 
     public Long getSessionId() {

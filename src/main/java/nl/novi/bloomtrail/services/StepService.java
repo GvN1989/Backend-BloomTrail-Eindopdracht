@@ -31,7 +31,7 @@ public class StepService {
         this.downloadService = downloadService;
     }
 
-    public Step findById(Long stepId){
+    public Step findById(Long stepId) {
         return validationHelper.validateStep(stepId);
     }
 
@@ -49,7 +49,7 @@ public class StepService {
         return savedStep;
     }
 
-    public Step updateStep (Long stepId, StepInputDto inputDto) {
+    public Step updateStep(Long stepId, StepInputDto inputDto) {
 
         Step existingStep = validationHelper.validateStep(stepId);
 
@@ -91,22 +91,17 @@ public class StepService {
         return updatedStep;
     }
 
-    public void deleteStep (Long stepId) {
+    public void deleteStep(Long stepId) {
         Step step = validationHelper.validateStep(stepId);
 
         CoachingProgram coachingProgram = step.getCoachingProgram();
-        stepRepository.delete(step);
-
         if (coachingProgram != null) {
-            coachingProgramService.updateProgramEndDate(coachingProgram.getCoachingProgramId());
-        }
+            coachingProgramService.updateProgramEndDate(coachingProgram.getCoachingProgramId()); }
         stepRepository.delete(step);
-        }
-
+    }
     public Step markStepCompletionStatus(Long stepId, boolean isCompleted) {
         Step step = stepRepository.findById(stepId)
                 .orElseThrow(() -> new RecordNotFoundException("Step with ID " + stepId + " not found"));
-
         step.setCompleted(isCompleted);
         return stepRepository.save(step);
     }
@@ -114,22 +109,16 @@ public class StepService {
     public Step assignAssignmentToStep(Long stepId, Long assignmentId) {
         Step step = validationHelper.validateStep(stepId);
         Assignment assignment = validationHelper.validateAssignment(assignmentId);
-
         if (step.getAssignment().contains(assignment)) {
-            throw new IllegalArgumentException("Assignment is already associated with the step.");
-        }
+            throw new IllegalArgumentException("Assignment is already associated with the step.");}
 
         assignment.setStep(step);
         step.getAssignment().add(assignment);
-
-
         assignmentRepository.save(assignment);
-        return stepRepository.save(step);
-    }
+        return stepRepository.save(step); }
 
     public byte[] downloadFilesForStep(Long stepId) throws IOException {
         Step step = validationHelper.validateStep(stepId);
         return downloadService.downloadFilesForEntity(step);
     }
-
 }

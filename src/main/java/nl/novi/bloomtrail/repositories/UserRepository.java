@@ -16,3 +16,4 @@ public interface UserRepository extends JpaRepository<User, String > {
     @Query("SELECT cp FROM CoachingProgram cp WHERE cp.client.username = :username")
     List<CoachingProgram> findCoachingProgramsAsClient(@Param("username") String username);
 }
+

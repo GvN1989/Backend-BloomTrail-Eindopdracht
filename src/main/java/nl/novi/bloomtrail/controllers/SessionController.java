@@ -37,8 +37,8 @@ public class SessionController {
     }
 
     @PostMapping
-    public ResponseEntity<SessionDto> addSessionToStep(@RequestBody @Valid SessionInputDto inputDto) {
-        Session session = sessionService.addSessionToStep(inputDto);
+    public ResponseEntity<SessionDto> createSessionAndAddToStep(@RequestBody @Valid SessionInputDto inputDto) {
+        Session session = sessionService.createSessionAndAddToStep(inputDto);
         SessionDto sessionDto = SessionMapper.toSessionDto(session);
         return ResponseEntity.ok(sessionDto);
     }

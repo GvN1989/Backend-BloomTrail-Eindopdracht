@@ -27,6 +27,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final FileService fileService;
     private final DownloadService downloadService;
+
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
     private final EntityValidationHelper validationHelper;

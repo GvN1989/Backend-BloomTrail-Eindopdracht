@@ -1,5 +1,6 @@
 package nl.novi.bloomtrail.controllers;
 
+import jakarta.validation.ConstraintViolationException;
 import nl.novi.bloomtrail.exceptions.EntityNotFoundException;
 import nl.novi.bloomtrail.exceptions.MappingException;
 import nl.novi.bloomtrail.exceptions.ValidationException;
@@ -20,6 +21,13 @@ import java.util.Map;
             Map<String, String> errors = new HashMap<>();
             ex.getBindingResult().getFieldErrors().forEach(error ->
                     errors.put(error.getField(), error.getDefaultMessage()));
+            return ResponseEntity.badRequest().body(errors);
+        }
+        @ExceptionHandler(ConstraintViolationException.class)
+        public ResponseEntity<Map<String, String>> handleConstraintViolationException(ConstraintViolationException ex) {
+            Map<String, String> errors = new HashMap<>();
+            ex.getConstraintViolations().forEach(violation ->
+                    errors.put(violation.getPropertyPath().toString(), violation.getMessage()));
             return ResponseEntity.badRequest().body(errors);
         }
         @ExceptionHandler(ValidationException.class)

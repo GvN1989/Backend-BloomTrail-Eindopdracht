@@ -41,14 +41,9 @@ public class CoachingProgramController {
         return ResponseEntity.ok(dto);
     }
 
-    @GetMapping("/coach/{coachUsername}")
-    public List<CoachingProgram> getCoachingProgramsByCoach(@PathVariable String coachUsername) {
-        return coachingProgramService.getCoachingProgramsByCoach(coachUsername);
-    }
-
-    @GetMapping("/client/{clientUsername}")
-    public List<CoachingProgram> getCoachingProgramsByClient(@PathVariable String clientUsername) {
-        return coachingProgramService.getCoachingProgramsByClient(clientUsername);
+    @GetMapping("/user/{username}")
+    public List<CoachingProgram> getCoachingProgramsByUser(@PathVariable String username) {
+        return coachingProgramService.getCoachingProgramsByUser(username);
     }
 
     @GetMapping("/{id}/steps")

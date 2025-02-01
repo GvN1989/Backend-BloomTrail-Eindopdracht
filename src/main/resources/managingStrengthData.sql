@@ -1,4 +1,4 @@
-CREATE TABLE managingStrengths (
+CREATE TABLE managingstrength (
                                    Id	INT,
                                    Strength_NL	VARCHAR(512),
                                    Strength_ENG	VARCHAR(512),
@@ -8,11 +8,11 @@ CREATE TABLE managingStrengths (
                                    Need_Relationship	VARCHAR(512),
                                    External_Triggers 	VARCHAR(512),
                                    Internal_Triggers 	VARCHAR(512),
-                                   Operating_belief	VARCHAR(512),
-                                   Miss_Managed 	VARCHAR(512)
+                                   Operating_belief	VARCHAR(2000),
+                                   Miss_Managed 	VARCHAR(2000)
 );
 
-INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('1', 'Prestatiegerichtheid', 'Achiever', 'Establish clear goals; Work voraciously toward completion; Invite clarification around objectives, targets, and measures of succes', 'Driven; Hard;working;Persistent', 'To know and have goals and clear success measures
+INSERT INTO managingStrength (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('1', 'Prestatiegerichtheid', 'Achiever', 'Establish clear goals; Work voraciously toward completion; Invite clarification around objectives, targets, and measures of succes', 'Driven; Hard;working;Persistent', 'To know and have goals and clear success measures
 ;Timeline for completion
 ;Autonomy To accomplish
 ;Deadlines', 'An accountability process (To keep others accountable and making progress)
@@ -23,7 +23,7 @@ INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing
 ; Be judgemental of underachievers
 ; Disconnect from and isolate self when others approach tasks differently or less effectively than you think you do
 ; Experience work/life balance deterioration (little self care), cannot relax or switch off');
-INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('2', 'Actiegerichtheid', 'Activator', 'Move To action quickly and readily
+INSERT INTO managingStrength (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('2', 'Actiegerichtheid', 'Activator', 'Move To action quickly and readily
 ; Learn by doing
 ; Act as a catalyst', 'Decisive
 ; Fearless/courageous
@@ -43,7 +43,7 @@ INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing
 I must be in action to feel strong or good about myself', 'Too impatient
 ; Jumping the gun
 ; Too many start ups without successful finishes');
-INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('3', 'Aanpassingsvermogen', 'Adaptability', 'Generate variety/options
+INSERT INTO managingStrength (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('3', 'Aanpassingsvermogen', 'Adaptability', 'Generate variety/options
 ; Respond adeptly To changing circumstances
 ; Create a path for others To also Respond To change
 ; Live for each moment', 'Unflappable, steady in the face of change
@@ -70,7 +70,7 @@ I must have change or room to respond to change, in order for me to feel safe, o
 ; Unplanned and even chaotic style and environment
 ; Prefer not to look ahead or look back
 ; Could feel paralyzed by routine and planning');
-INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('4', 'Analytisch', 'Analytical', 'Examine for and see patterns
+INSERT INTO managingStrength (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('4', 'Analytisch', 'Analytical', 'Examine for and see patterns
 ; Look for and present clear evidence to validate claims
 ; Offer solid, root cause analysis
 ; Prepare, organize, and present data/information well', 'Logical, more than emotional
@@ -95,7 +95,7 @@ I must have time to thoroughly analyze in order for me to feel safe or good abou
 ; Show up as tough or emotionless
 ; Take overly long amounts of time to get to conclusions
 ; Be caught in constant question asking');
-INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('5', 'Organisatievermogen', 'Arranger', 'Juggle mentally To Create effective configurations
+INSERT INTO managingStrength (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('5', 'Organisatievermogen', 'Arranger', 'Juggle mentally To Create effective configurations
 ; effectively manage change
 ; Plan and schedule To optimize outcomes and resources', 'Efficient
 ; Organized
@@ -121,7 +121,7 @@ I must be in control in order for me to feel okay about myself and about my deci
 ; Not communicating what they see or want to achieve
 ; Doing everything themselves in order to get it done to own standard
 ; Micro;manage ');
-INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('6', 'Overtuiging', 'Belief', 'Values & certainty
+INSERT INTO managingStrength (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('6', 'Overtuiging', 'Belief', 'Values & certainty
 ; Operate from bedrock values
 ; Live from the mantra: ''My word is bond''
 ; Hold others to high standards and principles
@@ -147,7 +147,7 @@ I must be in alignment with my own values and living with purpose, in order for 
 ; Demonstrate black/white thinking (no in--between)
 ; Can struggle to see things from someone else''s perspective.
 ; Get very upset in arguments or disagreements');
-INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('7', 'Sturingskracht', 'Command', 'Confidently Take charge
+INSERT INTO managingStrength (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('7', 'Sturingskracht', 'Command', 'Confidently Take charge
 ; Seek/Offer Feedback and alternative viewpoints
 ; Take risks
 ; Provide clear directions
@@ -186,7 +186,7 @@ I must take charge when it matters in order for me to feel like I''m contributin
 ; Being overly dominating
 ; Being blunt and argumentative
 ; Unwillingness to blend or bend');
-INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('8', 'Communicatie', 'Communication', 'Tell compelling, engaging stories
+INSERT INTO managingStrength (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('8', 'Communicatie', 'Communication', 'Tell compelling, engaging stories
 ; Offer clear, articulate language and explanations
 ; Engage others through painting a picture with words
 ; Turn your thoughts/feelings easily into words
@@ -215,7 +215,7 @@ I must communicate effectively in order for me to feel like I’m making a diffe
 ; Use more words than are needed (over--talk)
 ; Plan what to say while others are speaking (not listening)
 ; Harshly judge or disengage from others who are ineffective communicators');
-INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('9', 'Competitie', 'Competition', 'Clarify measurement
+INSERT INTO managingStrength (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('9', 'Competitie', 'Competition', 'Clarify measurement
 ; Hold up performance as the no--nonsense, ultimate yardstick
 ; Have the spirit of a champion
 ; Focus on the objective
@@ -243,7 +243,7 @@ I must win in order for me to feel safe and good about myself', 'Win at all cost
 ; Demonstrate one--upmanship
 ; Be combative
 ; Demean others or thing disparagingly of them');
-INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('10', 'Verbondenheid', 'Connectedness', 'Build bridges between ideas and people
+INSERT INTO managingStrength (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('10', 'Verbondenheid', 'Connectedness', 'Build bridges between ideas and people
 ; Hold the greatness of the whole
 ; see how all things are connected
 ; Look for the Purpose in everything', 'Kind
@@ -268,7 +268,7 @@ If I don’t connect to purpose or create effective connections with self/others
 I must connect with self, others, or ideas in order for me to feel safe and okay about myself and interactions with others', 'Could become ''weird'' and too sensing lacking factual evidence
 ; May see connections between things where there truly are none.
 ; Make assumptions');
-INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('11', 'Onpartijdigheid', 'Consistency', 'Reduce variance and increase uniformity
+INSERT INTO managingStrength (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('11', 'Onpartijdigheid', 'Consistency', 'Reduce variance and increase uniformity
 ; Rules and policies that promote predictability
 ; An Ability To Reduce variance and increase uniformity.', 'More interested in group needs than individual wants
 ; quick judgement that are fair To everyone involved.', 'Standard operating procedures
@@ -285,7 +285,7 @@ If I don’t have (or can’t provide) clear rules or procedures, I may feel fru
 I must have clear rules and procedures in my work and relationships in order for me to feel safe and confident about myself and interactions with others', 'Rigid
 ; cannot think or act outside the preset Rules or agenda even when circumstance warrants it.
 ; cannot differentiate between a contextual application (extraordinary circumstances) and the regulations.');
-INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('12', 'Context', 'Context', 'Easily recall historical evidence and past experiences
+INSERT INTO managingStrength (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('12', 'Context', 'Context', 'Easily recall historical evidence and past experiences
 ; Love sharing and hearing the backstory', 'Attentive to predecessors
 ; A historian (holding the history of a team, group, relationship)
 ; Quick to learn from past mistakes', 'Time to tell/hear the history or back story (it creates a springboard to help launch into the present)
@@ -305,7 +305,7 @@ I must have historical context in my work and relationships in order for me to f
 ; Story;tell about past events, rather than being present with what is happening and staying on task or point
 ; Have difficulty moving on in the face of change
 ; Harshly judge others who don’t see/hold the historical context as well as you');
-INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('13', 'Behoedzaamheid', 'Deliberative', 'Consider things carefully from multiple angles
+INSERT INTO managingStrength (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('13', 'Behoedzaamheid', 'Deliberative', 'Consider things carefully from multiple angles
 ; Tend To thoroughly and objectively evaluate before Moving To action', 'Very good at assessing and managing risk
 ; Vigilant
 ; Serious and thoughtful
@@ -340,7 +340,7 @@ I must maintain my privacy and have adequate deliberation time in order for me t
 ; Be self--contained and absorbed
 ; Be afraid to act
 ; Not trust others with anything');
-INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('14', 'Aanmoediging', 'Developer', 'Develop projects and turning ideas into reality
+INSERT INTO managingStrength (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('14', 'Aanmoediging', 'Developer', 'Develop projects and turning ideas into reality
 ; help others Become successful
 ; Celebrate baby steps
 ; challenge others To grow
@@ -362,7 +362,7 @@ INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing
 If I don’t create forward progress (development) I may feel frustrated (or like a failure), or like I’ve not done what I’m meant to;
 I must be developing someone or something in order for me to feel confident about myself or feel like my life is adding value', 'Can be to committed and patient even with those who do not grow or improve.
 ; Might ''slow down '' the team to accommodate those who need to grow. ');
-INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('15', 'Discipline', 'Discipline', 'Chunk down Big projects
+INSERT INTO managingStrength (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('15', 'Discipline', 'Discipline', 'Chunk down Big projects
 ; Provide order
 ; Create and Establish predictable routines
 ; keep and enforce schedules', 'Precise
@@ -388,7 +388,7 @@ I must get it right in order for me to feel safe, okay about myself or feel like
 ; Excessive rules, requirements, or expectations
 ; Rigidity
 ; Excessive routine and regimentation');
-INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('16', 'Empathie', 'Empathy', 'Sense emotions of others
+INSERT INTO managingStrength (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('16', 'Empathie', 'Empathy', 'Sense emotions of others
 ; Makes the visceral explicit
 ; Anticipate needs
 ; See others perspectives' ,'Kind
@@ -414,7 +414,7 @@ I must be discerning or others and helpful in order for me to feel okay about my
 ; Bleeding heart
 ; Can even Be manipulative and/or manipulated
 ; Paralyzed by emotions of others.');
-INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('17', 'Focus', 'Focus', 'Guide yourself and others toward goals
+INSERT INTO managingStrength (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('17', 'Focus', 'Focus', 'Guide yourself and others toward goals
 ; Bring laser--beam energy
 ; Naturally filter life''s choices
 ; Clarify by naturally focusing on what seems important', 'Destination driven
@@ -440,7 +440,7 @@ I must be focused in order for me to feel okay about myself or feel like I’m a
 ; Judging others who don''t think or operate similarly
 ; Have a myopic view of the goal, to the exclusion of all else
 ; Get caught up in the outcome over people');
-INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('18', 'Toekomstgerichtheid', 'Futuristic', 'Imagine and ask questions about the future
+INSERT INTO managingStrength (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('18', 'Toekomstgerichtheid', 'Futuristic', 'Imagine and ask questions about the future
 ; see the world as a prism of possibilities
 ; Look up and out for inspiration and To inspire others
 ; get Clarity by talking about the future
@@ -465,7 +465,7 @@ I must be able to envision and create future possibilities in order for me to fe
 ; Be caught in excessive dreaming
 ; Judge those who don''t think ahead very well
 ; Hold the view that ''I have it. I must TELL them, give them this brilliant idea''; rather than co--creating with others. ');
-INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('19', 'Harmonie', 'Harmony', 'Help maintain the status quo
+INSERT INTO managingStrength (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('19', 'Harmonie', 'Harmony', 'Help maintain the status quo
 ; Create common ground—seek areas of agreement
 ; Provide a steadying influence
 ; Proactively prevent conflict where possible', 'Peacemaker
@@ -494,7 +494,7 @@ I must be able to prevent or resolve conflict and maintain a harmonious experien
 ; Demonstrate stonewalling rather than be honest/direct
 ; Be unwilling to confront
 ; Become a people--pleaser, make/keep everyone happy');
-INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('20', 'Ideeënvorming', 'Ideation', 'See beneath the surface
+INSERT INTO managingStrength (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('20', 'Ideeënvorming', 'Ideation', 'See beneath the surface
 ; connect the dots
 ; Can Create ideas from nothing
 ; Envision new and innovative ways of doing things', 'Creative
@@ -508,9 +508,8 @@ INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing
 ; No room for brainstorming
 ; Others unwillingness to learn by doing and from making mistakes
 ; Others being afraid to try a different way ; being stuck inside the box
-; Micromanagement of the ''how''', 'Feeling as if you are stuck in the box
-; Worry about the inability to find an innovative solution.', 'My feeling of worth, value, or success is equal to the degree to which I am able to find a new way of seeing or doing something;
-If I am unable to find a new way of seeing or doing something, I may feel frustration or like I’m falling short of what I should be doing ;
+; Micromanagement of the how', 'Feeling as if you are stuck in the box
+; Worry about the inability to find an innovative solution.', 'My feeling of worth, value, or success is equal to the degree to which I am able to find a new way of seeing or doing something ; If I am unable to find a new way of seeing or doing something, I may feel frustration or like I’m falling short of what I should be doing;
 New ways of seeing or doing something makes me feel okay about myself and others or feel like I’m adding value (therefore, I must do this!)', 'Dreamer. Aloof.
 ; Lots of ideas with little actual constructive contribution
 ; Live inside their heads. The ''idea is the reality''
@@ -518,8 +517,8 @@ New ways of seeing or doing something makes me feel okay about myself and others
 ; Create ideas without action
 ; Spend so much time on new possibilities that reality is lost
 ; Dream up new ideas to stimulate your own energy but they are disconnected from the bigger vision and purpose
-; Judge those who seem to be stuck in the box, or don''t care to seek innovation/change ');
-INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('21', 'Saamhorigheid', 'Includer', 'See everyone as the same
+; Judge those who seem to be stuck in the box, or don''t care to seek innovation/change');
+INSERT INTO managingStrength (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('21', 'Saamhorigheid', 'Includer', 'See everyone as the same
 ; Accept others as they are
 ; Invite all voices in
 ; Tune into to the underdog
@@ -543,7 +542,7 @@ Including, or being included by others makes me feel good about myself and other
 ; Feel victimized, left out, and judgemental of those who don''t naturally include you (as you wait for them to do so). ; Be indiscriminate
 ; Be unwilling to confront or challenge someone''s place
 ; Overly generous to a fault');
-INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('22', 'Individualisering', 'Individualization', 'Enthusiastically seek out the best inside of others
+INSERT INTO managingStrength (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('22', 'Individualisering', 'Individualization', 'Enthusiastically seek out the best inside of others
 ; Capitalize on strengths
 ; Celebrate differences and diversity
 ; Easily adjust to others unique needs and gifts to create fit', 'A strength seeker
@@ -569,7 +568,7 @@ Being seen as unique or seeing and capitalizing on others’ uniqueness makes me
 ; Find that individuals become more important than the needs or goals of the group
 ; Become a people pleaser; adapting to the needs of others to earn respect and be seen as valuable.
 ');
-INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('23', 'Input', 'Input', 'Have deep treasure troves of resources, content, ideas, tools and knowledge around specific topics of interest to you
+INSERT INTO managingStrength (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('23', 'Input', 'Input', 'Have deep treasure troves of resources, content, ideas, tools and knowledge around specific topics of interest to you
 ; Have incredible recall and ability to memorize
 ; Ask provocative, exploratory questions
 ; Readily share resources, knowledge', 'A collector of things resources, information
@@ -589,7 +588,7 @@ INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing
 If I am unable to find a way to acquire and share knowledge or resources, I may feel frustration or like I’m falling short of what I should be doing;
 Asking good questions or sharing knowledge or resources makes me feel good about myself or feel like I’m adding value (therefore, I am not okay without this and must try to create this)', 'Hoarding
 ; Lots of knowledge and information with little use or application');
-INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('24', 'Intellect', 'Intellection', 'Think carefully before you act
+INSERT INTO managingStrength (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('24', 'Intellect', 'Intellection', 'Think carefully before you act
 ; Invite sharing, talking about ideas, philosophies, theories
 ; Slow the process down for thorough thinking
 ; Deepen others insight through your exploration and curiosity', 'Profound
@@ -619,7 +618,7 @@ Thoroughly considering and reflecting on the ideas connected to whatever is impo
 ; Build emotional walls/barriers
 ; Judge others who move too fast and don’t take time to carefully consider things
 ; Become disconnected from the moment');
-INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('25', 'Leergierigheid', 'Learner', 'Inspire others to learn
+INSERT INTO managingStrength (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('25', 'Leergierigheid', 'Learner', 'Inspire others to learn
 ; Seek to continually improve
 ; Provide resources, information, and tools to others out of the abundance of your mental reserves', 'Undaunted by mistakes (you see them as a pathway To learning)
 ; a trivia;holder (know a little about a lot of things)
@@ -633,12 +632,12 @@ INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing
 ; Others unwillingness to take a risk ', 'Same old; stuck in an unchanging rut
 ; Worry about not having the information/knowing', 'My feeling of worth, value, or success is equal to the degree to which I am able to find or provide relevant information, tools, and resources;
 If I am unable to find or provide relevant information, tools, and resources, I may feel frustration or like I’m falling short of what I should be doing;
-Finding or providing relevant information, tools, and resources is what makes me feel good about myself and others or feel like I’m adding value (therefore, I am not okay without this and must try to create this)', 'Can be 'sucked in' with the learning agenda and miss the practical application as always looking for new learning moments.
+Finding or providing relevant information, tools, and resources is what makes me feel good about myself and others or feel like I’m adding value (therefore, I am not okay without this and must try to create this)', 'Can be sucked in with the learning agenda and miss the practical application as always looking for new learning moments.
 ; Can judge non learners (or non readers) as lazy or even ''stupid''.
 ; Sound like a know it all
 ; Be unwilling to listen to others with varying viewpoints
 ; Judge those who appear to know less or who not seek learning as you do');
-INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('26', 'Maximalisering', 'Maximizer', 'Focus on strenghts
+INSERT INTO managingStrength (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('26', 'Maximalisering', 'Maximizer', 'Focus on strenghts
 ; Move things from average To superb
 ; Provide quality;control
 ; Effortlessly Seem To Hold multiple tasks simultaneously', 'Driven To Be your best
@@ -666,7 +665,7 @@ Producing excellence and getting it right is what makes me feel good about mysel
 ; Set a constantly moving, unsustainable standard of excellence
 ; Create the process/project while going through it
 ; Demand more (it''s never enough)');
-INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('27', 'Positivisme', 'Positivity', 'Put others at ease
+INSERT INTO managingStrength (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('27', 'Positivisme', 'Positivity', 'Put others at ease
 ; see the world with optimism
 ; Encourage others
 ; Bring lightness', 'a natural smiler
@@ -695,7 +694,7 @@ Inspiring warmth and optimism is what makes me feel good about myself or feel li
 ; Could be ''loud'' to a point of annoyance
 ; Miss reality for sake of positivity
 ; Could be intense and emotionally ''high maintenance'' ');
-INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('28', 'Relatievorming', 'Relator', 'You deeply serve those you know
+INSERT INTO managingStrength (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('28', 'Relatievorming', 'Relator', 'You deeply serve those you know
 ; Hold and honor trust carefully
 ; Cherish your few close, deep friendships
 ; Go deep with those you trust', 'Loyal
@@ -719,7 +718,7 @@ In the absence of deep, authentic, loyal relationships with key people, I may fe
 Creating a few authentic, meaningful relationships is what makes me feel good about myself or feel like I’m adding value (therefore, I am not okay without this)', 'If trust is broken they terminate the relationship completely and move on and could then struggle to forgive.
 ; Clique forming
 ; Open exclusivity in relationships');
-INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('29', 'Verantwoordelijkheidsbesef', 'Responsibility', 'Have a firm commitment To do it and do it right and well
+INSERT INTO managingStrength (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('29', 'Verantwoordelijkheidsbesef', 'Responsibility', 'Have a firm commitment To do it and do it right and well
 ; Take psychological ownership
 ; Establish and maintain accountability To timelines and agreed;upon outcomes
 ; deeply value integrity', 'Dependable
@@ -745,7 +744,7 @@ Doing what I say I’m going to do in a way that is acceptable to others is what
 ; Cannot handle failure to deliver. Cannot say No
 ; Unhealthy or no boundaries
 ; Could be extreme micromanagers (in contrast with their own need). ');
-INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('30', 'Hersteldrang', 'Restorative', 'Evaluate possibilities naturally and arrive at solutions
+INSERT INTO managingStrength (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('30', 'Hersteldrang', 'Restorative', 'Evaluate possibilities naturally and arrive at solutions
 ; do things right and well
 ; Diagnose symptoms
 ; come up with Creative solutions', 'a problem; fixer/solver
@@ -772,7 +771,7 @@ Solving problems and fixing what isn’t working is what makes me feel good abou
 ; Be paralyzed by fear of getting it wrong
 ; Have excessive self;criticism or judgment of others
 ; Sabotage a relationship or project so you can fix it');
-INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('31', 'Zelfverzekerdheid', 'Self -- Assurance', 'Provide a feeling of quiet reassurance that things are under control
+INSERT INTO managingStrength (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('31', 'Zelfverzekerdheid', 'Self -- Assurance', 'Provide a feeling of quiet reassurance that things are under control
 ; Have an air of authority, a presence
 ; Trust your own judgment
 ; Instill confidence in others', 'Internally confident
@@ -797,7 +796,7 @@ Being seen as competent and in control is what makes me feel good about myself o
 ; Be a maverick, unwilling to co--create, blend with others
 ; Judgmental of others’ vulnerability, insecurity, or weakness
 ; Want to solve all things or be the answer');
-INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('32', 'Significantie', 'Significance', 'Create Big impact
+INSERT INTO managingStrength (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('32', 'Significantie', 'Significance', 'Create Big impact
 ; present with An air of credibility
 ; have a hunger To make a difference', 'A free, independent spirit
 ; Focused on legacy
@@ -825,7 +824,7 @@ Being seen as credible and making a significant difference is what makes me feel
 ; Judge others as ''beneath'' you or ''above''  you
 ; Not listen to others
 ; Take credit for success, rather than share the limelight. ');
-INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('33', 'Strategisch', 'Strategic', 'Recover quickly from set;backs
+INSERT INTO managingStrength (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('33', 'Strategisch', 'Strategic', 'Recover quickly from set;backs
 ; Constantly ask ''what if''
 ; Identify and analyze possible solutions
 ; Assess/protect from risk
@@ -853,7 +852,7 @@ Offering the best possible solutions is what makes me feel good about myself, or
 ; Move to action without creating buy in
 ; Be close minded, believe you have the best solution and not take into account others’ views
 ; Being overly invested in your solution');
-INSERT INTO managingStrengths (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('34', 'WOO', 'WOO', 'Collect friendships; readily meet new people/strangers; start conversations easily;', 'Comfortable To Be with
+INSERT INTO managingStrength (Id, Strength_NL, Strength_ENG, Contribution_Doing, Contribution_Being, Need_Task , Need_Relationship, External_Triggers , Internal_Triggers , Operating_belief, Miss_Managed ) VALUES ('34', 'WOO', 'WOO', 'Collect friendships; readily meet new people/strangers; start conversations easily;', 'Comfortable To Be with
 ; Warm
 ; Friendly
 ; Charismatic', 'Lightheartedness/fun

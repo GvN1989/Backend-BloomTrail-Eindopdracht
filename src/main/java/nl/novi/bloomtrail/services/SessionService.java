@@ -56,12 +56,16 @@ public class SessionService {
                 .collect(Collectors.toList());
     }
 
-    public Session addSessionToStep(SessionInputDto inputDto) {
+    public Session createSessionAndAddToStep(SessionInputDto inputDto) {
         Step step = validationHelper.validateStep(inputDto.getStepId());
 
-        List<SessionInsight> sessionInsights = validationHelper.validateSessionInsights(inputDto.getSessionInsightsId());
-        List<Assignment> assignments = validationHelper.validateAssignments(inputDto.getAssignmentId());
+        List<SessionInsight> sessionInsights = inputDto.getSessionInsightsId() == null || inputDto.getSessionInsightsId().isEmpty()
+                ? List.of()
+                : validationHelper.validateSessionInsights(inputDto.getSessionInsightsId());
 
+        List<Assignment> assignments = inputDto.getAssignmentId() == null || inputDto.getAssignmentId().isEmpty()
+                ? List.of()
+                : validationHelper.validateAssignments(inputDto.getAssignmentId());
 
         Session session = SessionMapper.toSessionEntity(inputDto, step, sessionInsights, assignments);
 

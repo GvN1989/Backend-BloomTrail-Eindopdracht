@@ -16,6 +16,7 @@ public class StrengthResults {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "strength_results_id")
     private Long resultsId;
     private String filename;
     @CreationTimestamp
@@ -30,8 +31,16 @@ public class StrengthResults {
     @OneToMany(mappedBy = "strengthResults", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<File> files = new ArrayList<>();
     @ManyToOne
-    @JoinColumn(name = "coaching_program", nullable = false)
+    @JoinColumn(name = "coaching_program", insertable = false, updatable = false)
     private CoachingProgram coachingProgram;
+
+    @ManyToMany
+    @JoinTable(
+            name = "strength_results_managing_strengths",
+            joinColumns = @JoinColumn(name = "strength_results_id"),
+            inverseJoinColumns = @JoinColumn(name = "managing_strength_id")
+    )
+    private List<ManagingStrength> managingStrengths = new ArrayList<>();
 
     public Long getResultsId() {
         return resultsId;
@@ -110,5 +119,13 @@ public class StrengthResults {
 
     public void setCoachingProgram(CoachingProgram coachingProgram) {
         this.coachingProgram = coachingProgram;
+    }
+
+    public List<ManagingStrength> getManagingStrengths() {
+        return managingStrengths;
+    }
+
+    public void setManagingStrengths(List<ManagingStrength> managingStrengths) {
+        this.managingStrengths = managingStrengths;
     }
 }

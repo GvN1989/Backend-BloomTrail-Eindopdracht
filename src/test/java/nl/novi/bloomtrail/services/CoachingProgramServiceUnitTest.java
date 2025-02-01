@@ -1,5 +1,7 @@
 package nl.novi.bloomtrail.services;
 
+import jakarta.validation.*;
+import nl.novi.bloomtrail.dtos.CoachingProgramInputDto;
 import nl.novi.bloomtrail.dtos.SimpleCoachingProgramDto;
 import nl.novi.bloomtrail.exceptions.EntityNotFoundException;
 import nl.novi.bloomtrail.exceptions.RecordNotFoundException;
@@ -18,12 +20,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.*;
 
+import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class CoachingProgramServiceTest {
+public class CoachingProgramServiceUnitTest {
 
     @Mock
     private CoachingProgramRepository coachingProgramRepository;
@@ -41,12 +45,30 @@ public class CoachingProgramServiceTest {
     private CoachingProgramService coachingProgramService;
 
     private CoachingProgram mockCoachingProgram;
+    private User mockClient;
+    private User mockCoach;
 
     @BeforeEach
     public void setUp() {
         mockCoachingProgram = new CoachingProgram();
         mockCoachingProgram.setCoachingProgramId(1L);
+        mockCoachingProgram.setCoachingProgramName("Original Program");
         mockCoachingProgram.setTimeline(new ArrayList<>());
+
+        mockClient = new User();
+        mockClient.setUsername("clientUser");
+
+        mockCoach = new User();
+        mockCoach.setUsername("coachUser");
+
+        Mockito.lenient().when(coachingProgramRepository.findById(1L)).thenReturn(Optional.of(mockCoachingProgram));
+        Mockito.lenient().when(validationHelper.validateCoachingProgram(1L)).thenReturn(mockCoachingProgram);
+        Mockito.lenient().when(validationHelper.validateUser("clientUser")).thenReturn(mockClient);
+        Mockito.lenient().when(validationHelper.validateUser("coachUser")).thenReturn(mockCoach);
+
+        Mockito.lenient().when(coachingProgramRepository.save(any(CoachingProgram.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
     }
 
     @Tag("unit")
@@ -120,6 +142,158 @@ public class CoachingProgramServiceTest {
 
     @Tag("unit")
     @Test
+    void getCoachingProgramsByUser_Succes(){
+        String username= "testUser";
+        CoachingProgram program1= new CoachingProgram();
+        program1.setCoachingProgramId(1L);
+        program1.setCoachingProgramName("Program 1");
+
+        CoachingProgram program2= new CoachingProgram();
+        program2.setCoachingProgramId(2L);
+        program2.setCoachingProgramName("Program 2");
+
+        List<CoachingProgram> mockPrograms= List.of(program1, program2);
+
+        when(coachingProgramRepository.findByUserUsername(username)).thenReturn(mockPrograms);
+
+        List<CoachingProgram> result = coachingProgramService.getCoachingProgramsByUser(username);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(2, result.size());
+        Assertions.assertEquals("Program 1", result.get(0).getCoachingProgramName());
+        Assertions.assertEquals("Program 2", result.get(1).getCoachingProgramName());
+    }
+    @Tag("unit")
+    @Test
+    void getCoachingProgramsByUser_NoProgramsFound(){
+        String username = "nonExistingUser";
+
+        when(coachingProgramRepository.findByUserUsername(username)).thenReturn(Collections.emptyList());
+
+        List<CoachingProgram> result = coachingProgramService.getCoachingProgramsByUser(username);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertTrue(result.isEmpty(), "Expected an empty list when no programs are found.");
+    }
+
+    @Tag("unit")
+    @Test
+    void getCoachingProgramsByUser_NullUsername() {
+        when(coachingProgramRepository.findByUserUsername(null)).thenReturn(Collections.emptyList());
+
+        List<CoachingProgram> result = coachingProgramService.getCoachingProgramsByUser(null);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertTrue(result.isEmpty(), "Expected an empty list when username is null.");
+    }
+
+    @Tag("unit")
+    @Test
+    void getStepsByCoachingProgram_Success() {
+        Long coachingProgramId = 1L;
+
+        CoachingProgram coachingProgram = new CoachingProgram();
+        coachingProgram.setCoachingProgramId(coachingProgramId);
+
+        Step step1 = new Step();
+        step1.setStepId(1L);
+        step1.setStepName("Step 1");
+
+        Step step2 = new Step();
+        step2.setStepId(2L);
+        step2.setStepName("Step 2");
+
+        List<Step> mockSteps = List.of(step1, step2);
+
+        when(validationHelper.validateCoachingProgram(coachingProgramId)).thenReturn(coachingProgram);
+        when(stepRepository.findStepsByCoachingProgram(coachingProgramId)).thenReturn(mockSteps);
+
+        List<Step> result = coachingProgramService.getStepsByCoachingProgram(coachingProgramId);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(2, result.size());
+        Assertions.assertEquals("Step 1", result.get(0).getStepName());
+        Assertions.assertEquals("Step 2", result.get(1).getStepName());
+    }
+
+    @Tag("unit")
+    @Test
+    void getStepsByCoachingProgram_NoStepsFound() {
+        Long coachingProgramId = 2L;
+
+        CoachingProgram coachingProgram = new CoachingProgram();
+        coachingProgram.setCoachingProgramId(coachingProgramId);
+
+        when(validationHelper.validateCoachingProgram(coachingProgramId)).thenReturn(coachingProgram);
+        when(stepRepository.findStepsByCoachingProgram(coachingProgramId)).thenReturn(Collections.emptyList());
+
+        Assertions.assertThrows(RecordNotFoundException.class, () -> {
+            coachingProgramService.getStepsByCoachingProgram(coachingProgramId);
+        }, "Expected RecordNotFoundException when no steps are found.");
+    }
+
+    @Tag("unit")
+    @Test
+    void getStepsByCoachingProgram_InvalidCoachingProgram() {
+        Long invalidCoachingProgramId = 99L;
+
+        when(validationHelper.validateCoachingProgram(invalidCoachingProgramId))
+                .thenThrow(new IllegalArgumentException("Invalid coaching program"));
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            coachingProgramService.getStepsByCoachingProgram(invalidCoachingProgramId);
+        }, "Expected IllegalArgumentException when coaching program is invalid.");
+    }
+
+    @Tag("unit")
+    @Test
+    void saveCoachingProgram_Success() {
+        CoachingProgramInputDto inputDto = new CoachingProgramInputDto();
+        inputDto.setClientUsername("clientUser");
+        inputDto.setCoachUsername("coachUser");
+        inputDto.setCoachingProgramName("Leadership Training");
+
+        User client = new User();
+        client.setUsername("clientUser");
+
+        User coach = new User();
+        coach.setUsername("coachUser");
+
+        CoachingProgram coachingProgram = new CoachingProgram();
+        coachingProgram.setCoachingProgramId(1L);
+        coachingProgram.setCoachingProgramName("Leadership Training");
+        coachingProgram.setClient(client);
+        coachingProgram.setCoach(coach);
+
+        when(validationHelper.validateUser("clientUser")).thenReturn(client);
+        when(validationHelper.validateUser("coachUser")).thenReturn(coach);
+        when(coachingProgramRepository.save(any(CoachingProgram.class))).thenReturn(coachingProgram);
+
+        CoachingProgram result = coachingProgramService.saveCoachingProgram(inputDto);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals("Leadership Training", result.getCoachingProgramName());
+        Assertions.assertEquals("clientUser", result.getClient().getUsername());
+        Assertions.assertEquals("coachUser", result.getCoach().getUsername());
+    }
+
+    @Tag("unit")
+    @Test
+    void saveCoachingProgram_InvalidClientUsername() {
+        CoachingProgramInputDto inputDto = new CoachingProgramInputDto();
+        inputDto.setClientUsername("invalidClient");
+        inputDto.setCoachUsername("coachUser");
+
+        when(validationHelper.validateUser("invalidClient"))
+                .thenThrow(new IllegalArgumentException("Client user not found"));
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            coachingProgramService.saveCoachingProgram(inputDto);
+        }, "Expected IllegalArgumentException when client username is invalid.");
+    }
+
+    @Tag("unit")
+    @Test
     public void testDeleteCoachingProgram_SUCCES() {
         Long coachingProgramId = 6L;
 
@@ -132,6 +306,47 @@ public class CoachingProgramServiceTest {
 
         Mockito.verify(validationHelper, Mockito.times(1)).validateCoachingProgram(coachingProgramId);
         Mockito.verify(coachingProgramRepository, Mockito.times(1)).delete(MockCoachingProgram);
+    }
+
+    @Tag("unit")
+    @Test
+    void saveCoachingProgram_InvalidCoachUsername() {
+        CoachingProgramInputDto inputDto = new CoachingProgramInputDto();
+        inputDto.setClientUsername("clientUser");
+        inputDto.setCoachUsername("invalidCoach");
+
+        User client = new User();
+        client.setUsername("clientUser");
+
+        when(validationHelper.validateUser("clientUser")).thenReturn(client);
+        when(validationHelper.validateUser("invalidCoach"))
+                .thenThrow(new IllegalArgumentException("Coach user not found"));
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            coachingProgramService.saveCoachingProgram(inputDto);
+        }, "Expected IllegalArgumentException when coach username is invalid.");
+    }
+
+    @Test
+    void saveCoachingProgram_DatabaseError() {
+        CoachingProgramInputDto inputDto = new CoachingProgramInputDto();
+        inputDto.setClientUsername("clientUser");
+        inputDto.setCoachUsername("coachUser");
+
+        User client = new User();
+        client.setUsername("clientUser");
+
+        User coach = new User();
+        coach.setUsername("coachUser");
+
+        when(validationHelper.validateUser("clientUser")).thenReturn(client);
+        when(validationHelper.validateUser("coachUser")).thenReturn(coach);
+        when(coachingProgramRepository.save(any(CoachingProgram.class)))
+                .thenThrow(new RuntimeException("Database save error"));
+
+        Assertions.assertThrows(RuntimeException.class, () -> {
+            coachingProgramService.saveCoachingProgram(inputDto);
+        }, "Expected RuntimeException when database save fails.");
     }
 
     @Tag("unit")
@@ -150,6 +365,110 @@ public class CoachingProgramServiceTest {
         Mockito.verify(coachingProgramRepository, Mockito.never()).deleteById(Mockito.any());
     }
 
+    @Tag("unit")
+    @Test
+    void updateCoachingProgram_Success() {
+
+        CoachingProgramInputDto inputDto = new CoachingProgramInputDto();
+        inputDto.setClientUsername("clientUser");
+        inputDto.setCoachUsername("coachUser");
+        inputDto.setCoachingProgramName("Updated Program");
+        inputDto.setGoal("Updated Goal");
+        inputDto.setStartDate(Date.from(
+                LocalDate.parse("2024-03-01").atStartOfDay(ZoneOffset.UTC).toInstant()));
+        inputDto.setEndDate(Date.from(
+                LocalDate.parse("2024-06-01").atStartOfDay(ZoneOffset.UTC).toInstant()));
+
+        CoachingProgram result = coachingProgramService.updateCoachingProgram(1L, inputDto);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals("Updated Program", result.getCoachingProgramName());
+        Assertions.assertEquals("Updated Goal", result.getGoal());
+        Assertions.assertEquals(LocalDate.parse("2024-03-01").atStartOfDay(ZoneOffset.UTC).toInstant(), result.getStartDate().toInstant());
+        Assertions.assertEquals(LocalDate.parse("2024-06-01").atStartOfDay(ZoneOffset.UTC).toInstant(), result.getEndDate().toInstant());
+        Assertions.assertEquals("clientUser", result.getClient().getUsername());
+        Assertions.assertEquals("coachUser", result.getCoach().getUsername());
+    }
+
+    @Tag("unit")
+    @Test
+    void updateCoachingProgram_InvalidCoachingProgramId() {
+        Long invalidCoachingProgramId = 99L;
+        CoachingProgramInputDto inputDto = new CoachingProgramInputDto();
+
+        when(validationHelper.validateCoachingProgram(invalidCoachingProgramId))
+                .thenThrow(new RecordNotFoundException("Coaching program not found"));
+
+        Assertions.assertThrows(RecordNotFoundException.class, () -> {
+            coachingProgramService.updateCoachingProgram(invalidCoachingProgramId, inputDto);
+        }, "Expected RecordNotFoundException when coaching program ID is invalid.");
+    }
+
+    @Tag("unit")
+    @Test
+    void updateCoachingProgram_InvalidClientUsername() {
+        Long coachingProgramId = 1L;
+        CoachingProgramInputDto inputDto = new CoachingProgramInputDto();
+        inputDto.setClientUsername("invalidClient");
+        inputDto.setCoachUsername("coachUser");
+
+        CoachingProgram coachingProgram = new CoachingProgram();
+        coachingProgram.setCoachingProgramId(coachingProgramId);
+
+        when(validationHelper.validateCoachingProgram(coachingProgramId)).thenReturn(coachingProgram);
+        when(validationHelper.validateUser("invalidClient"))
+                .thenThrow(new IllegalArgumentException("Client user not found"));
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            coachingProgramService.updateCoachingProgram(coachingProgramId, inputDto);
+        }, "Expected IllegalArgumentException when client username is invalid.");
+    }
+
+    @Tag("unit")
+    @Test
+    void updateCoachingProgram_NullStartDate() {
+        Long coachingProgramId = 1L;
+        CoachingProgramInputDto inputDto = new CoachingProgramInputDto();
+        inputDto.setClientUsername("clientUser");
+        inputDto.setCoachUsername("coachUser");
+        inputDto.setCoachingProgramName("TestProgram");
+
+        inputDto.setStartDate(null);
+        inputDto.setEndDate(Date.from(
+                LocalDate.now().plusMonths(1).atStartOfDay(ZoneId.of("UTC")).toInstant()));
+
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        Validator validator = factory.getValidator();
+
+        Set<ConstraintViolation<CoachingProgramInputDto>> violations = validator.validate(inputDto);
+
+        Assertions.assertFalse(violations.isEmpty(), "Expected validation violations for null startDate.");
+    }
+
+    @Tag("unit")
+    @Test
+    void updateCoachingProgram_DatabaseError() {
+        Long coachingProgramId = 1L;
+
+        CoachingProgramInputDto inputDto = new CoachingProgramInputDto();
+        inputDto.setClientUsername("clientUser");
+        inputDto.setCoachUsername("coachUser");
+        inputDto.setCoachingProgramName("TestProgram");
+
+        CoachingProgram coachingProgram = new CoachingProgram();
+        coachingProgram.setCoachingProgramId(coachingProgramId);
+
+        when(validationHelper.validateCoachingProgram(coachingProgramId)).thenReturn(coachingProgram);
+        when(coachingProgramRepository.save(any(CoachingProgram.class)))
+                .thenThrow(new RuntimeException("Database error"));
+
+        Assertions.assertThrows(RuntimeException.class, () -> {
+            coachingProgramService.updateCoachingProgram(coachingProgramId, inputDto);
+        }, "Expected RuntimeException when database save fails.");
+    }
+
+
+
     @Test
     @Tag("unit")
     public void testAssignStepToCoachingProgram_SUCCES() {
@@ -159,9 +478,9 @@ public class CoachingProgramServiceTest {
         Step newStep = new Step();
         newStep.setSequence(1);
         newStep.setStepStartDate(Date.from(
-                LocalDate.parse("2025-01-10").atStartOfDay(ZoneId.systemDefault()).toInstant()));
+                LocalDate.parse("2025-01-10").atStartOfDay(ZoneOffset.UTC).toInstant()));
         newStep.setStepEndDate(Date.from(
-                LocalDate.parse("2025-01-15").atStartOfDay(ZoneId.systemDefault()).toInstant()));
+                LocalDate.parse("2025-01-15").atStartOfDay(ZoneOffset.UTC).toInstant()));
 
         CoachingProgram mockCoachingProgram = new CoachingProgram();
         mockCoachingProgram.setCoachingProgramId(coachingProgramId);
@@ -262,6 +581,31 @@ public class CoachingProgramServiceTest {
 
     @Tag("unit")
     @Test
+    public void testAssignStepToCoachingProgram_StartDateSequenceConflict() {
+        Step existingStep = new Step();
+        existingStep.setSequence(1);
+        existingStep.setStepStartDate(Date.from(
+                LocalDate.parse("2025-01-10").atStartOfDay(ZoneId.systemDefault()).toInstant()));
+
+        Step conflictingStep = new Step();
+        conflictingStep.setSequence(2);
+        conflictingStep.setStepStartDate(Date.from(
+                LocalDate.parse("2025-01-05").atStartOfDay(ZoneId.systemDefault()).toInstant()));
+
+        when(validationHelper.validateCoachingProgram(1L)).thenReturn(mockCoachingProgram);
+        when(stepRepository.findStepsByCoachingProgram(1L)).thenReturn(List.of(existingStep));
+
+        IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            coachingProgramService.assignStepToCoachingProgram(1L, conflictingStep);
+        });
+
+        Assertions.assertEquals("The step's start date conflicts with the provided sequence.", exception.getMessage());
+
+        Mockito.verify(stepRepository, Mockito.never()).save(Mockito.any(Step.class));
+    }
+
+    @Tag("unit")
+    @Test
     public void testAssignStepToCoachingProgram_CoachingProgramNotFound() {
 
         Long invalidCoachingProgramId = 999L;
@@ -281,6 +625,153 @@ public class CoachingProgramServiceTest {
 
         Mockito.verify(stepRepository, Mockito.never()).save(Mockito.any(Step.class));
     }
+
+    @Tag("unit")
+    @Test
+    public void testAssignStepToCoachingProgram_NoExistingSteps() {
+        Step newStep = new Step();
+        newStep.setSequence(1);
+        newStep.setStepStartDate(Date.from(
+                LocalDate.parse("2025-01-10").atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        newStep.setStepEndDate(Date.from(
+                LocalDate.parse("2025-01-15").atStartOfDay(ZoneId.systemDefault()).toInstant()));
+
+        CoachingProgram mockCoachingProgram = new CoachingProgram();
+        mockCoachingProgram.setCoachingProgramId(1L);
+        mockCoachingProgram.setTimeline(new ArrayList<>()); // No existing steps
+
+        when(validationHelper.validateCoachingProgram(1L)).thenReturn(mockCoachingProgram);
+        when(stepRepository.findStepsByCoachingProgram(1L)).thenReturn(new ArrayList<>());
+        when(stepRepository.save(Mockito.any(Step.class))).thenReturn(newStep);
+
+        CoachingProgram result = coachingProgramService.assignStepToCoachingProgram(1L, newStep);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(1, result.getTimeline().size(), "New step should be added");
+        Assertions.assertEquals(newStep.getStepEndDate(), result.getTimeline().get(0).getStepEndDate(), "Step end date should be correctly assigned");
+    }
+
+    @Tag("unit")
+    @Test
+    public void testAssignStepToCoachingProgram_SameSequenceEarlierStartDate() {
+        Step existingStep = new Step();
+        existingStep.setSequence(2);
+        existingStep.setStepStartDate(Date.from(
+                LocalDate.parse("2025-01-10").atStartOfDay(ZoneId.systemDefault()).toInstant()));
+
+        Step conflictingStep = new Step();
+        conflictingStep.setSequence(2);
+        conflictingStep.setStepStartDate(Date.from(
+                LocalDate.parse("2025-01-05").atStartOfDay(ZoneId.systemDefault()).toInstant()));
+
+        when(validationHelper.validateCoachingProgram(1L)).thenReturn(mockCoachingProgram);
+        when(stepRepository.findStepsByCoachingProgram(1L)).thenReturn(List.of(existingStep));
+
+        IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            coachingProgramService.assignStepToCoachingProgram(1L, conflictingStep);
+        });
+
+        Assertions.assertEquals("A step with sequence 2 already exists in this program.", exception.getMessage());
+
+        Mockito.verify(stepRepository, Mockito.never()).save(Mockito.any(Step.class));
+    }
+
+    @Tag("unit")
+    @Test
+    public void testAssignStepToCoachingProgram_SameSequenceEqualStartDate() {
+        Step existingStep = new Step();
+        existingStep.setSequence(1);
+        existingStep.setStepStartDate(Date.from(
+                LocalDate.parse("2025-01-10").atStartOfDay(ZoneId.systemDefault()).toInstant()));
+
+        Step conflictingStep = new Step();
+        conflictingStep.setSequence(1);
+        conflictingStep.setStepStartDate(Date.from(
+                LocalDate.parse("2025-01-10").atStartOfDay(ZoneId.systemDefault()).toInstant()));
+
+        when(validationHelper.validateCoachingProgram(1L)).thenReturn(mockCoachingProgram);
+        when(stepRepository.findStepsByCoachingProgram(1L)).thenReturn(List.of(existingStep));
+
+        IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            coachingProgramService.assignStepToCoachingProgram(1L, conflictingStep);
+        });
+
+        Assertions.assertEquals("A step with sequence 1 already exists in this program.", exception.getMessage());
+
+        Mockito.verify(stepRepository, Mockito.never()).save(Mockito.any(Step.class));
+    }
+
+    @Tag("unit")
+    @Test
+    public void testAssignStepToCoachingProgram_SequenceStartDateConflict() {
+        Step existingStep = new Step();
+        existingStep.setSequence(1);  // ✅ Lower sequence
+        existingStep.setStepStartDate(Date.from(
+                LocalDate.parse("2025-01-15").atStartOfDay(ZoneId.systemDefault()).toInstant())); // ✅ Later start date
+
+        Step newStep = new Step();
+        newStep.setSequence(2); // ✅ Higher sequence
+        newStep.setStepStartDate(Date.from(
+                LocalDate.parse("2025-01-10").atStartOfDay(ZoneId.systemDefault()).toInstant())); // ✅ Earlier start date
+
+        when(validationHelper.validateCoachingProgram(1L)).thenReturn(mockCoachingProgram);
+        when(stepRepository.findStepsByCoachingProgram(1L)).thenReturn(List.of(existingStep));
+
+        IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            coachingProgramService.assignStepToCoachingProgram(1L, newStep);
+        });
+
+        Assertions.assertEquals("The step's start date conflicts with the provided sequence.", exception.getMessage());
+
+        Mockito.verify(stepRepository, Mockito.never()).save(Mockito.any(Step.class));
+    }
+
+    @Tag("unit")
+    @Test
+    public void testAssignStepToCoachingProgram_ValidSequence_NoConflict() {
+        Step existingStep = new Step();
+        existingStep.setStepId(100L);
+        existingStep.setSequence(1);
+        existingStep.setStepStartDate(Date.from(
+                LocalDate.parse("2025-01-05").atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        existingStep.setStepEndDate(Date.from(
+                LocalDate.parse("2025-01-08").atStartOfDay(ZoneId.systemDefault()).toInstant()));
+
+        Step newStep = new Step();
+        newStep.setStepId(101L);
+        newStep.setSequence(2);
+        newStep.setStepStartDate(Date.from(
+                LocalDate.parse("2025-01-10").atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        newStep.setStepEndDate(Date.from(
+                LocalDate.parse("2025-01-15").atStartOfDay(ZoneId.systemDefault()).toInstant()));
+
+        mockCoachingProgram.setTimeline(new ArrayList<>(List.of(existingStep)));
+
+        when(validationHelper.validateCoachingProgram(1L)).thenReturn(mockCoachingProgram);
+        when(stepRepository.findStepsByCoachingProgram(1L)).thenReturn(List.of(existingStep));
+
+        when(stepRepository.save(Mockito.any(Step.class))).thenAnswer(invocation -> {
+            Step savedStep = invocation.getArgument(0);
+
+            boolean isDuplicate = mockCoachingProgram.getTimeline().stream()
+                    .anyMatch(s -> s.getSequence().equals(savedStep.getSequence())
+                            && s.getStepStartDate().equals(savedStep.getStepStartDate()));
+
+            if (!isDuplicate) {
+                mockCoachingProgram.getTimeline().add(savedStep);
+            }
+
+            return savedStep;
+        });
+
+        CoachingProgram result = coachingProgramService.assignStepToCoachingProgram(1L, newStep);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(2, result.getTimeline().size(), "The timeline should have 2 steps (1 existing + 1 new).");
+    }
+
+
+
     @Tag ("unit")
     @Test
     public void testCalculateProgressPercentage_SUCCES() {

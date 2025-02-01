@@ -4,7 +4,7 @@ import nl.novi.bloomtrail.dtos.StrengthResultsInputDto;
 import nl.novi.bloomtrail.enums.FileContext;
 import nl.novi.bloomtrail.mappers.StrengthResultsMapper;
 import nl.novi.bloomtrail.models.*;
-import nl.novi.bloomtrail.repositories.ManagingStrengthsRepository;
+import nl.novi.bloomtrail.repositories.ManagingStrengthRepository;
 import nl.novi.bloomtrail.repositories.StrengthResultsRepository;
 import org.springframework.stereotype.Service;
 import nl.novi.bloomtrail.helper.EntityValidationHelper;
@@ -17,15 +17,15 @@ import java.util.stream.Collectors;
 @Service
 public class StrengthResultsService {
     private final StrengthResultsRepository strengthResultsRepository;
-    private final ManagingStrengthsRepository managingStrengthsRepository;
+    private final ManagingStrengthRepository managingStrengthRepository;
     private final PdfGeneratorService pdfGeneratorService;
     private final FileService fileService;
     private final EntityValidationHelper validationHelper;
     private final DownloadService downloadService;
 
-    public StrengthResultsService(StrengthResultsRepository strengthResultsRepository, PdfGeneratorService pdfGeneratorService, FileService fileService, ManagingStrengthsRepository managingStrengthsRepository, EntityValidationHelper validationHelper, DownloadService downloadService) {
+    public StrengthResultsService(StrengthResultsRepository strengthResultsRepository, PdfGeneratorService pdfGeneratorService, FileService fileService, ManagingStrengthRepository managingStrengthRepository, EntityValidationHelper validationHelper, DownloadService downloadService) {
         this.strengthResultsRepository = strengthResultsRepository;
-        this.managingStrengthsRepository = managingStrengthsRepository;
+        this.managingStrengthRepository = managingStrengthRepository;
         this.pdfGeneratorService = pdfGeneratorService;
         this.fileService = fileService;
         this.validationHelper = validationHelper;
@@ -59,7 +59,7 @@ public class StrengthResultsService {
     }
 
     public StrengthResults createStrengthResultsReport(String userId) {
-        List<ManagingStrength> topStrengths = managingStrengthsRepository.findTop15ByUsernameOrderByRank(userId);
+        List<ManagingStrength> topStrengths = managingStrengthRepository.findTop15ByUsernameOrderByRank(userId);
 
         if (topStrengths.isEmpty()) {
             throw new IllegalArgumentException("No strengths found for user with ID: " + userId);

@@ -5,7 +5,6 @@ import jakarta.validation.constraints.NotNull;
 import nl.novi.bloomtrail.enums.FileContext;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
 
@@ -28,18 +27,18 @@ public class File {
     private FileContext context;
 
     @ManyToOne
-    @JoinColumn(name = "assignment_id", nullable = true)
+    @JoinColumn(name = "assignment_id", insertable = false, updatable = false)
     private Assignment assignment;
 
     @ManyToOne
-    @JoinColumn(name = "strength_results_id", nullable = true)
+    @JoinColumn(name = "strength_results_id", insertable = false, updatable = false)
     private StrengthResults strengthResults;
 
     @ManyToOne
-    @JoinColumn(name = "sessionInsights_id", nullable = true)
+    @JoinColumn(name = "session_insights_id", insertable = false, updatable = false)
     private SessionInsight sessionInsight;
 
-    @OneToOne(mappedBy = "upload", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "profilePicture", cascade = CascadeType.ALL)
     private User user;
 
     public Long getFileId() {

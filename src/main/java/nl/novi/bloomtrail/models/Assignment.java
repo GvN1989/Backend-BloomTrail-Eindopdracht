@@ -12,15 +12,16 @@ public class Assignment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "assignment_id")
     private Long assignmentId;
     private String description;
     @Enumerated(EnumType.STRING)
     private FileStatus fileStatus;
     @ManyToOne
-    @JoinColumn(name = "session_id", nullable = false)
+    @JoinColumn(name = "session_id", insertable = false, updatable = false)
     private Session session;
     @ManyToOne
-    @JoinColumn(name = "step_id", nullable = false)
+    @JoinColumn(name = "step_id", insertable = false, updatable = false)
     private Step step;
     @OneToMany(mappedBy = "assignment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<File> files = new ArrayList<>();

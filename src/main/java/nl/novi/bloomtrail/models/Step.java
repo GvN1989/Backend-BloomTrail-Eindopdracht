@@ -29,15 +29,15 @@ public class Step {
     private Integer sequence;
 
     @ManyToOne
-    @JoinColumn(name = "coaching_program_id", nullable = false)
+    @JoinColumn(name = "coaching_program_id", insertable = false, updatable = false)
     private CoachingProgram coachingProgram;
 
     @OneToMany
-    @JoinColumn(name = "session_id", nullable = false)
+    @JoinColumn(name = "session_id", insertable = false, updatable = false)
     private List<Session> session = new ArrayList<>();
 
     @OneToMany
-    @JoinColumn(name = "assignment_id", nullable = false)
+    @JoinColumn(name = "assignment_id", insertable = false, updatable = false)
     private List<Assignment> assignment = new ArrayList<>();
 
     public Long getStepId() {

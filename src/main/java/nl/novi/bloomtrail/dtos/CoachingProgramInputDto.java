@@ -57,6 +57,7 @@ public class CoachingProgramInputDto {
         this.goal = goal;
     }
 
+    @NotNull(message = "Start date cannot be null")
     public Date getStartDate() {
         return startDate;
     }

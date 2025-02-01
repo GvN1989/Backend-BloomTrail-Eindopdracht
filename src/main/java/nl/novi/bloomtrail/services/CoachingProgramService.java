@@ -8,12 +8,15 @@ import nl.novi.bloomtrail.helper.EntityValidationHelper;
 import nl.novi.bloomtrail.models.*;
 import nl.novi.bloomtrail.repositories.*;
 import org.springframework.stereotype.Service;
+import jakarta.validation.Valid;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
 @Service
+@Validated
 public class CoachingProgramService {
 
     private final CoachingProgramRepository coachingProgramRepository;
@@ -36,12 +39,8 @@ public class CoachingProgramService {
         return coachingProgramRepository.findAllCoachingProgramDetails();
     }
 
-    public List<CoachingProgram> getCoachingProgramsByCoach(String coachUsername) {
-        return coachingProgramRepository.findByCoachUsername(coachUsername);
-    }
-
-    public List<CoachingProgram> getCoachingProgramsByClient(String clientUsername) {
-        return coachingProgramRepository.findByClientUsername(clientUsername);
+    public List<CoachingProgram> getCoachingProgramsByUser(String username) {
+        return coachingProgramRepository.findByUserUsername(username);
     }
 
     public List<Step> getStepsByCoachingProgram(Long coachingProgramId) {
@@ -61,7 +60,7 @@ public class CoachingProgramService {
         return coachingProgramRepository.save(coachingProgram);
     }
 
-    public CoachingProgram updateCoachingProgram(Long coachingProgramId, CoachingProgramInputDto inputDto) {
+    public CoachingProgram updateCoachingProgram(Long coachingProgramId, @Valid CoachingProgramInputDto inputDto) {
         CoachingProgram coachingProgram = validationHelper.validateCoachingProgram(coachingProgramId);
 
         User client = validationHelper.validateUser(inputDto.getClientUsername());
@@ -173,8 +172,5 @@ public class CoachingProgramService {
 
         return coachingProgram;
     }
-
-
-
 
 }

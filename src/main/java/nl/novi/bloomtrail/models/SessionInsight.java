@@ -16,6 +16,7 @@ public class SessionInsight {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "session_insights_id")
     private Long sessionInsightId;
     @NotBlank
     private String author;
@@ -27,7 +28,7 @@ public class SessionInsight {
     private FileContext fileContext;
 
     @ManyToOne
-    @JoinColumn(name = "session_id", nullable = false)
+    @JoinColumn(name = "session_id", insertable = false, updatable = false)
     private Session session;
 
     @OneToMany(mappedBy = "sessionInsight", cascade = CascadeType.ALL, orphanRemoval = true)

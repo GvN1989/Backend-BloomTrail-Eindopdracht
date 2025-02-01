@@ -47,8 +47,12 @@ public class EntityValidationHelper {
     }
 
     public CoachingProgram validateCoachingProgram (Long coachingProgramId) {
+        if (coachingProgramId == null) {
+            throw new IllegalArgumentException("Coaching program ID cannot be null.");
+        }
+
         return coachingProgramRepository.findById(coachingProgramId)
-                .orElseThrow(() -> new EntityNotFoundException("CoachingProgram" , coachingProgramId));
+                .orElseThrow(() -> new EntityNotFoundException("CoachingProgram", coachingProgramId));
     }
 
     public Step validateStep (Long StepId) {
