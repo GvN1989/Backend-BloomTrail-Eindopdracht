@@ -8,6 +8,7 @@ import nl.novi.bloomtrail.models.Session;
 import nl.novi.bloomtrail.models.Step;
 import nl.novi.bloomtrail.models.CoachingProgram;
 import nl.novi.bloomtrail.repositories.AssignmentRepository;
+import nl.novi.bloomtrail.repositories.CoachingProgramRepository;
 import nl.novi.bloomtrail.repositories.StepRepository;
 import nl.novi.bloomtrail.helper.EntityValidationHelper;
 import org.springframework.stereotype.Service;
@@ -23,12 +24,15 @@ public class StepService {
     private final AssignmentRepository assignmentRepository;
     private final DownloadService downloadService;
 
-    public StepService(StepRepository stepRepository, EntityValidationHelper validationHelper, CoachingProgramService coachingProgramService, AssignmentRepository assignmentRepository, DownloadService downloadService) {
+    private final CoachingProgramRepository coachingProgramRepository;
+
+    public StepService(StepRepository stepRepository, EntityValidationHelper validationHelper, CoachingProgramService coachingProgramService, AssignmentRepository assignmentRepository, DownloadService downloadService, CoachingProgramRepository coachingProgramRepository) {
         this.stepRepository = stepRepository;
         this.validationHelper = validationHelper;
         this.coachingProgramService = coachingProgramService;
         this.assignmentRepository = assignmentRepository;
         this.downloadService = downloadService;
+        this.coachingProgramRepository = coachingProgramRepository;
     }
 
     public Step findById(Long stepId) {
@@ -40,11 +44,18 @@ public class StepService {
         List<Session> sessions = validationHelper.validateSessions(inputDto.getSessionIds());
         List<Assignment> assignments = validationHelper.validateAssignments(inputDto.getAssignmentIds());
 
-        Step step = StepMapper.toStepEntity(inputDto, coachingProgram, sessions, assignments);
+        if (inputDto.getStepStartDate() == null || inputDto.getStepEndDate() == null) {
+            throw new IllegalArgumentException("Step start date and end date cannot be null.");
+        }
 
+        Step step = StepMapper.toStepEntity(inputDto, coachingProgram, sessions, assignments);
         Step savedStep = stepRepository.save(step);
 
         coachingProgramService.assignStepToCoachingProgram(inputDto.getCoachingProgramId(), savedStep);
+
+        coachingProgramRepository.flush();
+
+        coachingProgramService.updateProgramEndDate(inputDto.getCoachingProgramId());
 
         return savedStep;
     }

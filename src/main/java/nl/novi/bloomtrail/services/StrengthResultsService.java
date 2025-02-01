@@ -59,7 +59,7 @@ public class StrengthResultsService {
     }
 
     public StrengthResults createStrengthResultsReport(String userId) {
-        List<ManagingStrength> topStrengths = managingStrengthRepository.findTop15ByUsernameOrderByRank(userId);
+        List<ManagingStrength> topStrengths = managingStrengthRepository.findTop15ByUserUsernameOrderByRank(userId);
 
         if (topStrengths.isEmpty()) {
             throw new IllegalArgumentException("No strengths found for user with ID: " + userId);

@@ -7,6 +7,7 @@ import nl.novi.bloomtrail.models.Assignment;
 import nl.novi.bloomtrail.models.CoachingProgram;
 import nl.novi.bloomtrail.models.Session;
 import nl.novi.bloomtrail.models.Step;
+import nl.novi.bloomtrail.repositories.CoachingProgramRepository;
 import nl.novi.bloomtrail.repositories.StepRepository;
 import nl.novi.bloomtrail.repositories.AssignmentRepository;
 
@@ -47,6 +48,9 @@ public class StepServiceUnitTest {
 
     @Mock
     private AssignmentRepository assignmentRepository;
+
+    @Mock
+    private CoachingProgramRepository coachingProgramRepository;
 
     @Mock
     private DownloadService downloadService;
@@ -100,13 +104,32 @@ public class StepServiceUnitTest {
     @Tag("unit")
     @Test
     void testAddStepToProgram_Success() {
+        StepInputDto mockStepInputDto = new StepInputDto();
+        mockStepInputDto.setCoachingProgramId(1L);
+        mockStepInputDto.setStepName("Test Step");
+        mockStepInputDto.setSequence(1);
+        mockStepInputDto.setStepStartDate(LocalDate.of(2025, 1, 1));
+        mockStepInputDto.setStepEndDate(LocalDate.of(2025, 1, 10));
+
+        CoachingProgram mockCoachingProgram = new CoachingProgram();
+        mockCoachingProgram.setCoachingProgramId(1L);
+
+        Step mockStep = new Step();
+        mockStep.setStepId(1L);
+        mockStep.setStepName("Test Step");
+
+        when(validationHelper.validateCoachingProgram(1L)).thenReturn(mockCoachingProgram);
         when(stepRepository.save(any(Step.class))).thenReturn(mockStep);
+        doNothing().when(coachingProgramRepository).flush();
 
         Step result = stepService.addStepToProgram(mockStepInputDto);
 
         Assertions.assertNotNull(result);
+        Assertions.assertEquals("Test Step", result.getStepName());
+
         Mockito.verify(stepRepository, Mockito.times(1)).save(any(Step.class));
         Mockito.verify(coachingProgramService, Mockito.times(1)).assignStepToCoachingProgram(eq(1L), any(Step.class));
+        Mockito.verify(coachingProgramRepository, Mockito.times(1)).flush();
     }
     @Tag("unit")
     @Test
@@ -127,10 +150,8 @@ public class StepServiceUnitTest {
     @Test
     void testUpdateStep_CoversAllFields() {
         mockStepInputDto.setStepName("Updated Step");
-        mockStepInputDto.setStepStartDate(Date.from(
-                LocalDate.parse("2025-01-01").atStartOfDay(ZoneOffset.UTC).toInstant()));
-        mockStepInputDto.setStepEndDate(Date.from(
-                LocalDate.parse("2025-01-10").atStartOfDay(ZoneOffset.UTC).toInstant()));
+        mockStepInputDto.setStepStartDate(LocalDate.parse("2025-01-01"));
+        mockStepInputDto.setStepEndDate(LocalDate.parse("2025-01-10"));
         mockStepInputDto.setCompleted(true);
         mockStepInputDto.setStepGoal("New Goal");
         mockStepInputDto.setSequence(2);
@@ -160,8 +181,8 @@ public class StepServiceUnitTest {
 
         Assertions.assertNotNull(result);
         Assertions.assertEquals("Updated Step", result.getStepName());
-        Assertions.assertEquals(LocalDate.parse("2025-01-01").atStartOfDay(ZoneOffset.UTC).toInstant(), result.getStepStartDate().toInstant());
-        Assertions.assertEquals(LocalDate.parse("2025-01-10").atStartOfDay(ZoneOffset.UTC).toInstant(), result.getStepEndDate().toInstant());
+        Assertions.assertEquals(LocalDate.parse("2025-01-01"), result.getStepStartDate());
+        Assertions.assertEquals(LocalDate.parse("2025-01-10"), result.getStepEndDate());
         Assertions.assertTrue(result.getCompleted());
         Assertions.assertEquals("New Goal", result.getStepGoal());
         Assertions.assertEquals(2, result.getSequence());

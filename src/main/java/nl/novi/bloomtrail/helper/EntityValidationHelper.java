@@ -7,6 +7,9 @@ import nl.novi.bloomtrail.models.*;
 import nl.novi.bloomtrail.repositories.*;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,16 +22,16 @@ public class EntityValidationHelper {
     private final CoachingProgramRepository coachingProgramRepository;
     private final StepRepository stepRepository;
     private final StrengthResultsRepository strengthResultsRepository;
-    private final SessionInsightsRepository sessionInsightsRepository;
+    private final SessionInsightRepository sessionInsightRepository;
 
-    public EntityValidationHelper(AssignmentRepository assignmentRepository, SessionRepository sessionRepository, UserRepository userRepository, CoachingProgramRepository coachingProgramRepository, StepRepository stepRepository, StrengthResultsRepository strengthResultsRepository, SessionInsightsRepository sessionInsightsRepository) {
+    public EntityValidationHelper(AssignmentRepository assignmentRepository, SessionRepository sessionRepository, UserRepository userRepository, CoachingProgramRepository coachingProgramRepository, StepRepository stepRepository, StrengthResultsRepository strengthResultsRepository, SessionInsightRepository sessionInsightRepository) {
         this.assignmentRepository = assignmentRepository;
         this.sessionRepository = sessionRepository;
         this.userRepository = userRepository;
         this.coachingProgramRepository = coachingProgramRepository;
         this.stepRepository = stepRepository;
         this.strengthResultsRepository = strengthResultsRepository;
-        this.sessionInsightsRepository = sessionInsightsRepository;
+        this.sessionInsightRepository = sessionInsightRepository;
     }
 
     public Assignment validateAssignment(Long assignmentId) {
@@ -122,7 +125,7 @@ public class EntityValidationHelper {
     }
 
     public SessionInsight validateSessionInsight(Long sessionInsightId) {
-        return sessionInsightsRepository.findById(sessionInsightId)
+        return sessionInsightRepository.findById(sessionInsightId)
                 .orElseThrow(() -> new EntityNotFoundException("StrengthResults", sessionInsightId));
 
     }
@@ -147,4 +150,7 @@ public class EntityValidationHelper {
                     + session.getSessionDate() + " " + session.getSessionTime());
         }
     }
+
+
+
 }

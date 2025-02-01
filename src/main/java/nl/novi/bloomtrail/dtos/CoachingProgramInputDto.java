@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 
+import java.time.LocalDate;
 import java.util.Date;
 
 public class CoachingProgramInputDto {
@@ -22,12 +23,12 @@ public class CoachingProgramInputDto {
     @NotNull
     @JsonFormat(pattern= "dd-mm-yyy")
     @Future
-    private Date startDate;
+    private LocalDate startDate;
 
     @NotNull
     @JsonFormat(pattern= "dd-mm-yyy")
     @Future
-    private Date endDate;
+    private LocalDate endDate;
 
     private String clientUsername;
     private String coachUsername;
@@ -56,21 +57,20 @@ public class CoachingProgramInputDto {
     public void setGoal(String goal) {
         this.goal = goal;
     }
-
     @NotNull(message = "Start date cannot be null")
-    public Date getStartDate() {
+    public LocalDate getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(Date startDate) {
+    public void setStartDate(LocalDate startDate) {
         this.startDate = startDate;
     }
 
-    public Date getEndDate() {
+    public LocalDate getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(Date endDate) {
+    public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
     }
 

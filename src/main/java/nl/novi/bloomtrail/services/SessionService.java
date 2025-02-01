@@ -7,7 +7,7 @@ import nl.novi.bloomtrail.mappers.SessionMapper;
 import nl.novi.bloomtrail.models.*;
 import nl.novi.bloomtrail.repositories.AssignmentRepository;
 import nl.novi.bloomtrail.repositories.CoachingProgramRepository;
-import nl.novi.bloomtrail.repositories.SessionInsightsRepository;
+import nl.novi.bloomtrail.repositories.SessionInsightRepository;
 import nl.novi.bloomtrail.repositories.SessionRepository;
 import org.springframework.stereotype.Service;
 
@@ -21,16 +21,16 @@ public class SessionService {
     private final SessionRepository sessionRepository;
     private final CoachingProgramRepository coachingProgramRepository;
     private final EntityValidationHelper validationHelper;
-    private final SessionInsightsRepository sessionInsightsRepository;
+    private final SessionInsightRepository sessionInsightRepository;
     private final AssignmentRepository assignmentRepository;
 
     private final DownloadService downloadService;
 
-    public SessionService(SessionRepository sessionRepository, CoachingProgramRepository coachingProgramRepository, EntityValidationHelper validationHelper, SessionInsightsRepository sessionInsightsRepository, AssignmentRepository assignmentRepository, DownloadService downloadService) {
+    public SessionService(SessionRepository sessionRepository, CoachingProgramRepository coachingProgramRepository, EntityValidationHelper validationHelper, SessionInsightRepository sessionInsightRepository, AssignmentRepository assignmentRepository, DownloadService downloadService) {
         this.sessionRepository = sessionRepository;
         this.coachingProgramRepository = coachingProgramRepository;
         this.validationHelper = validationHelper;
-        this.sessionInsightsRepository = sessionInsightsRepository;
+        this.sessionInsightRepository = sessionInsightRepository;
         this.assignmentRepository = assignmentRepository;
         this.downloadService = downloadService;
     }
@@ -114,7 +114,7 @@ public class SessionService {
         session.getSessionInsights().add(sessionInsight);
 
         sessionRepository.save(session);
-        sessionInsightsRepository.save(sessionInsight);
+        sessionInsightRepository.save(sessionInsight);
 
         return session;
     }

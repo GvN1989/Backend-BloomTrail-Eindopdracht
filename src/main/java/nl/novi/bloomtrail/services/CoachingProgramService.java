@@ -9,9 +9,10 @@ import nl.novi.bloomtrail.models.*;
 import nl.novi.bloomtrail.repositories.*;
 import org.springframework.stereotype.Service;
 import jakarta.validation.Valid;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
@@ -51,6 +52,12 @@ public class CoachingProgramService {
         }
         return steps;
     }
+
+    @Transactional
+    public CoachingProgram getCoachingProgramWithSteps(Long programId) {
+        return coachingProgramRepository.findByIdWithSteps(programId)
+                .orElseThrow(() -> new RecordNotFoundException("Coaching program not found"));
+    }
     public CoachingProgram saveCoachingProgram(CoachingProgramInputDto inputDto) {
 
         User client = validationHelper.validateUser(inputDto.getClientUsername());
@@ -83,6 +90,7 @@ public class CoachingProgramService {
 
     public CoachingProgram assignStepToCoachingProgram(Long coachingProgramId, Step step) {
         CoachingProgram coachingProgram = validationHelper.validateCoachingProgram(coachingProgramId);
+
         if (coachingProgram.getTimeline().contains(step)) {
             throw new IllegalArgumentException("Step is already part of the coaching program timeline.");
         }
@@ -92,8 +100,6 @@ public class CoachingProgramService {
         coachingProgram.getTimeline().add(step);
         step.setCoachingProgram(coachingProgram);
         stepRepository.save(step);
-
-        updateProgramEndDate(coachingProgramId);
 
         return coachingProgram;
     }
@@ -106,7 +112,7 @@ public class CoachingProgramService {
                 throw new IllegalArgumentException("A step with sequence " + newStep.getSequence() + " already exists in this program.");
             }
 
-            if (step.getStepStartDate().after(newStep.getStepStartDate()) && step.getSequence() < newStep.getSequence()) {
+            if (step.getStepStartDate().isAfter(newStep.getStepStartDate()) && step.getSequence() < newStep.getSequence()) {
                 throw new IllegalArgumentException("The step's start date conflicts with the provided sequence.");
             }
         }
@@ -117,27 +123,21 @@ public class CoachingProgramService {
 
         List<Step> steps = coachingProgram.getTimeline();
         if (steps == null || steps.isEmpty()) {
-            coachingProgram.setEndDate(null);
-            coachingProgramRepository.save(coachingProgram);
             return;
         }
 
-        Date latestEndDate = steps.stream()
-                .map(Step::getStepEndDate)
-                .filter(Objects::nonNull)
-                .max(Date::compareTo)
-                .orElse(null);
+        LocalDate latestEndDate = steps.stream()
+                    .map(Step::getStepEndDate)
+                    .filter(Objects::nonNull)
+                    .max(LocalDate::compareTo)
+                    .orElse(null);
 
-        if (latestEndDate == null) {
-            throw new IllegalStateException("No valid step end dates found.");
+            if (latestEndDate != null) {
+                coachingProgram.setEndDate(latestEndDate);
+                coachingProgramRepository.save(coachingProgram);
+            }
         }
 
-        Date currentEndDate = coachingProgram.getEndDate();
-        if (currentEndDate == null || latestEndDate.after(currentEndDate)) {
-            coachingProgram.setEndDate(latestEndDate);
-            coachingProgramRepository.save(coachingProgram);
-        }
-    }
 
     public double calculateProgressPercentage(Long coachingProgramId) {
         CoachingProgram coachingProgram = validationHelper.validateCoachingProgram(coachingProgramId);

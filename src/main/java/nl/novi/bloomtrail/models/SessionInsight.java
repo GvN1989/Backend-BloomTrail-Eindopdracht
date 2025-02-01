@@ -16,7 +16,7 @@ public class SessionInsight {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "session_insights_id")
+    @Column(name = "session_insight_id")
     private Long sessionInsightId;
     @NotBlank
     private String author;

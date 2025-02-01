@@ -19,8 +19,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.*;
 
 import static org.mockito.Mockito.*;
@@ -374,18 +372,16 @@ public class CoachingProgramServiceUnitTest {
         inputDto.setCoachUsername("coachUser");
         inputDto.setCoachingProgramName("Updated Program");
         inputDto.setGoal("Updated Goal");
-        inputDto.setStartDate(Date.from(
-                LocalDate.parse("2024-03-01").atStartOfDay(ZoneOffset.UTC).toInstant()));
-        inputDto.setEndDate(Date.from(
-                LocalDate.parse("2024-06-01").atStartOfDay(ZoneOffset.UTC).toInstant()));
+        inputDto.setStartDate(LocalDate.parse("2024-03-01"));
+        inputDto.setEndDate(LocalDate.parse("2024-06-01"));
 
         CoachingProgram result = coachingProgramService.updateCoachingProgram(1L, inputDto);
 
         Assertions.assertNotNull(result);
         Assertions.assertEquals("Updated Program", result.getCoachingProgramName());
         Assertions.assertEquals("Updated Goal", result.getGoal());
-        Assertions.assertEquals(LocalDate.parse("2024-03-01").atStartOfDay(ZoneOffset.UTC).toInstant(), result.getStartDate().toInstant());
-        Assertions.assertEquals(LocalDate.parse("2024-06-01").atStartOfDay(ZoneOffset.UTC).toInstant(), result.getEndDate().toInstant());
+        Assertions.assertEquals(LocalDate.parse("2024-03-01"), result.getStartDate());
+        Assertions.assertEquals(LocalDate.parse("2024-06-01"), result.getEndDate());
         Assertions.assertEquals("clientUser", result.getClient().getUsername());
         Assertions.assertEquals("coachUser", result.getCoach().getUsername());
     }
@@ -434,8 +430,7 @@ public class CoachingProgramServiceUnitTest {
         inputDto.setCoachingProgramName("TestProgram");
 
         inputDto.setStartDate(null);
-        inputDto.setEndDate(Date.from(
-                LocalDate.now().plusMonths(1).atStartOfDay(ZoneId.of("UTC")).toInstant()));
+        inputDto.setEndDate(LocalDate.now().plusMonths(6));
 
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         Validator validator = factory.getValidator();
@@ -477,10 +472,8 @@ public class CoachingProgramServiceUnitTest {
 
         Step newStep = new Step();
         newStep.setSequence(1);
-        newStep.setStepStartDate(Date.from(
-                LocalDate.parse("2025-01-10").atStartOfDay(ZoneOffset.UTC).toInstant()));
-        newStep.setStepEndDate(Date.from(
-                LocalDate.parse("2025-01-15").atStartOfDay(ZoneOffset.UTC).toInstant()));
+        newStep.setStepStartDate(LocalDate.parse("2025-01-10"));
+        newStep.setStepEndDate(LocalDate.parse("2025-01-15"));
 
         CoachingProgram mockCoachingProgram = new CoachingProgram();
         mockCoachingProgram.setCoachingProgramId(coachingProgramId);
@@ -496,7 +489,7 @@ public class CoachingProgramServiceUnitTest {
         Assertions.assertTrue(result.getTimeline().contains(newStep), "New step should be added to the timeline");
         Assertions.assertEquals(1, result.getTimeline().size(),"Timeline size should be 1");
 
-        Mockito.verify(validationHelper, Mockito.times(2)).validateCoachingProgram(coachingProgramId);
+        Mockito.verify(validationHelper, Mockito.times(1)).validateCoachingProgram(coachingProgramId);
         Mockito.verify(stepRepository, Mockito.times(1)).findStepsByCoachingProgram(coachingProgramId);
         Mockito.verify(stepRepository, Mockito.times(1)).save(newStep);
     }
@@ -506,13 +499,11 @@ public class CoachingProgramServiceUnitTest {
     public void testAssignStepToCoachingProgram_DuplicateStep(){
         Step existingStep = new Step();
         existingStep.setStepId(1L);
-        existingStep.setStepStartDate(Date.from(
-                LocalDate.parse("2025-01-10").atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        existingStep.setStepStartDate(LocalDate.parse("2025-01-10"));
 
         Step duplicateStep = new Step();
         duplicateStep.setStepId(1L);
-        duplicateStep.setStepStartDate(Date.from(
-                LocalDate.parse("2025-01-15").atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        duplicateStep.setStepStartDate(LocalDate.parse("2025-01-15"));
 
         CoachingProgram mockCoachingProgram = new CoachingProgram();
         mockCoachingProgram.setCoachingProgramId(1L);
@@ -534,13 +525,11 @@ public class CoachingProgramServiceUnitTest {
     public void testAssignStepToCoachingProgram_SequenceConflict() {
         Step existingStep = new Step();
         existingStep.setSequence(1);
-        existingStep.setStepStartDate(Date.from(
-                LocalDate.parse("2025-01-10").atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        existingStep.setStepStartDate(LocalDate.parse("2025-01-10"));
 
         Step conflictingStep = new Step();
         conflictingStep.setSequence(1);
-        conflictingStep.setStepStartDate(Date.from(
-                LocalDate.parse("2025-01-11").atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        conflictingStep.setStepStartDate(LocalDate.parse("2025-01-11"));
 
         when(validationHelper.validateCoachingProgram(1L)).thenReturn(mockCoachingProgram);
         when(stepRepository.findStepsByCoachingProgram(1L)).thenReturn(List.of(existingStep));
@@ -559,13 +548,11 @@ public class CoachingProgramServiceUnitTest {
     public void testAssignStepToCoachingProgram_StartDateConflict() {
         Step existingStep = new Step();
         existingStep.setSequence(1);
-        existingStep.setStepStartDate(Date.from(
-                LocalDate.parse("2025-01-10").atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        existingStep.setStepStartDate(LocalDate.parse("2025-01-10"));
 
         Step conflictingStep = new Step();
         conflictingStep.setSequence(2);
-        conflictingStep.setStepStartDate(Date.from(
-                LocalDate.parse("2025-01-01").atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        conflictingStep.setStepStartDate(LocalDate.parse("2025-01-01"));
 
         when(validationHelper.validateCoachingProgram(1L)).thenReturn(mockCoachingProgram);
         when(stepRepository.findStepsByCoachingProgram(1L)).thenReturn(List.of(existingStep));
@@ -584,13 +571,11 @@ public class CoachingProgramServiceUnitTest {
     public void testAssignStepToCoachingProgram_StartDateSequenceConflict() {
         Step existingStep = new Step();
         existingStep.setSequence(1);
-        existingStep.setStepStartDate(Date.from(
-                LocalDate.parse("2025-01-10").atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        existingStep.setStepStartDate(LocalDate.parse("2025-01-10"));
 
         Step conflictingStep = new Step();
         conflictingStep.setSequence(2);
-        conflictingStep.setStepStartDate(Date.from(
-                LocalDate.parse("2025-01-05").atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        conflictingStep.setStepStartDate(LocalDate.parse("2025-01-05"));
 
         when(validationHelper.validateCoachingProgram(1L)).thenReturn(mockCoachingProgram);
         when(stepRepository.findStepsByCoachingProgram(1L)).thenReturn(List.of(existingStep));
@@ -611,8 +596,7 @@ public class CoachingProgramServiceUnitTest {
         Long invalidCoachingProgramId = 999L;
         Step newStep = new Step();
         newStep.setSequence(1);
-        newStep.setStepStartDate(Date.from(
-                LocalDate.parse("2025-01-01").atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        newStep.setStepStartDate(LocalDate.parse("2025-01-01"));
 
         when(validationHelper.validateCoachingProgram(invalidCoachingProgramId))
                 .thenThrow(new EntityNotFoundException("CoachingProgram", invalidCoachingProgramId));
@@ -631,10 +615,8 @@ public class CoachingProgramServiceUnitTest {
     public void testAssignStepToCoachingProgram_NoExistingSteps() {
         Step newStep = new Step();
         newStep.setSequence(1);
-        newStep.setStepStartDate(Date.from(
-                LocalDate.parse("2025-01-10").atStartOfDay(ZoneId.systemDefault()).toInstant()));
-        newStep.setStepEndDate(Date.from(
-                LocalDate.parse("2025-01-15").atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        newStep.setStepStartDate(LocalDate.parse("2025-01-10"));
+        newStep.setStepEndDate(LocalDate.parse("2025-01-15"));
 
         CoachingProgram mockCoachingProgram = new CoachingProgram();
         mockCoachingProgram.setCoachingProgramId(1L);
@@ -656,13 +638,11 @@ public class CoachingProgramServiceUnitTest {
     public void testAssignStepToCoachingProgram_SameSequenceEarlierStartDate() {
         Step existingStep = new Step();
         existingStep.setSequence(2);
-        existingStep.setStepStartDate(Date.from(
-                LocalDate.parse("2025-01-10").atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        existingStep.setStepStartDate(LocalDate.parse("2025-01-10"));
 
         Step conflictingStep = new Step();
         conflictingStep.setSequence(2);
-        conflictingStep.setStepStartDate(Date.from(
-                LocalDate.parse("2025-01-05").atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        conflictingStep.setStepStartDate(LocalDate.parse("2025-01-05"));
 
         when(validationHelper.validateCoachingProgram(1L)).thenReturn(mockCoachingProgram);
         when(stepRepository.findStepsByCoachingProgram(1L)).thenReturn(List.of(existingStep));
@@ -681,13 +661,11 @@ public class CoachingProgramServiceUnitTest {
     public void testAssignStepToCoachingProgram_SameSequenceEqualStartDate() {
         Step existingStep = new Step();
         existingStep.setSequence(1);
-        existingStep.setStepStartDate(Date.from(
-                LocalDate.parse("2025-01-10").atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        existingStep.setStepStartDate(LocalDate.parse("2025-01-10"));
 
         Step conflictingStep = new Step();
         conflictingStep.setSequence(1);
-        conflictingStep.setStepStartDate(Date.from(
-                LocalDate.parse("2025-01-10").atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        conflictingStep.setStepStartDate(LocalDate.parse("2025-01-10"));
 
         when(validationHelper.validateCoachingProgram(1L)).thenReturn(mockCoachingProgram);
         when(stepRepository.findStepsByCoachingProgram(1L)).thenReturn(List.of(existingStep));
@@ -705,14 +683,11 @@ public class CoachingProgramServiceUnitTest {
     @Test
     public void testAssignStepToCoachingProgram_SequenceStartDateConflict() {
         Step existingStep = new Step();
-        existingStep.setSequence(1);  // ✅ Lower sequence
-        existingStep.setStepStartDate(Date.from(
-                LocalDate.parse("2025-01-15").atStartOfDay(ZoneId.systemDefault()).toInstant())); // ✅ Later start date
-
+        existingStep.setSequence(1);
+        existingStep.setStepStartDate(LocalDate.parse("2025-01-15"));
         Step newStep = new Step();
-        newStep.setSequence(2); // ✅ Higher sequence
-        newStep.setStepStartDate(Date.from(
-                LocalDate.parse("2025-01-10").atStartOfDay(ZoneId.systemDefault()).toInstant())); // ✅ Earlier start date
+        newStep.setSequence(2);
+        newStep.setStepStartDate(LocalDate.parse("2025-01-10"));
 
         when(validationHelper.validateCoachingProgram(1L)).thenReturn(mockCoachingProgram);
         when(stepRepository.findStepsByCoachingProgram(1L)).thenReturn(List.of(existingStep));
@@ -732,18 +707,14 @@ public class CoachingProgramServiceUnitTest {
         Step existingStep = new Step();
         existingStep.setStepId(100L);
         existingStep.setSequence(1);
-        existingStep.setStepStartDate(Date.from(
-                LocalDate.parse("2025-01-05").atStartOfDay(ZoneId.systemDefault()).toInstant()));
-        existingStep.setStepEndDate(Date.from(
-                LocalDate.parse("2025-01-08").atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        existingStep.setStepStartDate(LocalDate.parse("2025-01-05"));
+        existingStep.setStepEndDate(LocalDate.parse("2025-01-08"));
 
         Step newStep = new Step();
         newStep.setStepId(101L);
         newStep.setSequence(2);
-        newStep.setStepStartDate(Date.from(
-                LocalDate.parse("2025-01-10").atStartOfDay(ZoneId.systemDefault()).toInstant()));
-        newStep.setStepEndDate(Date.from(
-                LocalDate.parse("2025-01-15").atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        newStep.setStepStartDate(LocalDate.parse("2025-01-10"));
+        newStep.setStepEndDate(LocalDate.parse("2025-01-15"));
 
         mockCoachingProgram.setTimeline(new ArrayList<>(List.of(existingStep)));
 
@@ -896,6 +867,22 @@ public class CoachingProgramServiceUnitTest {
         Mockito.verify(validationHelper, Mockito.times(2)).validateCoachingProgram(coachingProgramId);
         Mockito.verify(coachingProgramRepository, Mockito.times(2)).save(mockCoachingProgram);
     }
+    @Tag("unit")
+    @Test
+    void testGetCoachingProgramWithSteps_Success() {
+        CoachingProgram mockProgram = new CoachingProgram();
+        mockProgram.setCoachingProgramId(1L);
+        mockProgram.setTimeline(List.of(new Step(), new Step()));
+
+        when(coachingProgramRepository.findByIdWithSteps(1L)).thenReturn(Optional.of(mockProgram));
+
+        CoachingProgram result = coachingProgramService.getCoachingProgramWithSteps(1L);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(1L, result.getCoachingProgramId());
+        Assertions.assertEquals(2, result.getTimeline().size());
+        verify(coachingProgramRepository, times(1)).findByIdWithSteps(1L);
+    }
 
     @Tag("unit")
     @Test
@@ -972,10 +959,10 @@ public class CoachingProgramServiceUnitTest {
         mockCoachingProgram.setCoachingProgramId(coachingProgramId);
 
         Step step1 = new Step();
-        step1.setStepEndDate(Date.from(LocalDate.parse("2025-01-10").atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        step1.setStepEndDate(LocalDate.parse("2025-01-10"));
 
         Step step2 = new Step();
-        step2.setStepEndDate(Date.from(LocalDate.parse("2025-01-15").atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        step2.setStepEndDate(LocalDate.parse("2025-01-15"));
 
         mockCoachingProgram.setTimeline(List.of(step1, step2));
         when(validationHelper.validateCoachingProgram(coachingProgramId)).thenReturn(mockCoachingProgram);
@@ -983,7 +970,7 @@ public class CoachingProgramServiceUnitTest {
         coachingProgramService.updateProgramEndDate(coachingProgramId);
 
         Assertions.assertEquals(
-                Date.from(LocalDate.parse("2025-01-15").atStartOfDay(ZoneId.systemDefault()).toInstant()),
+                LocalDate.from(LocalDate.parse("2025-01-15")),
                 mockCoachingProgram.getEndDate()
         );
 
@@ -1000,34 +987,13 @@ public class CoachingProgramServiceUnitTest {
         mockCoachingProgram.setCoachingProgramId(coachingProgramId);
         mockCoachingProgram.setTimeline(new ArrayList<>());
 
-        when(validationHelper.validateCoachingProgram(coachingProgramId)).thenReturn(mockCoachingProgram);
+        when(validationHelper.validateCoachingProgram(1L)).thenReturn(mockCoachingProgram);
 
-        coachingProgramService.updateProgramEndDate(coachingProgramId);
+        coachingProgramService.updateProgramEndDate(1L);
 
-        Assertions.assertNull(mockCoachingProgram.getEndDate());
-        Mockito.verify(coachingProgramRepository, Mockito.times(1)).save(mockCoachingProgram);
-    }
 
-    @Test
-    @Tag("unit")
-    public void testUpdateProgramEndDate_InvalidStepEndDates() {
-        Long coachingProgramId = 1L;
-
-        CoachingProgram mockCoachingProgram = new CoachingProgram();
-        mockCoachingProgram.setCoachingProgramId(coachingProgramId);
-
-        Step step1 = new Step();
-        step1.setStepEndDate(null);
-
-        mockCoachingProgram.setTimeline(List.of(step1));
-        when(validationHelper.validateCoachingProgram(coachingProgramId)).thenReturn(mockCoachingProgram);
-
-        IllegalStateException exception = Assertions.assertThrows(IllegalStateException.class, () -> {
-            coachingProgramService.updateProgramEndDate(coachingProgramId);
-        });
-
-        Assertions.assertEquals("No valid step end dates found.", exception.getMessage());
-        Mockito.verify(coachingProgramRepository, Mockito.never()).save(Mockito.any());
+        Assertions.assertNull(mockCoachingProgram.getEndDate(), "End date should remain unchanged when timeline is empty");
+        verify(coachingProgramRepository, never()).save(any(CoachingProgram.class));
     }
 
 

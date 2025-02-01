@@ -68,7 +68,7 @@ public class FileService {
         return switch (parentEntity) {
             case Assignment assignment -> fileRepository.findByAssignment(assignment);
             case StrengthResults strengthResults -> fileRepository.findByStrengthResults(strengthResults);
-            case SessionInsight sessionInsight -> fileRepository.findBySessionInsights(sessionInsight);
+            case SessionInsight sessionInsight -> fileRepository.findBySessionInsight(sessionInsight);
             default -> throw new IllegalArgumentException("Unsupported file type");
         };
     }

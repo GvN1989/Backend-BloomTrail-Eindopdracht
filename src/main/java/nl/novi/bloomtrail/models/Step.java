@@ -3,6 +3,7 @@ package nl.novi.bloomtrail.models;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -18,9 +19,9 @@ public class Step {
 
     private String StepName;
 
-    private Date stepStartDate;
+    private LocalDate stepStartDate;
 
-    private Date stepEndDate;
+    private LocalDate stepEndDate;
 
     private Boolean completed;
 
@@ -48,20 +49,20 @@ public class Step {
         this.stepId = stepId;
     }
 
-    public Date getStepStartDate() {
+    public LocalDate getStepStartDate() {
         return stepStartDate;
     }
 
-    public void setStepStartDate(Date stepStartDate) {
+    public void setStepStartDate(LocalDate stepStartDate) {
         this.stepStartDate = stepStartDate;
     }
 
-    public Date getStepEndDate() {
+    public LocalDate getStepEndDate() {
         return stepEndDate;
     }
 
-    public void setStepEndDate(Date stepDate) {
-        this.stepEndDate = stepDate;
+    public void setStepEndDate(LocalDate stepEndDate) {
+        this.stepEndDate = stepEndDate;
     }
 
     public Boolean getCompleted() {

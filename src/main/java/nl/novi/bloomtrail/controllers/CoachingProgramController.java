@@ -86,7 +86,7 @@ public class CoachingProgramController {
 
     }
 
-    @PutMapping("/{id}/step}")
+    @PutMapping("/{id}/step")
     public ResponseEntity <CoachingProgramDto> assignStepToCoachingProgram (@Valid @PathVariable("id") Long coachingProgramId, @RequestBody StepInputDto inputDto) {
 
         Step step = validationHelper.validateStep(inputDto.getStepId());

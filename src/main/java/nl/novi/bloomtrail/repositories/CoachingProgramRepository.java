@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 
 public interface CoachingProgramRepository extends JpaRepository<CoachingProgram, Long> {
@@ -17,4 +18,7 @@ public interface CoachingProgramRepository extends JpaRepository<CoachingProgram
             "c.coachingProgramId, c.coachingProgramName, c.client.username, c.coach.username) " +
             "FROM CoachingProgram c")
     List<SimpleCoachingProgramDto> findAllCoachingProgramDetails();
+
+    @Query("SELECT c FROM CoachingProgram c LEFT JOIN FETCH c.timeline WHERE c.coachingProgramId = :id")
+    Optional<CoachingProgram> findByIdWithSteps(@Param("id") Long id);
 }

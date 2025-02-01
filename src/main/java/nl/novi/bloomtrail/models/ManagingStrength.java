@@ -9,6 +9,8 @@ public class ManagingStrength {
     @Id
     @Column(name = "strength_id")
     private Long strengthId;
+    @Column(name = "strength_rank")
+    private Integer rank;
     private String strengthNl;
     private String strengthEn;
     private String contributionDoing;
@@ -118,5 +120,13 @@ public class ManagingStrength {
 
     public void setStrengthResults(StrengthResults strengthResults) {
         this.strengthResults = strengthResults;
+    }
+
+    public Integer getRank() {
+        return rank;
+    }
+
+    public void setRank(Integer rank) {
+        this.rank = rank;
     }
 }

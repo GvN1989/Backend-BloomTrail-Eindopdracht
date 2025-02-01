@@ -1,5 +1,6 @@
 package nl.novi.bloomtrail.dtos;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -9,9 +10,9 @@ public class StepDto {
 
     private String StepName;
 
-    private Date stepStartDate;
+    private LocalDate stepStartDate;
 
-    private Date stepEndDate;
+    private LocalDate stepEndDate;
 
     private Boolean completed;
 
@@ -39,19 +40,19 @@ public class StepDto {
         StepName = stepName;
     }
 
-    public Date getStepStartDate() {
+    public LocalDate getStepStartDate() {
         return stepStartDate;
     }
 
-    public void setStepStartDate(Date stepStartDate) {
+    public void setStepStartDate(LocalDate stepStartDate) {
         this.stepStartDate = stepStartDate;
     }
 
-    public Date getStepEndDate() {
+    public LocalDate getStepEndDate() {
         return stepEndDate;
     }
 
-    public void setStepEndDate(Date stepEndDate) {
+    public void setStepEndDate(LocalDate stepEndDate) {
         this.stepEndDate = stepEndDate;
     }
 

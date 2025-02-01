@@ -57,10 +57,10 @@ public class SessionController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/{id}/session-insight/{id}")
+    @PutMapping("/{id}/session-insight/{sessionInsightId}")
     public ResponseEntity<SessionDto> assignSessionInsightToSession(
             @PathVariable("id") Long sessionId,
-            @PathVariable("id") Long sessionInsightId) {
+            @PathVariable("sessionInsightId") Long sessionInsightId) {
 
         Session updatedSession = sessionService.assignSessionInsightToSession (sessionId, sessionInsightId);
         SessionDto sessionDto = SessionMapper.toSessionDto(updatedSession);

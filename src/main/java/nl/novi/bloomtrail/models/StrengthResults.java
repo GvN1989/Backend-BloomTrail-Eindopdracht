@@ -40,6 +40,7 @@ public class StrengthResults {
             joinColumns = @JoinColumn(name = "strength_results_id"),
             inverseJoinColumns = @JoinColumn(name = "managing_strength_id")
     )
+
     private List<ManagingStrength> managingStrengths = new ArrayList<>();
 
     public Long getResultsId() {

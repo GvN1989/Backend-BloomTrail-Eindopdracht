@@ -2,11 +2,14 @@ package nl.novi.bloomtrail.dtos;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.*;
+import lombok.NoArgsConstructor;
 import nl.novi.bloomtrail.models.Step;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
+@NoArgsConstructor
 public class StepInputDto {
     private Long StepId;
 
@@ -14,18 +17,16 @@ public class StepInputDto {
     @Size(max = 255)
     private String StepName;
 
-    @JsonFormat(pattern = "dd-mm-yyy")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     @Future
-    private Date stepStartDate;
+    private LocalDate stepStartDate;
 
-    @JsonFormat(pattern = "dd-mm-yyy")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     @Future
-    private Date stepEndDate;
+    private LocalDate stepEndDate;
 
     private Boolean completed;
 
-    @NotBlank(message = "Step must have a goal description")
-    @Size(max = 500)
     private String stepGoal;
 
     private Integer sequence;
@@ -53,19 +54,19 @@ public class StepInputDto {
         StepName = stepName;
     }
 
-    public Date getStepStartDate() {
+    public LocalDate getStepStartDate() {
         return stepStartDate;
     }
 
-    public void setStepStartDate(Date stepStartDate) {
+    public void setStepStartDate(LocalDate stepStartDate) {
         this.stepStartDate = stepStartDate;
     }
 
-    public Date getStepEndDate() {
+    public LocalDate getStepEndDate() {
         return stepEndDate;
     }
 
-    public void setStepEndDate(Date stepEndDate) {
+    public void setStepEndDate(LocalDate stepEndDate) {
         this.stepEndDate = stepEndDate;
     }
 

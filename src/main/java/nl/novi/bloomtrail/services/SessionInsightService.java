@@ -1,12 +1,10 @@
 package nl.novi.bloomtrail.services;
 
 import nl.novi.bloomtrail.helper.EntityValidationHelper;
-import nl.novi.bloomtrail.models.Assignment;
 import nl.novi.bloomtrail.models.Session;
 import nl.novi.bloomtrail.models.SessionInsight;
-import nl.novi.bloomtrail.models.File;
 import nl.novi.bloomtrail.enums.FileContext;
-import nl.novi.bloomtrail.repositories.SessionInsightsRepository;
+import nl.novi.bloomtrail.repositories.SessionInsightRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,13 +14,13 @@ import java.util.List;
 @Service
 public class SessionInsightService {
 
-    private final SessionInsightsRepository sessionInsightsRepository;
+    private final SessionInsightRepository sessionInsightRepository;
     private final FileService fileService;
     private final EntityValidationHelper validationHelper;
     private final DownloadService downloadService;
 
-    public SessionInsightService(SessionInsightsRepository sessionInsightsRepository, FileService fileService, EntityValidationHelper validationHelper, DownloadService downloadService) {
-        this.sessionInsightsRepository = sessionInsightsRepository;
+    public SessionInsightService(SessionInsightRepository sessionInsightRepository, FileService fileService, EntityValidationHelper validationHelper, DownloadService downloadService) {
+        this.sessionInsightRepository = sessionInsightRepository;
         this.fileService = fileService;
         this.validationHelper = validationHelper;
         this.downloadService = downloadService;
@@ -55,7 +53,7 @@ public class SessionInsightService {
     public void deleteSessionInsight(Long sessionInsightId) {
         SessionInsight sessionInsight = validationHelper.validateSessionInsight(sessionInsightId);
         fileService.deleteFilesForParentEntity(sessionInsight);
-        sessionInsightsRepository.delete(sessionInsight);
+        sessionInsightRepository.delete(sessionInsight);
     }
 
     public byte[] downloadSessionInsightFiles(Long sessionInsightId, FileContext context) throws IOException {

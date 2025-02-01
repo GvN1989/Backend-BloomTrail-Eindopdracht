@@ -35,7 +35,7 @@ public class File {
     private StrengthResults strengthResults;
 
     @ManyToOne
-    @JoinColumn(name = "session_insights_id", insertable = false, updatable = false)
+    @JoinColumn(name = "session_insight_id", insertable = false, updatable = false)
     private SessionInsight sessionInsight;
 
     @OneToOne(mappedBy = "profilePicture", cascade = CascadeType.ALL)

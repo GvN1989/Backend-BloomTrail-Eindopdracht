@@ -21,8 +21,11 @@ public class SessionInputDto {
     @NotBlank
     private String client;
     @NotNull
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-mm-yyyy")
+    @Future
     private LocalDate sessionDate;
     @NotNull
+    @Future
     private LocalTime sessionTime;
     private String location;
     private String comment;

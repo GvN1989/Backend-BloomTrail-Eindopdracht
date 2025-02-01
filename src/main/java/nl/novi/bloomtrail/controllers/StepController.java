@@ -35,6 +35,9 @@ public class StepController {
 
     @PostMapping
     public ResponseEntity<StepDto> addStepToProgram(@Valid @RequestBody StepInputDto inputDto) {
+
+        System.out.println("Received StepInputDto: " + inputDto);
+
         Step step = stepService.addStepToProgram(inputDto);
         StepDto response = StepMapper.toStepDto(step);
         return ResponseEntity.created(URI.create("/steps/" + step.getStepId())).body(response);
