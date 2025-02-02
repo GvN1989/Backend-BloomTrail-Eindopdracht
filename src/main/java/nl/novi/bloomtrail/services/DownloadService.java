@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.io.IOException;
 import java.util.zip.ZipEntry;
@@ -32,6 +33,7 @@ public class DownloadService {
             throw new RuntimeException("Failed to read file from local system: " + url, e);
         }
     }
+
     public byte[] downloadFilesForEntity(Object parentEntity) throws IOException {
         List<File> files = fileService.getUploadsForParentEntity(parentEntity);
 
@@ -43,11 +45,17 @@ public class DownloadService {
             return downloadFile(files.get(0).getUrl());
         }
 
-        List<String> fileUrls = files.stream()
-                .map(File::getUrl)
+        List<byte[]> fileContents = files.stream()
+                .map(file -> {
+                    try {
+                        return downloadFile(file.getUrl());
+                    } catch (Exception e) {
+                        throw new RuntimeException("Error reading file: " + file.getUrl(), e);
+                    }
+                })
                 .toList();
 
-        return createZipFromFiles(fileUrls);
+        return createZipFromFiles(fileContents);
     }
 
     public byte[] downloadSessionInsightFiles(Long sessionInsightId, FileContext context) throws IOException {
@@ -71,52 +79,70 @@ public class DownloadService {
             return downloadFile(files.get(0).getUrl());
         }
 
-        List<String> fileUrls = files.stream()
-                .map(File::getUrl)
+        List<byte[]> fileContents = files.stream()
+                .map(file -> {
+                    try {
+                        return downloadFile(file.getUrl());
+                    } catch (Exception e) {
+                        throw new RuntimeException("Error reading file: " + file.getUrl(), e);
+                    }
+                })
                 .toList();
 
-        return createZipFromFiles(fileUrls);
+        return createZipFromFiles(fileContents);
     }
 
-    public byte[] downloadStrengthResults(Long strengthResultsId, boolean includeReport) throws IOException {
-        StrengthResults strengthResults = validationHelper.validateStrengthResult(strengthResultsId);
+    public byte[] downloadStrengthResults(Long resultsId, boolean includeReport) throws IOException {
+        StrengthResults strengthResults = validationHelper.validateStrengthResult(resultsId);
 
         List<File> files = fileService.getUploadsForParentEntity(strengthResults);
-        List<String> fileUrls = files.stream()
+        List<String> fileUrls = new ArrayList<>(files.stream()
                 .map(File::getUrl)
-                .toList();
+                .toList());
 
         if (includeReport && strengthResults.getStrengthResultsFilePath() != null) {
             fileUrls.add(strengthResults.getStrengthResultsFilePath());
         }
 
         if (fileUrls.isEmpty()) {
-            throw new IllegalArgumentException("No files available for download for the given StrengthResults ID: " + strengthResultsId);
+            throw new IllegalArgumentException("No files available for download for the given StrengthResults ID: " + resultsId);
         }
 
         if (fileUrls.size() == 1) {
             return downloadFile(fileUrls.get(0));
         }
 
-        return createZipFromFiles(fileUrls);
+        List<byte[]> fileContents = fileUrls.stream()
+                .map(filePath -> {
+                    try {
+                        return downloadFile(filePath);
+                    } catch (Exception e) {
+                        throw new RuntimeException("Error reading file: " + filePath, e);
+                    }
+                })
+                .toList();
+
+        return createZipFromFiles(fileContents);
     }
 
 
-    public byte[] createZipFromFiles(List<String> fileUrls) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try (ZipOutputStream zos = new ZipOutputStream(baos)) {
-            for (String fileUrl : fileUrls) {
-                byte[] fileData = downloadFile(fileUrl);
-                ZipEntry entry = new ZipEntry(Paths.get(fileUrl).getFileName().toString());
-                zos.putNextEntry(entry);
+    public byte[] createZipFromFiles(List<byte[]> filesData) throws IOException {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+             ZipOutputStream zos = new ZipOutputStream(baos)) {
+
+            int index = 1;
+            for (byte[] fileData : filesData) {
+                ZipEntry zipEntry = new ZipEntry("report_" + index++ + ".pdf");
+                zos.putNextEntry(zipEntry);
                 zos.write(fileData);
                 zos.closeEntry();
             }
+
+            zos.finish();
+            return baos.toByteArray();
         }
-        return baos.toByteArray();
+
     }
-
-
 }
 
 

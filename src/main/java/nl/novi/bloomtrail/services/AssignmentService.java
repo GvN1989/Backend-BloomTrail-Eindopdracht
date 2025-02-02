@@ -5,7 +5,6 @@ import nl.novi.bloomtrail.helper.EntityValidationHelper;
 import nl.novi.bloomtrail.models.Assignment;
 import nl.novi.bloomtrail.models.Session;
 import nl.novi.bloomtrail.models.File;
-import nl.novi.bloomtrail.mappers.AssignmentMapper;
 import nl.novi.bloomtrail.enums.FileContext;
 import nl.novi.bloomtrail.models.Step;
 import nl.novi.bloomtrail.repositories.AssignmentRepository;
@@ -49,15 +48,45 @@ public class AssignmentService {
         return fileService.getUploadsForParentEntity(assignment);
     }
 
-    public Assignment createAssignment(AssignmentInputDto dto, MultipartFile file) {
-        Session session = validationHelper.validateSession(dto.getSessionId());
-        Assignment assignment = AssignmentMapper.toAssignmentEntity(dto, session);
+    public Assignment updateAssignment(Long assignmentId, AssignmentInputDto inputDto) {
+        Assignment assignment = validationHelper.validateAssignment(assignmentId);
 
-        if (file != null && !file.isEmpty()) {
-            fileService.saveFile(file, FileContext.ASSIGNMENT, assignment);
+        if (inputDto.getStepId() != null) {
+            Step step = validationHelper.validateStep(inputDto.getStepId());
+            assignment.setStep(step);
+        }
+
+        if (inputDto.getSessionId() != null) {
+            Session session = validationHelper.validateSession(inputDto.getSessionId());
+            assignment.setSession(session);
         }
 
         return assignmentRepository.save(assignment);
+    }
+
+    public Assignment createAssignment(AssignmentInputDto inputDto, MultipartFile file) {
+        if (!inputDto.isValid()) {
+            throw new IllegalArgumentException("Assignment must be linked to a step.");
+        }
+
+        Assignment assignment = new Assignment();
+        assignment.setDescription(inputDto.getDescription());
+
+        Step step = validationHelper.validateStep(inputDto.getStepId());
+        assignment.setStep(step);
+
+        if (inputDto.getSessionId() != null) {
+            Session session = validationHelper.validateSession(inputDto.getSessionId());
+            assignment.setSession(session);
+        }
+
+        Assignment savedAssignment = assignmentRepository.save(assignment);
+
+        if (file != null && !file.isEmpty()) {
+            fileService.saveFile(file, FileContext.ASSIGNMENT, savedAssignment);
+        }
+
+        return savedAssignment;
     }
 
     public void deleteAssignment(Long assignmentId) {

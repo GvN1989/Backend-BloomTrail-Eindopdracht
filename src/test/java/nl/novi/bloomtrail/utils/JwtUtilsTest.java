@@ -1,4 +1,4 @@
 package nl.novi.bloomtrail.utils;
 
-public class JwtUtilTest {
+public class JwtUtilsTest {
 }

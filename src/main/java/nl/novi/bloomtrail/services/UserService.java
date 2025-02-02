@@ -1,43 +1,42 @@
 package nl.novi.bloomtrail.services;
 
-import nl.novi.bloomtrail.dtos.CoachingProgramRoleDto;
 import nl.novi.bloomtrail.dtos.UserDto;
 import nl.novi.bloomtrail.enums.FileContext;
+import nl.novi.bloomtrail.exceptions.RecordNotFoundException;
 import nl.novi.bloomtrail.exceptions.UsernameNotFoundException;
-import nl.novi.bloomtrail.models.Authority;
-import nl.novi.bloomtrail.models.CoachingProgram;
-import nl.novi.bloomtrail.models.File;
-import nl.novi.bloomtrail.models.User;
-import nl.novi.bloomtrail.repositories.UserRepository;
-import nl.novi.bloomtrail.utils.RandomStringGenerator;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Service;
 import nl.novi.bloomtrail.helper.EntityValidationHelper;
+import nl.novi.bloomtrail.models.Authority;
+import nl.novi.bloomtrail.models.*;
+import nl.novi.bloomtrail.repositories.UserRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
+
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
+
 
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final EntityValidationHelper validationHelper;
     private final FileService fileService;
     private final DownloadService downloadService;
 
-    @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
-    private final EntityValidationHelper validationHelper;
-
-    public UserService(UserRepository userRepository, FileService fileService, DownloadService downloadService, EntityValidationHelper validationHelper) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, EntityValidationHelper validationHelper, FileService fileService, DownloadService downloadService) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.validationHelper = validationHelper;
         this.fileService = fileService;
         this.downloadService = downloadService;
-        this.validationHelper = validationHelper;
     }
+
 
     public List<UserDto> getUsers() {
         List<UserDto> collection = new ArrayList<>();
@@ -51,9 +50,9 @@ public class UserService {
     public UserDto getUser(String username) {
         UserDto dto = new UserDto();
         Optional<User> user = userRepository.findById(username);
-        if (user.isPresent()){
+        if (user.isPresent()) {
             dto = fromUser(user.get());
-        }else {
+        } else {
             throw new UsernameNotFoundException(username);
         }
         return dto;
@@ -65,12 +64,17 @@ public class UserService {
 
     public String createUser(UserDto userDto) {
 
-        String randomString = RandomStringGenerator.generateAlphaNumeric(20);
-        userDto.setApikey(randomString);
+        String hashedPassword = passwordEncoder.encode(userDto.getPassword());
+        userDto.setPassword(hashedPassword);
 
-        userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        User newUser = toUser(userDto);
 
-        User newUser = userRepository.save(toUser(userDto));
+        if (newUser.getAuthorities() == null || newUser.getAuthorities().isEmpty()) {
+            newUser.setAuthorities(Set.of(new Authority(newUser.getUsername(), "ROLE_USER")));
+        }
+
+
+        newUser = userRepository.save(newUser);
         return newUser.getUsername();
     }
 
@@ -79,14 +83,9 @@ public class UserService {
     }
 
     public void updateUser(String username, UserDto newUser) {
-        if (!userRepository.existsById(username)) throw new UsernameNotFoundException(username);
+        if (!userRepository.existsById(username)) throw new RecordNotFoundException();
         User user = userRepository.findById(username).get();
-
-        if(newUser.getPassword()!=null && !newUser.getPassword().isEmpty()) {
-            String encryptedPassword = passwordEncoder.encode(newUser.getPassword());
-
-            user.setPassword(newUser.getPassword());
-        }
+        user.setPassword(newUser.getPassword());
         userRepository.save(user);
     }
 
@@ -98,30 +97,50 @@ public class UserService {
     }
 
     public void addAuthority(String username, String authority) {
+        User user = userRepository.findById(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-        if (!userRepository.existsById(username)) throw new UsernameNotFoundException(username);
-        User user = userRepository.findById(username).get();
-        user.addAuthority(new Authority(username, authority));
+        Set<Authority> authorities = user.getAuthorities();
+
+        if (authorities.stream().noneMatch(a -> a.getAuthority().equalsIgnoreCase(authority))) {
+            authorities.add(new Authority(username, authority));
+        }
+
+        user.setAuthorities(authorities);
         userRepository.save(user);
     }
 
     public void removeAuthority(String username, String authority) {
-        if (!userRepository.existsById(username)) throw new UsernameNotFoundException(username);
-        User user = userRepository.findById(username).get();
-        Authority authorityToRemove = user.getAuthorities().stream().filter((a) -> a.getAuthority().equalsIgnoreCase(authority)).findAny().get();
-        user.removeAuthority(authorityToRemove);
+        User user = userRepository.findById(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+
+        Set<Authority> authorities = user.getAuthorities();
+
+        Authority authorityToRemove = authorities.stream()
+                .filter(a -> a.getAuthority().equalsIgnoreCase(authority))
+                .findAny()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Authority not found: " + authority));
+
+        authorities.remove(authorityToRemove);
+
+        if (authorities.isEmpty()) {
+            authorities.add(new Authority(username, "ROLE_USER"));
+        }
+
+        user.setAuthorities(authorities);
         userRepository.save(user);
     }
 
-    public static UserDto fromUser(User user){
+    public static UserDto fromUser(User user) {
 
         var dto = new UserDto();
 
-        dto.setUsername(user.getUsername());
-        dto.setPassword(user.getPassword());
-        dto.setEnabled(user.isEnabled());
-        dto.setApikey(user.getApikey());
-        dto.setEmail(user.getEmail());
+        dto.username = user.getUsername();
+        dto.password = user.getPassword();
+        dto.enabled = user.isEnabled();
+        dto.apikey = user.getApikey();
+        dto.email = user.getEmail();
+        dto.authorities = user.getAuthorities();
 
         return dto;
     }
@@ -156,6 +175,7 @@ public class UserService {
 
         return downloadService.downloadFile(user.getProfilePicture().getUrl());
     }
+
     public void deleteProfilePicture(String username) {
         User user = validationHelper.validateUser(username);
 
@@ -170,6 +190,6 @@ public class UserService {
         } else {
             throw new IllegalStateException("User '" + username + "' does not have a profile picture to delete");
         }
-}
+    }
 
 }

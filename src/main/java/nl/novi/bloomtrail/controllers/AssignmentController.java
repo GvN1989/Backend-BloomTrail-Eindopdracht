@@ -1,12 +1,12 @@
 package nl.novi.bloomtrail.controllers;
 
+import jakarta.validation.Valid;
 import nl.novi.bloomtrail.dtos.AssignmentDto;
 import nl.novi.bloomtrail.dtos.AssignmentInputDto;
 import nl.novi.bloomtrail.mappers.AssignmentMapper;
 import nl.novi.bloomtrail.models.Assignment;
 import nl.novi.bloomtrail.models.File;
 import nl.novi.bloomtrail.services.AssignmentService;
-import nl.novi.bloomtrail.services.FileService;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -52,6 +52,17 @@ public class AssignmentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(assignment);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<AssignmentDto> updateAssignment(
+            @PathVariable("id") Long assignmentId,
+            @Valid @RequestBody AssignmentInputDto inputDto) {
+
+        Assignment updatedAssignment = assignmentService.updateAssignment(assignmentId, inputDto);
+        AssignmentDto response = AssignmentMapper.toAssignmentDto(updatedAssignment);
+
+        return ResponseEntity.ok(response);
+    }
+
 
     @PostMapping("/{id}/upload")
     public ResponseEntity<String> uploadFileForAssignment(
@@ -69,7 +80,7 @@ public class AssignmentController {
     }
 
     @GetMapping("/{assignmentId}/download")
-    public ResponseEntity<byte[]> downloadFilesForAssignment(@PathVariable Long assignmentId) throws IOException {
+    public ResponseEntity<byte[]> downloadSingleAssignmentFiles(@PathVariable Long assignmentId) throws IOException {
         byte[] fileData = assignmentService.downloadAssignmentFiles(assignmentId);
 
         List<File> files = assignmentService.getUploadsForAssignment(assignmentId);

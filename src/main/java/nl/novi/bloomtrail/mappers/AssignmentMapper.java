@@ -2,24 +2,25 @@ package nl.novi.bloomtrail.mappers;
 
 import nl.novi.bloomtrail.dtos.AssignmentDto;
 import nl.novi.bloomtrail.dtos.AssignmentInputDto;
+import nl.novi.bloomtrail.exceptions.MappingException;
 import nl.novi.bloomtrail.models.Assignment;
 import nl.novi.bloomtrail.models.File;
 import nl.novi.bloomtrail.models.Session;
+import nl.novi.bloomtrail.models.Step;
 
 
 import java.util.stream.Collectors;
 
 public class AssignmentMapper {
 
-    public static AssignmentDto toAssignmentDto (Assignment assignment) {
-        AssignmentDto dto= new AssignmentDto();
+    public static AssignmentDto toAssignmentDto(Assignment assignment) {
+        AssignmentDto dto = new AssignmentDto();
 
         dto.setAssignmentId(assignment.getAssignmentId());
         dto.setDescription(assignment.getDescription());
-        dto.setFileStatus(assignment.getFileStatus() != null ? assignment.getFileStatus().toString() : null);
         dto.setSessionId(assignment.getSession() != null ? assignment.getSession().getSessionId() : null);
-
-        if(assignment.getFiles() != null && !assignment.getFiles().isEmpty()) {
+        dto.setStepId(assignment.getStep() != null ? assignment.getStep().getStepId() : null);
+        if (assignment.getFiles() != null && !assignment.getFiles().isEmpty()) {
             dto.setUploadsIds(
                     assignment.getFiles().stream()
                             .map(File::getFileId)
@@ -31,15 +32,26 @@ public class AssignmentMapper {
 
     }
 
-    public static Assignment toAssignmentEntity(AssignmentInputDto inputDto, Session session) {
+    public static Assignment toAssignmentEntity(AssignmentInputDto inputDto, Session session, Step step) {
+        if (inputDto == null) {
+            throw new MappingException("AssignmentInputDto cannot be null");
+        }
 
-        Assignment assignment = new Assignment();
+        try {
+            Assignment assignment = new Assignment();
 
-        assignment.setSession(session);
-        assignment.setDescription(inputDto.getDescription());
-        assignment.setFileStatus(inputDto.getFileStatus());
+            assignment.setDescription(inputDto.getDescription());
+            if (session != null) {
+                assignment.setSession(session);
+            }
+            if (step != null) {
+                assignment.setStep(step);
+            }
 
-        return assignment;
+            return assignment;
 
+        } catch (Exception e) {
+            throw new MappingException("Error mapping AssignmentInputDto to Assignment", e);
+        }
     }
 }

@@ -14,6 +14,10 @@ public interface CoachingProgramRepository extends JpaRepository<CoachingProgram
     @Query("SELECT cp FROM CoachingProgram cp WHERE cp.client.username = :username OR cp.coach.username = :username")
     List<CoachingProgram> findByUserUsername(@Param("username") String username);
 
+    List<CoachingProgram> findByCoachingProgramNameIgnoreCase(String coachingProgramName);
+
+    Optional<CoachingProgram> findById(Long id);
+
     @Query("SELECT new nl.novi.bloomtrail.dtos.SimpleCoachingProgramDto(" +
             "c.coachingProgramId, c.coachingProgramName, c.client.username, c.coach.username) " +
             "FROM CoachingProgram c")

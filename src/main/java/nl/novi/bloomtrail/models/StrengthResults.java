@@ -1,7 +1,9 @@
 package nl.novi.bloomtrail.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import nl.novi.bloomtrail.enums.FileContext;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -19,6 +21,9 @@ public class StrengthResults {
     @Column(name = "strength_results_id")
     private Long resultsId;
     private String filename;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "file_context", nullable = false)
+    private FileContext fileContext;
     @CreationTimestamp
     private Date createdAt;
     @UpdateTimestamp
@@ -86,6 +91,7 @@ public class StrengthResults {
     public String getFilename() {
         return filename;
     }
+
     public void setFilename(String filename) {
         this.filename = filename;
     }
@@ -128,5 +134,13 @@ public class StrengthResults {
 
     public void setManagingStrengths(List<ManagingStrength> managingStrengths) {
         this.managingStrengths = managingStrengths;
+    }
+
+    public FileContext getFileContext() {
+        return fileContext;
+    }
+
+    public void setFileContext(FileContext fileContext) {
+        this.fileContext = fileContext;
     }
 }

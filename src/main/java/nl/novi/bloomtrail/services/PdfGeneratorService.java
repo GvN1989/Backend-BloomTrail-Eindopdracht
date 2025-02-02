@@ -17,21 +17,21 @@ public class PdfGeneratorService {
     public byte[] createPdf(List<ManagingStrength> strengths) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-    try {
-        PdfWriter writer = new PdfWriter(baos);
-        PdfDocument pdfDoc = new PdfDocument(writer);
-        Document document = new Document(pdfDoc);
+        try {
+            PdfWriter writer = new PdfWriter(baos);
+            PdfDocument pdfDoc = new PdfDocument(writer);
+            Document document = new Document(pdfDoc);
 
-        for (ManagingStrength strength : strengths) {
+            for (ManagingStrength strength : strengths) {
 
-            document.add(new Paragraph(strength.getStrengthNl() + " (" + strength.getStrengthEn() + ")"));
+                document.add(new Paragraph(strength.getStrengthNl() + " (" + strength.getStrengthEn() + ")"));
+            }
+
+            document.close();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create PDF", e);
         }
 
-        document.close();
-    } catch (Exception e) {
-        throw new RuntimeException("Failed to create PDF", e);
-    }
-
-    return baos.toByteArray();
+        return baos.toByteArray();
     }
 }

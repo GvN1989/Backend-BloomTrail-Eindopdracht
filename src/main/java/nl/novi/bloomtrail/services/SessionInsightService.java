@@ -1,5 +1,6 @@
 package nl.novi.bloomtrail.services;
 
+import nl.novi.bloomtrail.dtos.SessionInsightInputDto;
 import nl.novi.bloomtrail.helper.EntityValidationHelper;
 import nl.novi.bloomtrail.models.Session;
 import nl.novi.bloomtrail.models.SessionInsight;
@@ -13,7 +14,6 @@ import java.util.List;
 
 @Service
 public class SessionInsightService {
-
     private final SessionInsightRepository sessionInsightRepository;
     private final FileService fileService;
     private final EntityValidationHelper validationHelper;
@@ -29,9 +29,7 @@ public class SessionInsightService {
     public List<SessionInsight> getSessionInsightsByContext(Long sessionId, FileContext context) {
         Session session = validationHelper.validateSession(sessionId);
 
-        return session.getSessionInsights().stream()
-                .filter(insight -> insight.getFileContext() == context)
-                .toList();
+        return session.getSessionInsights().stream().filter(insight -> insight.getFileContext() == context).toList();
     }
 
     public List<SessionInsight> getSessionInsightsBySession(Long sessionId) {
@@ -40,7 +38,23 @@ public class SessionInsightService {
         return session.getSessionInsights();
     }
 
-    public void uploadClientReflectionFile(MultipartFile file,  Long sessionInsightId) {
+    public SessionInsight createSessionInsight(SessionInsightInputDto inputDto) {
+        if (!inputDto.isValid()) {
+            throw new IllegalArgumentException("SessionInsight must be linked to a session.");
+        }
+
+        Session session = validationHelper.validateSession(inputDto.getSessionId());
+
+        SessionInsight sessionInsight = new SessionInsight();
+        sessionInsight.setAuthor(inputDto.getAuthor());
+        sessionInsight.setDescription(inputDto.getDescription());
+        sessionInsight.setFileContext(inputDto.getFileContext());
+        sessionInsight.setSession(session);
+
+        return sessionInsightRepository.save(sessionInsight);
+    }
+
+    public void uploadClientReflectionFile(MultipartFile file, Long sessionInsightId) {
         SessionInsight sessionInsight = validationHelper.validateSessionInsight(sessionInsightId);
         fileService.saveFile(file, FileContext.SESSION_INSIGHTS_CLIENT_REFLECTION, sessionInsight);
     }
@@ -60,7 +74,6 @@ public class SessionInsightService {
         SessionInsight sessionInsight = validationHelper.validateSessionInsight(sessionInsightId);
         return downloadService.downloadSessionInsightFiles(sessionInsightId, context);
     }
-
 
 
 }

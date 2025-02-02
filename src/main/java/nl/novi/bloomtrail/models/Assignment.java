@@ -1,9 +1,13 @@
 package nl.novi.bloomtrail.models;
 
 import jakarta.persistence.*;
-import nl.novi.bloomtrail.enums.FileStatus;
+import nl.novi.bloomtrail.enums.FileContext;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -16,7 +20,12 @@ public class Assignment {
     private Long assignmentId;
     private String description;
     @Enumerated(EnumType.STRING)
-    private FileStatus fileStatus;
+    @Column(name = "file_context", nullable = false)
+    private FileContext fileContext;
+    @CreationTimestamp
+    private Date createdAt;
+    @UpdateTimestamp
+    private Date updatedAt;
     @ManyToOne
     @JoinColumn(name = "session_id", insertable = false, updatable = false)
     private Session session;
@@ -25,6 +34,7 @@ public class Assignment {
     private Step step;
     @OneToMany(mappedBy = "assignment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<File> files = new ArrayList<>();
+
     public Long getAssignmentId() {
         return assignmentId;
     }
@@ -39,14 +49,6 @@ public class Assignment {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public FileStatus getFileStatus() {
-        return fileStatus;
-    }
-
-    public void setFileStatus(FileStatus fileStatus) {
-        this.fileStatus = fileStatus;
     }
 
     public List<File> getFiles() {
@@ -71,5 +73,21 @@ public class Assignment {
 
     public void setStep(Step step) {
         this.step = step;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public FileContext getFileContext() {
+        return fileContext;
+    }
+
+    public void setFileContext(FileContext fileContext) {
+        this.fileContext = fileContext;
     }
 }

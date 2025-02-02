@@ -7,9 +7,6 @@ import nl.novi.bloomtrail.models.*;
 import nl.novi.bloomtrail.repositories.*;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,12 +33,12 @@ public class EntityValidationHelper {
 
     public Assignment validateAssignment(Long assignmentId) {
         return assignmentRepository.findById(assignmentId)
-                .orElseThrow(() -> new EntityNotFoundException("Assignment" ,assignmentId));
+                .orElseThrow(() -> new EntityNotFoundException("Assignment", assignmentId));
     }
 
     public Session validateSession(Long sessionId) {
         return sessionRepository.findById(sessionId)
-                .orElseThrow(() -> new EntityNotFoundException("Session" , sessionId));
+                .orElseThrow(() -> new EntityNotFoundException("Session", sessionId));
     }
 
     public User validateUser(String username) {
@@ -49,7 +46,7 @@ public class EntityValidationHelper {
                 .orElseThrow(() -> new UsernameNotFoundException(username));
     }
 
-    public CoachingProgram validateCoachingProgram (Long coachingProgramId) {
+    public CoachingProgram validateCoachingProgram(Long coachingProgramId) {
         if (coachingProgramId == null) {
             throw new IllegalArgumentException("Coaching program ID cannot be null.");
         }
@@ -58,13 +55,24 @@ public class EntityValidationHelper {
                 .orElseThrow(() -> new EntityNotFoundException("CoachingProgram", coachingProgramId));
     }
 
-    public Step validateStep (Long StepId) {
-        return stepRepository.findById(StepId)
-                .orElseThrow(() -> new EntityNotFoundException("Step with ID" , StepId));
+    public List<CoachingProgram> validateCoachingProgramName(String coachingProgramName) {
+        List<CoachingProgram> programs = coachingProgramRepository.findByCoachingProgramNameIgnoreCase(coachingProgramName);
+
+        if (programs.isEmpty()) {
+            throw new EntityNotFoundException("No Coaching Program found with name: " + coachingProgramName);
+        }
+
+        return programs;
     }
 
 
-    public List<Step> validateSteps (List<Long> stepIds) {
+    public Step validateStep(Long StepId) {
+        return stepRepository.findById(StepId)
+                .orElseThrow(() -> new EntityNotFoundException("Step with ID", StepId));
+    }
+
+
+    public List<Step> validateSteps(List<Long> stepIds) {
         if (stepIds == null || stepIds.isEmpty()) {
             return List.of();
         }
@@ -96,6 +104,7 @@ public class EntityValidationHelper {
 
         return assignments;
     }
+
     public void validateStepAssignment(CoachingProgram coachingProgram, Step step) {
         List<Step> timeline = coachingProgram.getTimeline();
 
@@ -138,6 +147,7 @@ public class EntityValidationHelper {
                 .map(this::validateSessionInsight)
                 .collect(Collectors.toList());
     }
+
     public void validateSessionDateAndTime(Step step, Session session) {
         boolean hasConflict = step.getSession().stream()
                 .anyMatch(existingSession ->
@@ -150,7 +160,6 @@ public class EntityValidationHelper {
                     + session.getSessionDate() + " " + session.getSessionTime());
         }
     }
-
 
 
 }

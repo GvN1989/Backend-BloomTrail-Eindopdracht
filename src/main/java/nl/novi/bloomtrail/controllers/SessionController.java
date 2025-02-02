@@ -57,28 +57,6 @@ public class SessionController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/{id}/session-insight/{sessionInsightId}")
-    public ResponseEntity<SessionDto> assignSessionInsightToSession(
-            @PathVariable("id") Long sessionId,
-            @PathVariable("sessionInsightId") Long sessionInsightId) {
-
-        Session updatedSession = sessionService.assignSessionInsightToSession (sessionId, sessionInsightId);
-        SessionDto sessionDto = SessionMapper.toSessionDto(updatedSession);
-
-        return ResponseEntity.ok(sessionDto);
-    }
-
-    @PutMapping("/{sessionId}/assignments/{assignmentId}")
-    public ResponseEntity<SessionDto> assignAssignmentToSession(
-            @PathVariable Long sessionId,
-            @PathVariable Long assignmentId) {
-
-        Session updatedSession = sessionService.assignAssignmentToSession(sessionId, assignmentId);
-        SessionDto sessionDto = SessionMapper.toSessionDto(updatedSession);
-
-        return ResponseEntity.ok(sessionDto);
-    }
-
     @GetMapping("/{sessionId}/download-zip")
     public ResponseEntity<byte[]> downloadFilesForSession(@PathVariable Long sessionId) throws IOException {
         byte[] zipData = sessionService.downloadFilesForSession(sessionId);

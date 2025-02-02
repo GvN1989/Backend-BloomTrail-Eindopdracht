@@ -5,11 +5,13 @@ import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.NoArgsConstructor;
 
 
 import java.time.LocalDate;
 import java.util.Date;
 
+@NoArgsConstructor
 public class CoachingProgramInputDto {
 
     private Long coachingProgramId;
@@ -21,14 +23,14 @@ public class CoachingProgramInputDto {
     private String goal;
 
     @NotNull
-    @JsonFormat(pattern= "dd-mm-yyy")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy", timezone = "UTC")
     @Future
-    private LocalDate startDate;
+    private Date startDate;
 
     @NotNull
-    @JsonFormat(pattern= "dd-mm-yyy")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy", timezone = "UTC")
     @Future
-    private LocalDate endDate;
+    private Date endDate;
 
     private String clientUsername;
     private String coachUsername;
@@ -58,19 +60,19 @@ public class CoachingProgramInputDto {
         this.goal = goal;
     }
     @NotNull(message = "Start date cannot be null")
-    public LocalDate getStartDate() {
+    public Date getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(LocalDate startDate) {
+    public void setStartDate(Date startDate) {
         this.startDate = startDate;
     }
 
-    public LocalDate getEndDate() {
+    public Date getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(LocalDate endDate) {
+    public void setEndDate(Date endDate) {
         this.endDate = endDate;
     }
 

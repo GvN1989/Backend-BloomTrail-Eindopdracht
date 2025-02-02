@@ -1,15 +1,18 @@
 package nl.novi.bloomtrail.controllers;
 
-import nl.novi.bloomtrail.payload.AuthenticationRequest;
-import nl.novi.bloomtrail.payload.AuthenticationResponse;
-import nl.novi.bloomtrail.services.CustomUserDetailsService;
-import nl.novi.bloomtrail.utils.JwtUtil;
+import nl.novi.bloomtrail.dtos.AuthenticationRequest;
+import nl.novi.bloomtrail.dtos.AuthenticationResponse;
+import nl.novi.bloomtrail.exceptions.UsernameNotFoundException;
+import nl.novi.bloomtrail.models.User;
+import nl.novi.bloomtrail.repositories.UserRepository;
+import nl.novi.bloomtrail.utils.JwtUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,14 +23,19 @@ import java.security.Principal;
 @RestController
 public class AuthenticationController {
 
-    private final CustomUserDetailsService customUserDetailsService;
-    private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
 
-    public AuthenticationController(CustomUserDetailsService customUserDetailsService, JwtUtil jwtUtil, AuthenticationManager authenticationManager) {
-        this.customUserDetailsService = customUserDetailsService;
-        this.jwtUtil = jwtUtil;
+    private final UserRepository userRepository;
+
+    private final PasswordEncoder passwordEncoder;
+
+    private final JwtUtils jwtUtils;
+
+    public AuthenticationController(AuthenticationManager authenticationManager,UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtils jwtUtils) {
         this.authenticationManager = authenticationManager;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtUtils = jwtUtils;
     }
 
     @GetMapping(value = "/authenticated")
@@ -39,23 +47,15 @@ public class AuthenticationController {
     public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) throws Exception {
 
         String username = authenticationRequest.getUsername();
-        String password = authenticationRequest.getPassword();
+        String rawPassword = authenticationRequest.getPassword();
 
-        try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(username, password)
-            );
-        }
-        catch (BadCredentialsException ex) {
-            throw new Exception("Incorrect username or password", ex);
-        }
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(username, rawPassword)
+        );
 
-        final UserDetails userDetails = customUserDetailsService
-                .loadUserByUsername(username);
-
-        final String jwt = jwtUtil.generateToken(userDetails);
+        final UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        final String jwt = jwtUtils.generateToken(userDetails);
 
         return ResponseEntity.ok(new AuthenticationResponse(jwt));
     }
-
 }

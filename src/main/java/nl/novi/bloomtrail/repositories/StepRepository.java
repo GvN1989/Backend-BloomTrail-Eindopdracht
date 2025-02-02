@@ -7,9 +7,9 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface StepRepository extends JpaRepository <Step, Long> {
+public interface StepRepository extends JpaRepository<Step, Long> {
 
-    @Query("SELECT s FROM Step s WHERE s.coachingProgram.coachingProgramId = :programId")
-    List<Step> findStepsByCoachingProgram(@Param("programId") Long coachingProgramId);
+    @Query("SELECT s FROM Step s WHERE s.coachingProgram.coachingProgramId = :coachingProgramId")
+    List<Step> findStepsByCoachingProgram(@Param("coachingProgramId") Long coachingProgramId);
 
 }

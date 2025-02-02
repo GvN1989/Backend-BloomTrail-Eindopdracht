@@ -4,13 +4,15 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.NoArgsConstructor;
 import nl.novi.bloomtrail.enums.SessionStatus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Date;
 import java.util.List;
-
+@NoArgsConstructor
 public class SessionInputDto {
 
     private Long sessionId;
@@ -21,22 +23,19 @@ public class SessionInputDto {
     @NotBlank
     private String client;
     @NotNull
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-mm-yyyy")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy", timezone = "UTC")
     @Future
-    private LocalDate sessionDate;
+    private Date sessionDate;
     @NotNull
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm", timezone = "UTC")
     @Future
-    private LocalTime sessionTime;
+    private Date sessionTime;
     private String location;
     private String comment;
-    @JsonFormat(pattern= "dd-mm-yyy")
     @Future
     private LocalDateTime createdAt;
-    @JsonFormat(pattern= "dd-mm-yyy")
     @Future
     private LocalDateTime updatedAt;
-    @NotNull
-    private SessionStatus status;
     private List<Long> sessionInsightsId;
     private List<Long> assignmentId;
     private Long StepId;
@@ -73,19 +72,19 @@ public class SessionInputDto {
         this.client = client;
     }
 
-    public LocalDate getSessionDate() {
+    public Date getSessionDate() {
         return sessionDate;
     }
 
-    public void setSessionDate(LocalDate sessionDate) {
+    public void setSessionDate(Date sessionDate) {
         this.sessionDate = sessionDate;
     }
 
-    public LocalTime getSessionTime() {
+    public Date getSessionTime() {
         return sessionTime;
     }
 
-    public void setSessionTime(LocalTime sessionTime) {
+    public void setSessionTime(Date sessionTime) {
         this.sessionTime = sessionTime;
     }
 
@@ -119,14 +118,6 @@ public class SessionInputDto {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    public SessionStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(SessionStatus status) {
-        this.status = status;
     }
 
     public List<Long> getSessionInsightsId() {

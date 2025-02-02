@@ -1,10 +1,8 @@
 package nl.novi.bloomtrail.controllers;
 
-
-import nl.novi.bloomtrail.dtos.AuthorityInputDto;
 import nl.novi.bloomtrail.dtos.UserDto;
 import nl.novi.bloomtrail.services.UserService;
-import org.apache.coyote.BadRequestException;
+import nl.novi.bloomtrail.exceptions.BadRequestException;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,6 +14,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URLConnection;
 import java.util.List;
+import java.util.Map;
+
 @RestController
 @RequestMapping(value="/users")
 public class UserController {
@@ -45,15 +45,15 @@ public class UserController {
 
     }
 
-    @PostMapping(value = "")
-    public ResponseEntity<UserDto> createKlant(@RequestBody UserDto dto) throws BadRequestException {
+    @PostMapping(value = "/")
+    public ResponseEntity<UserDto> createUser(@RequestBody UserDto dto) throws BadRequestException {
 
         if (dto.getUsername() == null || dto.getUsername().isEmpty()) {
-            throw new BadRequestException("Username cannot be null or empty");
+            throw new BadRequestException( "Username cannot be null or empty");
         }
 
         if (dto.getPassword() == null || dto.getPassword().isEmpty()) {
-            throw new BadRequestException("Password cannot be null or empty");
+            throw new BadRequestException( "Password cannot be null or empty");
         }
 
         if (dto.getEmail() == null || dto.getEmail().isEmpty()) {
@@ -61,10 +61,11 @@ public class UserController {
         }
 
         String newUsername = userService.createUser(dto);
-        userService.addAuthority(newUsername, "ROLE_USER");
 
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{username}")
-                .buildAndExpand(newUsername).toUri();
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{username}")
+                .buildAndExpand(newUsername)
+                .toUri();
 
         UserDto createdUser = userService.getUser(newUsername);
 
@@ -72,7 +73,7 @@ public class UserController {
     }
 
     @PutMapping(value = "/{username}")
-    public ResponseEntity<UserDto> updateKlant(@PathVariable("username") String username, @RequestBody UserDto dto) {
+    public ResponseEntity<UserDto> updateUser(@PathVariable("username") String username, @RequestBody UserDto dto) {
 
         userService.updateUser(username, dto);
 
@@ -80,7 +81,7 @@ public class UserController {
     }
 
     @DeleteMapping(value = "/{username}")
-    public ResponseEntity<Object> deleteKlant(@PathVariable("username") String username) {
+    public ResponseEntity<Object> deleteUser(@PathVariable("username") String username) {
         userService.deleteUser(username);
         return ResponseEntity.noContent().build();
     }
@@ -92,13 +93,14 @@ public class UserController {
 
 
     @PostMapping(value = "/{username}/authorities")
-    public ResponseEntity<Object> addUserAuthority(@PathVariable("username") String username, @RequestBody AuthorityInputDto authorityInputDto) {
+    public ResponseEntity<Object> addUserAuthority(@PathVariable("username") String username, @RequestBody Map<String, Object> fields) {
         try {
-            userService.addAuthority(username, authorityInputDto.getAuthority());
+            String authorityName = (String) fields.get("authority");
+            userService.addAuthority(username, authorityName);
             return ResponseEntity.noContent().build();
         }
         catch (Exception ex) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid request", ex);
+            throw new BadRequestException();
         }
     }
 

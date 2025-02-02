@@ -2,12 +2,12 @@ package nl.novi.bloomtrail.services;
 
 import nl.novi.bloomtrail.dtos.SessionInputDto;
 import nl.novi.bloomtrail.exceptions.RecordNotFoundException;
+import nl.novi.bloomtrail.helper.DateConverter;
 import nl.novi.bloomtrail.helper.EntityValidationHelper;
+import nl.novi.bloomtrail.helper.TimeConverter;
 import nl.novi.bloomtrail.mappers.SessionMapper;
 import nl.novi.bloomtrail.models.*;
-import nl.novi.bloomtrail.repositories.AssignmentRepository;
 import nl.novi.bloomtrail.repositories.CoachingProgramRepository;
-import nl.novi.bloomtrail.repositories.SessionInsightRepository;
 import nl.novi.bloomtrail.repositories.SessionRepository;
 import org.springframework.stereotype.Service;
 
@@ -21,17 +21,12 @@ public class SessionService {
     private final SessionRepository sessionRepository;
     private final CoachingProgramRepository coachingProgramRepository;
     private final EntityValidationHelper validationHelper;
-    private final SessionInsightRepository sessionInsightRepository;
-    private final AssignmentRepository assignmentRepository;
-
     private final DownloadService downloadService;
 
-    public SessionService(SessionRepository sessionRepository, CoachingProgramRepository coachingProgramRepository, EntityValidationHelper validationHelper, SessionInsightRepository sessionInsightRepository, AssignmentRepository assignmentRepository, DownloadService downloadService) {
+    public SessionService(SessionRepository sessionRepository, CoachingProgramRepository coachingProgramRepository, EntityValidationHelper validationHelper, DownloadService downloadService) {
         this.sessionRepository = sessionRepository;
         this.coachingProgramRepository = coachingProgramRepository;
         this.validationHelper = validationHelper;
-        this.sessionInsightRepository = sessionInsightRepository;
-        this.assignmentRepository = assignmentRepository;
         this.downloadService = downloadService;
     }
 
@@ -80,10 +75,10 @@ public class SessionService {
                 .orElseThrow(() -> new RecordNotFoundException("Session with ID " + sessionId + " not found"));
 
         if (inputDto.getSessionDate() != null) {
-            session.setSessionDate(inputDto.getSessionDate());
+            session.setSessionDate(DateConverter.convertToLocalDate(inputDto.getSessionDate()));
         }
         if (inputDto.getSessionTime() != null) {
-            session.setSessionTime(inputDto.getSessionTime());
+            session.setSessionTime(TimeConverter.convertToLocalTime(inputDto.getSessionTime()));
         }
         if (inputDto.getLocation() != null) {
             session.setLocation(inputDto.getLocation());
@@ -95,43 +90,11 @@ public class SessionService {
         return sessionRepository.save(session);
     }
 
-    public void deleteSession (Long sessionId) {
+    public void deleteSession(Long sessionId) {
         if (!sessionRepository.existsById(sessionId)) {
             throw new RecordNotFoundException("No session found with ID " + sessionId);
         }
         sessionRepository.deleteById(sessionId);
-    }
-
-    public Session assignSessionInsightToSession(Long sessionId, Long sessionInsightId) {
-        Session session = validationHelper.validateSession(sessionId);
-        SessionInsight sessionInsight = validationHelper.validateSessionInsight(sessionInsightId);
-
-        if (session.getSessionInsights().contains(sessionInsight)) {
-            throw new IllegalArgumentException("Session Insight is already associated with the session" + sessionId);
-        }
-
-        sessionInsight.setSession(session);
-        session.getSessionInsights().add(sessionInsight);
-
-        sessionRepository.save(session);
-        sessionInsightRepository.save(sessionInsight);
-
-        return session;
-    }
-
-    public Session assignAssignmentToSession(Long sessionId, Long assignmentId) {
-        Session session = validationHelper.validateSession(sessionId);
-        Assignment assignment = validationHelper.validateAssignment(assignmentId);
-
-        if (assignment.getSession() != null) {
-            throw new IllegalArgumentException("Assignment is already associated with session" + sessionId );
-        }
-
-        assignment.setSession(session);
-        session.getAssignment().add(assignment);
-
-        assignmentRepository.save(assignment);
-        return sessionRepository.save(session);
     }
 
     public byte[] downloadFilesForSession(Long sessionId) throws IOException {

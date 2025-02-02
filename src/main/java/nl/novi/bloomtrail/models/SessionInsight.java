@@ -34,6 +34,7 @@ public class SessionInsight {
     @OneToMany(mappedBy = "sessionInsight", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<File> files = new ArrayList<>();
 
+
     public Long getSessionInsightId() {
         return sessionInsightId;
     }
@@ -89,6 +90,5 @@ public class SessionInsight {
     public void setFileContext(FileContext fileContext) {
         this.fileContext = fileContext;
     }
-
 
 }

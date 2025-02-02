@@ -28,14 +28,14 @@ public class FileService {
     }
 
     public File saveFile(byte[] fileData, String fileName, FileContext context) {
-            String fileUrl = FileStorageUtil.saveFile(fileData, fileName);
+        String fileUrl = FileStorageUtil.saveFile(fileData, fileName);
 
-            File file = new File();
-            file.setFileType("application/pdf");
-            file.setUrl(fileUrl);
-            file.setContext(context);
+        File file = new File();
+        file.setFileType("application/pdf");
+        file.setUrl(fileUrl);
+        file.setContext(context);
 
-            return fileRepository.save(file);
+        return fileRepository.save(file);
     }
 
     private File saveFile(String url, FileContext context, Object parentEntity, String fileType) {

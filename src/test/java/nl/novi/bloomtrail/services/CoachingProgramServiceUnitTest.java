@@ -5,6 +5,7 @@ import nl.novi.bloomtrail.dtos.CoachingProgramInputDto;
 import nl.novi.bloomtrail.dtos.SimpleCoachingProgramDto;
 import nl.novi.bloomtrail.exceptions.EntityNotFoundException;
 import nl.novi.bloomtrail.exceptions.RecordNotFoundException;
+import nl.novi.bloomtrail.helper.DateConverter;
 import nl.novi.bloomtrail.helper.EntityValidationHelper;
 import nl.novi.bloomtrail.models.*;
 import nl.novi.bloomtrail.repositories.*;
@@ -52,6 +53,7 @@ public class CoachingProgramServiceUnitTest {
         mockCoachingProgram.setCoachingProgramId(1L);
         mockCoachingProgram.setCoachingProgramName("Original Program");
         mockCoachingProgram.setTimeline(new ArrayList<>());
+        mockCoachingProgram.setGoal("Test Goal");
 
         mockClient = new User();
         mockClient.setUsername("clientUser");
@@ -71,9 +73,42 @@ public class CoachingProgramServiceUnitTest {
 
     @Tag("unit")
     @Test
+    void testFindByNameIgnoreCase_Success() {
+
+        String programName = "Leadership Program";
+
+        CoachingProgram mockProgram1 = new CoachingProgram();
+        mockProgram1.setCoachingProgramId(1L);
+        mockProgram1.setCoachingProgramName("Leadership Program");
+
+        CoachingProgram mockProgram2 = new CoachingProgram();
+        mockProgram2.setCoachingProgramId(2L);
+        mockProgram2.setCoachingProgramName("Advanced Leadership Program");
+
+        List<CoachingProgram> mockPrograms = List.of(mockProgram1, mockProgram2);
+
+
+        when(validationHelper.validateCoachingProgramName(programName)).thenReturn(mockPrograms);
+
+
+        List<CoachingProgram> result = coachingProgramService.findByCoachingProgramNameIgnoreCase(programName);
+
+
+        Assertions.assertNotNull(result, "Result should not be null");
+        Assertions.assertEquals(2, result.size(), "Result list size should match");
+        Assertions.assertEquals("Leadership Program", result.get(0).getCoachingProgramName(), "First program name should match");
+        Assertions.assertEquals("Advanced Leadership Program", result.get(1).getCoachingProgramName(), "Second program name should match");
+
+
+        Mockito.verify(validationHelper, Mockito.times(1)).validateCoachingProgramName(programName);
+    }
+
+
+    @Tag("unit")
+    @Test
     public void testFindByID_SUCCES() {
 
-        Long coachingProgramId = 6L;
+        Long coachingProgramId = 1L;
 
         CoachingProgram mockProgram = new CoachingProgram();
         mockProgram.setCoachingProgramId(coachingProgramId);
@@ -372,8 +407,8 @@ public class CoachingProgramServiceUnitTest {
         inputDto.setCoachUsername("coachUser");
         inputDto.setCoachingProgramName("Updated Program");
         inputDto.setGoal("Updated Goal");
-        inputDto.setStartDate(LocalDate.parse("2024-03-01"));
-        inputDto.setEndDate(LocalDate.parse("2024-06-01"));
+        inputDto.setStartDate(DateConverter.convertToDate(LocalDate.parse("2024-03-01")));
+        inputDto.setEndDate(DateConverter.convertToDate(LocalDate.parse("2024-06-01")));
 
         CoachingProgram result = coachingProgramService.updateCoachingProgram(1L, inputDto);
 
@@ -430,7 +465,7 @@ public class CoachingProgramServiceUnitTest {
         inputDto.setCoachingProgramName("TestProgram");
 
         inputDto.setStartDate(null);
-        inputDto.setEndDate(LocalDate.now().plusMonths(6));
+        inputDto.setEndDate(DateConverter.convertToDate(LocalDate.parse("2025-12-01")));
 
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         Validator validator = factory.getValidator();
@@ -461,287 +496,6 @@ public class CoachingProgramServiceUnitTest {
             coachingProgramService.updateCoachingProgram(coachingProgramId, inputDto);
         }, "Expected RuntimeException when database save fails.");
     }
-
-
-
-    @Test
-    @Tag("unit")
-    public void testAssignStepToCoachingProgram_SUCCES() {
-
-        Long coachingProgramId = 1L;
-
-        Step newStep = new Step();
-        newStep.setSequence(1);
-        newStep.setStepStartDate(LocalDate.parse("2025-01-10"));
-        newStep.setStepEndDate(LocalDate.parse("2025-01-15"));
-
-        CoachingProgram mockCoachingProgram = new CoachingProgram();
-        mockCoachingProgram.setCoachingProgramId(coachingProgramId);
-        mockCoachingProgram.setTimeline(new ArrayList<>());
-
-        when(validationHelper.validateCoachingProgram(coachingProgramId)).thenReturn(mockCoachingProgram);
-        when(stepRepository.findStepsByCoachingProgram(coachingProgramId)).thenReturn(new ArrayList<>());
-        when(stepRepository.save(Mockito.any(Step.class))).thenReturn(newStep);
-
-        CoachingProgram result = coachingProgramService.assignStepToCoachingProgram(coachingProgramId, newStep);
-
-        Assertions.assertNotNull(result, "Result should not be null");
-        Assertions.assertTrue(result.getTimeline().contains(newStep), "New step should be added to the timeline");
-        Assertions.assertEquals(1, result.getTimeline().size(),"Timeline size should be 1");
-
-        Mockito.verify(validationHelper, Mockito.times(1)).validateCoachingProgram(coachingProgramId);
-        Mockito.verify(stepRepository, Mockito.times(1)).findStepsByCoachingProgram(coachingProgramId);
-        Mockito.verify(stepRepository, Mockito.times(1)).save(newStep);
-    }
-
-    @Tag("unit")
-    @Test
-    public void testAssignStepToCoachingProgram_DuplicateStep(){
-        Step existingStep = new Step();
-        existingStep.setStepId(1L);
-        existingStep.setStepStartDate(LocalDate.parse("2025-01-10"));
-
-        Step duplicateStep = new Step();
-        duplicateStep.setStepId(1L);
-        duplicateStep.setStepStartDate(LocalDate.parse("2025-01-15"));
-
-        CoachingProgram mockCoachingProgram = new CoachingProgram();
-        mockCoachingProgram.setCoachingProgramId(1L);
-        mockCoachingProgram.setTimeline(new ArrayList<>(List.of(existingStep)));
-
-        when(validationHelper.validateCoachingProgram(1L)).thenReturn(mockCoachingProgram);
-
-        IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            coachingProgramService.assignStepToCoachingProgram(1L, duplicateStep);
-        });
-
-        Assertions.assertEquals("Step is already part of the coaching program timeline.", exception.getMessage());
-
-        Mockito.verify(stepRepository, Mockito.never()).save(Mockito.any(Step.class));
-    }
-
-    @Test
-    @Tag("unit")
-    public void testAssignStepToCoachingProgram_SequenceConflict() {
-        Step existingStep = new Step();
-        existingStep.setSequence(1);
-        existingStep.setStepStartDate(LocalDate.parse("2025-01-10"));
-
-        Step conflictingStep = new Step();
-        conflictingStep.setSequence(1);
-        conflictingStep.setStepStartDate(LocalDate.parse("2025-01-11"));
-
-        when(validationHelper.validateCoachingProgram(1L)).thenReturn(mockCoachingProgram);
-        when(stepRepository.findStepsByCoachingProgram(1L)).thenReturn(List.of(existingStep));
-
-        IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            coachingProgramService.assignStepToCoachingProgram(1L, conflictingStep);
-        });
-
-        Assertions.assertEquals("A step with sequence 1 already exists in this program.", exception.getMessage());
-
-        Mockito.verify(stepRepository, Mockito.never()).save(Mockito.any(Step.class));
-    }
-
-    @Test
-    @Tag("unit")
-    public void testAssignStepToCoachingProgram_StartDateConflict() {
-        Step existingStep = new Step();
-        existingStep.setSequence(1);
-        existingStep.setStepStartDate(LocalDate.parse("2025-01-10"));
-
-        Step conflictingStep = new Step();
-        conflictingStep.setSequence(2);
-        conflictingStep.setStepStartDate(LocalDate.parse("2025-01-01"));
-
-        when(validationHelper.validateCoachingProgram(1L)).thenReturn(mockCoachingProgram);
-        when(stepRepository.findStepsByCoachingProgram(1L)).thenReturn(List.of(existingStep));
-
-        IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            coachingProgramService.assignStepToCoachingProgram(1L, conflictingStep);
-        });
-
-        Assertions.assertEquals("The step's start date conflicts with the provided sequence.", exception.getMessage());
-
-        Mockito.verify(stepRepository, Mockito.never()).save(Mockito.any(Step.class));
-    }
-
-    @Tag("unit")
-    @Test
-    public void testAssignStepToCoachingProgram_StartDateSequenceConflict() {
-        Step existingStep = new Step();
-        existingStep.setSequence(1);
-        existingStep.setStepStartDate(LocalDate.parse("2025-01-10"));
-
-        Step conflictingStep = new Step();
-        conflictingStep.setSequence(2);
-        conflictingStep.setStepStartDate(LocalDate.parse("2025-01-05"));
-
-        when(validationHelper.validateCoachingProgram(1L)).thenReturn(mockCoachingProgram);
-        when(stepRepository.findStepsByCoachingProgram(1L)).thenReturn(List.of(existingStep));
-
-        IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            coachingProgramService.assignStepToCoachingProgram(1L, conflictingStep);
-        });
-
-        Assertions.assertEquals("The step's start date conflicts with the provided sequence.", exception.getMessage());
-
-        Mockito.verify(stepRepository, Mockito.never()).save(Mockito.any(Step.class));
-    }
-
-    @Tag("unit")
-    @Test
-    public void testAssignStepToCoachingProgram_CoachingProgramNotFound() {
-
-        Long invalidCoachingProgramId = 999L;
-        Step newStep = new Step();
-        newStep.setSequence(1);
-        newStep.setStepStartDate(LocalDate.parse("2025-01-01"));
-
-        when(validationHelper.validateCoachingProgram(invalidCoachingProgramId))
-                .thenThrow(new EntityNotFoundException("CoachingProgram", invalidCoachingProgramId));
-
-              EntityNotFoundException exception = Assertions.assertThrows(EntityNotFoundException.class, () -> {
-                  coachingProgramService.assignStepToCoachingProgram(invalidCoachingProgramId, newStep);
-              });
-
-        Assertions.assertEquals("CoachingProgram with ID 999 not found. ", exception.getMessage());
-
-        Mockito.verify(stepRepository, Mockito.never()).save(Mockito.any(Step.class));
-    }
-
-    @Tag("unit")
-    @Test
-    public void testAssignStepToCoachingProgram_NoExistingSteps() {
-        Step newStep = new Step();
-        newStep.setSequence(1);
-        newStep.setStepStartDate(LocalDate.parse("2025-01-10"));
-        newStep.setStepEndDate(LocalDate.parse("2025-01-15"));
-
-        CoachingProgram mockCoachingProgram = new CoachingProgram();
-        mockCoachingProgram.setCoachingProgramId(1L);
-        mockCoachingProgram.setTimeline(new ArrayList<>()); // No existing steps
-
-        when(validationHelper.validateCoachingProgram(1L)).thenReturn(mockCoachingProgram);
-        when(stepRepository.findStepsByCoachingProgram(1L)).thenReturn(new ArrayList<>());
-        when(stepRepository.save(Mockito.any(Step.class))).thenReturn(newStep);
-
-        CoachingProgram result = coachingProgramService.assignStepToCoachingProgram(1L, newStep);
-
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(1, result.getTimeline().size(), "New step should be added");
-        Assertions.assertEquals(newStep.getStepEndDate(), result.getTimeline().get(0).getStepEndDate(), "Step end date should be correctly assigned");
-    }
-
-    @Tag("unit")
-    @Test
-    public void testAssignStepToCoachingProgram_SameSequenceEarlierStartDate() {
-        Step existingStep = new Step();
-        existingStep.setSequence(2);
-        existingStep.setStepStartDate(LocalDate.parse("2025-01-10"));
-
-        Step conflictingStep = new Step();
-        conflictingStep.setSequence(2);
-        conflictingStep.setStepStartDate(LocalDate.parse("2025-01-05"));
-
-        when(validationHelper.validateCoachingProgram(1L)).thenReturn(mockCoachingProgram);
-        when(stepRepository.findStepsByCoachingProgram(1L)).thenReturn(List.of(existingStep));
-
-        IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            coachingProgramService.assignStepToCoachingProgram(1L, conflictingStep);
-        });
-
-        Assertions.assertEquals("A step with sequence 2 already exists in this program.", exception.getMessage());
-
-        Mockito.verify(stepRepository, Mockito.never()).save(Mockito.any(Step.class));
-    }
-
-    @Tag("unit")
-    @Test
-    public void testAssignStepToCoachingProgram_SameSequenceEqualStartDate() {
-        Step existingStep = new Step();
-        existingStep.setSequence(1);
-        existingStep.setStepStartDate(LocalDate.parse("2025-01-10"));
-
-        Step conflictingStep = new Step();
-        conflictingStep.setSequence(1);
-        conflictingStep.setStepStartDate(LocalDate.parse("2025-01-10"));
-
-        when(validationHelper.validateCoachingProgram(1L)).thenReturn(mockCoachingProgram);
-        when(stepRepository.findStepsByCoachingProgram(1L)).thenReturn(List.of(existingStep));
-
-        IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            coachingProgramService.assignStepToCoachingProgram(1L, conflictingStep);
-        });
-
-        Assertions.assertEquals("A step with sequence 1 already exists in this program.", exception.getMessage());
-
-        Mockito.verify(stepRepository, Mockito.never()).save(Mockito.any(Step.class));
-    }
-
-    @Tag("unit")
-    @Test
-    public void testAssignStepToCoachingProgram_SequenceStartDateConflict() {
-        Step existingStep = new Step();
-        existingStep.setSequence(1);
-        existingStep.setStepStartDate(LocalDate.parse("2025-01-15"));
-        Step newStep = new Step();
-        newStep.setSequence(2);
-        newStep.setStepStartDate(LocalDate.parse("2025-01-10"));
-
-        when(validationHelper.validateCoachingProgram(1L)).thenReturn(mockCoachingProgram);
-        when(stepRepository.findStepsByCoachingProgram(1L)).thenReturn(List.of(existingStep));
-
-        IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            coachingProgramService.assignStepToCoachingProgram(1L, newStep);
-        });
-
-        Assertions.assertEquals("The step's start date conflicts with the provided sequence.", exception.getMessage());
-
-        Mockito.verify(stepRepository, Mockito.never()).save(Mockito.any(Step.class));
-    }
-
-    @Tag("unit")
-    @Test
-    public void testAssignStepToCoachingProgram_ValidSequence_NoConflict() {
-        Step existingStep = new Step();
-        existingStep.setStepId(100L);
-        existingStep.setSequence(1);
-        existingStep.setStepStartDate(LocalDate.parse("2025-01-05"));
-        existingStep.setStepEndDate(LocalDate.parse("2025-01-08"));
-
-        Step newStep = new Step();
-        newStep.setStepId(101L);
-        newStep.setSequence(2);
-        newStep.setStepStartDate(LocalDate.parse("2025-01-10"));
-        newStep.setStepEndDate(LocalDate.parse("2025-01-15"));
-
-        mockCoachingProgram.setTimeline(new ArrayList<>(List.of(existingStep)));
-
-        when(validationHelper.validateCoachingProgram(1L)).thenReturn(mockCoachingProgram);
-        when(stepRepository.findStepsByCoachingProgram(1L)).thenReturn(List.of(existingStep));
-
-        when(stepRepository.save(Mockito.any(Step.class))).thenAnswer(invocation -> {
-            Step savedStep = invocation.getArgument(0);
-
-            boolean isDuplicate = mockCoachingProgram.getTimeline().stream()
-                    .anyMatch(s -> s.getSequence().equals(savedStep.getSequence())
-                            && s.getStepStartDate().equals(savedStep.getStepStartDate()));
-
-            if (!isDuplicate) {
-                mockCoachingProgram.getTimeline().add(savedStep);
-            }
-
-            return savedStep;
-        });
-
-        CoachingProgram result = coachingProgramService.assignStepToCoachingProgram(1L, newStep);
-
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(2, result.getTimeline().size(), "The timeline should have 2 steps (1 existing + 1 new).");
-    }
-
-
 
     @Tag ("unit")
     @Test
@@ -882,72 +636,6 @@ public class CoachingProgramServiceUnitTest {
         Assertions.assertEquals(1L, result.getCoachingProgramId());
         Assertions.assertEquals(2, result.getTimeline().size());
         verify(coachingProgramRepository, times(1)).findByIdWithSteps(1L);
-    }
-
-    @Tag("unit")
-    @Test
-    public void testAssignCoachingResultsToCoachingProgram_SUCCESS(){
-
-        Long coachingProgramId = 1L;
-        List<Long> strengthResultsIds = List.of(100L, 101L);
-
-        StrengthResults result1 = new StrengthResults();
-        result1.setResultsId(100L);
-
-        StrengthResults result2 = new StrengthResults();
-        result2.setResultsId(101L);
-
-        List<StrengthResults> strengthResultsList = List.of(result1, result2);
-
-        when(validationHelper.validateCoachingProgram(coachingProgramId)).thenReturn(mockCoachingProgram);
-        when(strengthResultsRepository.findAllById(strengthResultsIds)).thenReturn(strengthResultsList);
-
-        CoachingProgram result = coachingProgramService.assignStrengthResultsToCoachingProgram(coachingProgramId, strengthResultsIds);
-
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(mockCoachingProgram, result);
-        Mockito.verify(strengthResultsRepository, Mockito.times(1)).saveAll(strengthResultsList);
-        Assertions.assertEquals(mockCoachingProgram, result1.getCoachingProgram());
-        Assertions.assertEquals(mockCoachingProgram, result2.getCoachingProgram());
-    }
-
-    @Tag("unit")
-    @Test
-    public void testAssignCoachingResultsToCoachingProgram_NoStrengthResultsFound(){
-        Long coachingProgramId = 1L;
-        List<Long> invalidStrengthResultsIds = List.of(999L, 1000L);
-
-        when(validationHelper.validateCoachingProgram(coachingProgramId)).thenReturn(mockCoachingProgram);
-        when(strengthResultsRepository.findAllById(invalidStrengthResultsIds)).thenReturn(Collections.emptyList());
-
-        RecordNotFoundException exception = Assertions.assertThrows(RecordNotFoundException.class, () -> {
-            coachingProgramService.assignStrengthResultsToCoachingProgram(coachingProgramId, invalidStrengthResultsIds);
-        });
-
-        Assertions.assertEquals("No StrengthResults found for the provided IDs: [999, 1000]", exception.getMessage());
-
-        Mockito.verify(strengthResultsRepository, Mockito.never()).saveAll(Mockito.anyList());
-    }
-
-    @Test
-    @Tag("unit")
-    public void testAssignStrengthResultsToCoachingProgram_CoachingProgramNotFound() {
-        Long invalidCoachingProgramId = 999L;
-        List<Long> strengthResultsIds = List.of(100L);
-
-        when(validationHelper.validateCoachingProgram(invalidCoachingProgramId))
-                .thenThrow(new EntityNotFoundException("CoachingProgram", invalidCoachingProgramId));
-
-
-        EntityNotFoundException exception = Assertions.assertThrows(EntityNotFoundException.class, () -> {
-            coachingProgramService.assignStrengthResultsToCoachingProgram(invalidCoachingProgramId, strengthResultsIds);
-        });
-
-        Assertions.assertEquals("CoachingProgram with ID 999 not found. ", exception.getMessage());
-
-
-        Mockito.verify(strengthResultsRepository, Mockito.never()).findAllById(Mockito.anyList());
-        Mockito.verify(strengthResultsRepository, Mockito.never()).saveAll(Mockito.anyList());
     }
 
     @Tag("unit")

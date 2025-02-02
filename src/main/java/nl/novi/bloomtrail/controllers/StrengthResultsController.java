@@ -2,14 +2,13 @@ package nl.novi.bloomtrail.controllers;
 
 import nl.novi.bloomtrail.dtos.StrengthResultsInputDto;
 import nl.novi.bloomtrail.helper.EntityValidationHelper;
+import nl.novi.bloomtrail.models.File;
 import nl.novi.bloomtrail.models.StrengthResults;
 import nl.novi.bloomtrail.services.DownloadService;
 import nl.novi.bloomtrail.services.StrengthResultsService;
-import org.springframework.http.ContentDisposition;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
@@ -68,8 +67,8 @@ public class StrengthResultsController {
     }
 
     @GetMapping("/{id}/all")
-    public ResponseEntity<byte[]> downloadAllStrengthResults(@PathVariable("id") Long strengthResultsId) throws IOException {
-        byte[] zipData = strengthResultsService.downloadStrengthResults(strengthResultsId, true);
+    public ResponseEntity<byte[]> downloadAllStrengthResults(@PathVariable("id") Long resultsId) throws IOException {
+        byte[] zipData = strengthResultsService.downloadStrengthResults(resultsId, true);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
@@ -80,6 +79,51 @@ public class StrengthResultsController {
         return ResponseEntity.ok()
                 .headers(headers)
                 .body(zipData);
+    }
+
+    @GetMapping("/{id}/download")
+    public ResponseEntity<byte[]> downloadSingleStrengthResults(@PathVariable("id") Long resultsId) throws IOException {
+        byte[] fileData = strengthResultsService.downloadStrengthResults(resultsId, false );
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDisposition(ContentDisposition.attachment()
+                .filename("strength_report_" + resultsId + ".pdf")
+                .build());
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(fileData);
+    }
+
+    @GetMapping("/download-multiple")
+    public ResponseEntity<byte[]> downloadMultipleStrengthResults(@RequestParam List<Long> ids) throws IOException {
+        try {
+            List<byte[]> filesData = ids.stream()
+                    .map(id -> {
+                        try {
+                            return downloadService.downloadStrengthResults(id, true);
+                        } catch (IOException e) {
+                            throw new RuntimeException("Error downloading StrengthResults for ID: " + id, e);
+                        }
+                    })
+                    .toList();
+
+            byte[] zipData = downloadService.createZipFromFiles(filesData);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDisposition(ContentDisposition.attachment()
+                    .filename("strength_reports.zip")
+                    .build());
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(zipData);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(("Failed to generate ZIP: " + e.getMessage()).getBytes());
+        }
     }
 
     @PostMapping
@@ -108,9 +152,9 @@ public class StrengthResultsController {
         return ResponseEntity.ok(strengthResults);
     }
 
-    @GetMapping("/coaching-program/{programId}")
-    public ResponseEntity<List<StrengthResults>> getStrengthResultsByCoachingProgram(@PathVariable("programId") Long programId) {
-        List<StrengthResults> results = strengthResultsService.getStrengthResultsByCoachingProgram(programId);
+    @GetMapping("/coaching-program/{id}")
+    public ResponseEntity<List<StrengthResults>> getStrengthResultsByCoachingProgram(@PathVariable("id") Long coachingProgramId) {
+        List<StrengthResults> results = strengthResultsService.getStrengthResultsByCoachingProgram(coachingProgramId);
         return ResponseEntity.ok(results);
     }
 
@@ -120,4 +164,11 @@ public class StrengthResultsController {
         return ResponseEntity.ok(strengthResults);
     }
 
+    @PostMapping("/{id}/upload")
+    public ResponseEntity<File> uploadFileToStrengthResults(
+            @PathVariable("id") Long strengthResultsId,
+            @RequestParam("file") MultipartFile file) {
+        File uploadedFile = strengthResultsService.uploadFileToStrengthResults(file, strengthResultsId);
+        return ResponseEntity.ok(uploadedFile);
+    }
 }

@@ -15,18 +15,24 @@ public class Step {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "step_id")
     private Long stepId;
 
+    @NotNull(message = "The step name cannot be null")
+    @Column(name = "step_name")
     private String StepName;
-
+    @NotNull(message = "The step startdate cannot be null")
+    @Column(name = "step_start_date")
     private LocalDate stepStartDate;
-
+    @NotNull(message = "The step end date cannot be null")
+    @Column(name = "step_end_date")
     private LocalDate stepEndDate;
-
+    @Column(name = "completed")
     private Boolean completed;
-
+    @Column(name = "step_goal")
     private String StepGoal;
     @NotNull
+    @Column(name = "sequence")
     private Integer sequence;
 
     @ManyToOne

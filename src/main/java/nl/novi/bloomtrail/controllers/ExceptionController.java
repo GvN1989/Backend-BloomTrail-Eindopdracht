@@ -4,9 +4,9 @@ import jakarta.validation.ConstraintViolationException;
 import nl.novi.bloomtrail.exceptions.EntityNotFoundException;
 import nl.novi.bloomtrail.exceptions.MappingException;
 import nl.novi.bloomtrail.exceptions.RecordNotFoundException;
-import nl.novi.bloomtrail.exceptions.ValidationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -41,10 +41,6 @@ import java.util.Map;
                     errors.put(violation.getPropertyPath().toString(), violation.getMessage()));
             return ResponseEntity.badRequest().body(errors);
         }
-        @ExceptionHandler(ValidationException.class)
-        public ResponseEntity<String> handleValidationException(ValidationException ex) {
-            return ResponseEntity.badRequest().body(ex.getMessage());
-        }
 
         @ExceptionHandler(EntityNotFoundException.class)
         public ResponseEntity<String> handleEntityNotFoundException(EntityNotFoundException ex) {
@@ -55,7 +51,11 @@ import java.util.Map;
         public ResponseEntity<String> handleMappingException(MappingException ex) {
             return ResponseEntity.internalServerError().body(ex.getMessage());
         }
-
+        @ExceptionHandler(HttpMessageNotReadableException.class)
+        public ResponseEntity<String> handleJsonMappingException(HttpMessageNotReadableException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Invalid request format: " + e.getMostSpecificCause().getMessage());
+        }
         @ExceptionHandler(Exception.class)
         public ResponseEntity<Object> handleGlobalException (Exception exception) {
             return new ResponseEntity<>("An unexptected error occured" + exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);

@@ -5,4 +5,9 @@ public class MappingException extends ApplicationException{
         super(message);
     }
 
+
+    public MappingException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
 }

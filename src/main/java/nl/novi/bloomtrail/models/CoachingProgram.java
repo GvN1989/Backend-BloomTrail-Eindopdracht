@@ -9,7 +9,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 @Entity
-@Table(name= "coaching_programs")
+@Table(name = "coaching_programs")
 public class CoachingProgram {
 
     @Id
@@ -18,22 +18,24 @@ public class CoachingProgram {
     private Long coachingProgramId;
 
     @NotNull(message = "The coaching program cannot be null")
+    @Column(name = "coaching_program_name")
     private String coachingProgramName;
+    @Column(name = "goal")
     private String goal;
 
     @NotNull(message = "Start date cannot be null")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     @Temporal(TemporalType.DATE)
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
 
     @NotNull(message = "End date cannot be null")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     @Temporal(TemporalType.DATE)
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
 
-    @Column(nullable = false)
+    @Column(name = "progress", nullable = false)
     private double progress = 0.0;
     @ManyToOne
     @JoinColumn(name = "client_id", nullable = false)
@@ -44,7 +46,7 @@ public class CoachingProgram {
 
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "strengt_results_id")
-    private List <StrengthResults> strengthResults;
+    private List<StrengthResults> strengthResults;
 
     @OneToMany(mappedBy = "coachingProgram", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Step> timeline = new ArrayList<>();

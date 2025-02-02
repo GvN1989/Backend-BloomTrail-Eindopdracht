@@ -1,19 +1,20 @@
 package nl.novi.bloomtrail.controllers;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import nl.novi.bloomtrail.dtos.StepDto;
 import nl.novi.bloomtrail.dtos.StepInputDto;
 import nl.novi.bloomtrail.mappers.StepMapper;
 import nl.novi.bloomtrail.models.Step;
 import nl.novi.bloomtrail.services.StepService;
-import org.springframework.http.ContentDisposition;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
-import java.net.URI;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/step")
@@ -32,15 +33,33 @@ public class StepController {
         return ResponseEntity.ok(dto);
     }
 
+    @PostMapping("/steps/batch")
+    public ResponseEntity<List<StepDto>> addStepsToProgram(@Valid @RequestBody Object input) {
 
-    @PostMapping
-    public ResponseEntity<StepDto> addStepToProgram(@Valid @RequestBody StepInputDto inputDto) {
+        System.out.println("Received JSON: " + input); // ✅ Debugging step
 
-        System.out.println("Received StepInputDto: " + inputDto);
+        ObjectMapper objectMapper = new ObjectMapper();
 
-        Step step = stepService.addStepToProgram(inputDto);
-        StepDto response = StepMapper.toStepDto(step);
-        return ResponseEntity.created(URI.create("/steps/" + step.getStepId())).body(response);
+        List<StepDto> response;
+
+        if (input instanceof Map) {
+            StepInputDto stepDto = objectMapper.convertValue(input, StepInputDto.class);
+            response = stepService.addStepsToProgram(List.of(stepDto)).stream()
+                    .map(StepMapper::toStepDto)
+                    .toList();
+        }
+        else if (input instanceof List) {
+            List<StepInputDto> inputDtos = objectMapper.convertValue(input, new TypeReference<List<StepInputDto>>() {});
+            response = stepService.addStepsToProgram(inputDtos).stream()
+                    .map(StepMapper::toStepDto)
+                    .toList();
+        }
+        else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid input format.");
+        }
+
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @DeleteMapping("/{id}")
@@ -65,17 +84,6 @@ public class StepController {
 
         Step updatedStep = stepService.markStepCompletionStatus(stepId, isCompleted);
 
-        StepDto stepDto = StepMapper.toStepDto(updatedStep);
-
-        return ResponseEntity.ok(stepDto);
-    }
-
-    @PutMapping("/{id}/assignments/{assignmentId}")
-    public ResponseEntity<StepDto> assignAssignmentToStep(
-            @PathVariable("id") Long stepId,
-            @PathVariable("assignmentId") Long assignmentId) {
-
-        Step updatedStep = stepService.assignAssignmentToStep(stepId, assignmentId);
         StepDto stepDto = StepMapper.toStepDto(updatedStep);
 
         return ResponseEntity.ok(stepDto);

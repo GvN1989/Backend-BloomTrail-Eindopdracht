@@ -15,7 +15,7 @@ import java.util.List;
 
 
 @Entity
-@Table(name= "Sessions")
+@Table(name = "Sessions")
 public class Session {
 
     @Id
@@ -40,11 +40,6 @@ public class Session {
     private LocalDateTime createdAt;
     @UpdateTimestamp
     private LocalDateTime updatedAt;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status")
-    @NotNull
-    private SessionStatus status;
 
     @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SessionInsight> sessionInsights = new ArrayList<>();
@@ -134,14 +129,6 @@ public class Session {
 
     public void setSessionName(String sessionName) {
         this.sessionName = sessionName;
-    }
-
-    public SessionStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(SessionStatus status) {
-        this.status = status;
     }
 
     public List<SessionInsight> getSessionInsights() {

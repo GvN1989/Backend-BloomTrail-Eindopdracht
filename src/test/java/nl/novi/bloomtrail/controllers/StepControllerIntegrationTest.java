@@ -7,6 +7,7 @@ import nl.novi.bloomtrail.repositories.CoachingProgramRepository;
 import nl.novi.bloomtrail.repositories.StepRepository;
 import nl.novi.bloomtrail.repositories.UserRepository;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,17 +16,20 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
+
 import java.time.LocalDate;
+
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest
 @AutoConfigureMockMvc (addFilters = false)
 @ActiveProfiles("test")
 public class StepControllerIntegrationTest {
+
 
     @Autowired
     private MockMvc mockMvc;
@@ -38,47 +42,57 @@ public class StepControllerIntegrationTest {
 
     @Autowired
     private UserRepository userRepository;
+    private CoachingProgram coachingProgram;
 
-    @Test
-    void shouldCreateStepSuccesfully() throws Exception {
+    @BeforeEach
+    void setUp() {
+
         User client = new User();
         client.setUsername("testUser");
         client.setEmail("testuser@example.com");
         client.setPassword("password123");
+        client.setApikey("ValidClientApiKey1234567890");
         client = userRepository.save(client);
 
         User coach = new User();
         coach.setUsername("testCoach");
         coach.setEmail("testCoach@example.com");
         coach.setPassword("password456");
+        coach.setApikey("ValidCoachApiKey9876543210");
         coach = userRepository.save(coach);
 
-        CoachingProgram coachingProgram = new CoachingProgram();
+
+        coachingProgram = new CoachingProgram();
         coachingProgram.setCoachingProgramName("Test Coaching Program");
         coachingProgram.setClient(client);
         coachingProgram.setCoach(coach);
-        coachingProgram.setStartDate(LocalDate.of(2025, 4, 1));
-        coachingProgram.setEndDate(LocalDate.of(2025, 12, 31));
+        coachingProgram.setStartDate(LocalDate.parse("2025-01-01"));
+        coachingProgram.setEndDate(LocalDate.parse("2025-08-01"));
         coachingProgram = coachingProgramRepository.save(coachingProgram);
+    }
+
+    @Test
+    void shouldCreateStepSuccesfully() throws Exception {
+
 
         String requestJson = """
         {
             "coachingProgramId": %d,
             "stepName": "Test Step",
             "sequence": 1,
-            "stepStartDate": "02-06-2025",
+            "stepStartDate": "05-06-2025",
             "stepEndDate": "01-08-2025",
             "stepGoal": "Test goal"
         }
     """.formatted(coachingProgram.getCoachingProgramId());
 
         this.mockMvc
-                .perform(MockMvcRequestBuilders.post("/step")
+                .perform(MockMvcRequestBuilders.post("/step/steps/batch")
                         .contentType(APPLICATION_JSON)
                         .content(requestJson))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.stepName").value("Test Step"));
+                .andExpect(jsonPath("$[0].stepName").value("Test Step"));
     }
 
     @Test
@@ -87,6 +101,9 @@ public class StepControllerIntegrationTest {
         Step step = new Step();
         step.setStepName("Step Test");
         step.setSequence(1);
+        step.setStepStartDate(LocalDate.parse("2025-01-01"));
+        step.setStepEndDate(LocalDate.parse("2025-02-01"));
+        step.setCoachingProgram(coachingProgram);
         step = stepRepository.save(step);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/step/" + step.getStepId())

@@ -2,6 +2,7 @@ package nl.novi.bloomtrail.controllers;
 
 import jakarta.validation.Valid;
 import nl.novi.bloomtrail.dtos.*;
+import nl.novi.bloomtrail.exceptions.EntityNotFoundException;
 import nl.novi.bloomtrail.mappers.CoachingProgramMapper;
 import nl.novi.bloomtrail.mappers.StepMapper;
 import nl.novi.bloomtrail.models.CoachingProgram;
@@ -20,15 +21,13 @@ import java.util.List;
 public class CoachingProgramController {
 
     private final CoachingProgramService coachingProgramService;
-    private final EntityValidationHelper validationHelper;
 
 
-    public CoachingProgramController(CoachingProgramService coachingProgramService, EntityValidationHelper validationHelper) {
+    public CoachingProgramController(CoachingProgramService coachingProgramService) {
         this.coachingProgramService = coachingProgramService;
-        this.validationHelper = validationHelper;
     }
 
-    @GetMapping("/details")
+    @GetMapping("/summary")
     public ResponseEntity<List<SimpleCoachingProgramDto>> getCoachingProgramDetails() {
         List<SimpleCoachingProgramDto> coachingPrograms = coachingProgramService.getCoachingProgramDetails();
         return ResponseEntity.ok(coachingPrograms);
@@ -41,6 +40,20 @@ public class CoachingProgramController {
         return ResponseEntity.ok(dto);
     }
 
+    @GetMapping("/by-name")
+    public ResponseEntity<List<CoachingProgramDto>> getCoachingProgramByName(@PathVariable("name") String coachingProgramName) {
+        List<CoachingProgram> coachingPrograms = coachingProgramService.findByCoachingProgramNameIgnoreCase(coachingProgramName);
+
+        if (coachingPrograms.isEmpty()) {
+            throw new EntityNotFoundException("No coaching programs found with this name.");
+        }
+
+        List<CoachingProgramDto> dtos = coachingPrograms.stream()
+                .map(CoachingProgramMapper::toCoachingProgramDto)
+                .toList();
+
+        return ResponseEntity.ok(dtos);
+    }
     @GetMapping("/user/{username}")
     public List<CoachingProgram> getCoachingProgramsByUser(@PathVariable String username) {
         return coachingProgramService.getCoachingProgramsByUser(username);
@@ -86,23 +99,5 @@ public class CoachingProgramController {
 
     }
 
-    @PutMapping("/{id}/step")
-    public ResponseEntity <CoachingProgramDto> assignStepToCoachingProgram (@Valid @PathVariable("id") Long coachingProgramId, @RequestBody StepInputDto inputDto) {
-
-        Step step = validationHelper.validateStep(inputDto.getStepId());
-        CoachingProgram updatedCoachingProgram = coachingProgramService.assignStepToCoachingProgram(coachingProgramId, step);
-        CoachingProgramDto updatedCoachingProgramDto = CoachingProgramMapper.toCoachingProgramDto(updatedCoachingProgram);
-        return ResponseEntity.ok().body(updatedCoachingProgramDto);
-
-    }
-
-    @PutMapping("/{id}/strength-results")
-    public ResponseEntity<CoachingProgramDto> assignStrengthResults(@Valid @PathVariable("id") Long coachingProgramId,@RequestBody List<Long> strengthResultsIds) {
-
-        CoachingProgram updatedCoachingProgram = coachingProgramService.assignStrengthResultsToCoachingProgram(coachingProgramId, strengthResultsIds);
-        CoachingProgramDto updatedCoachingProgramDto = CoachingProgramMapper.toCoachingProgramDto(updatedCoachingProgram);
-
-        return ResponseEntity.ok(updatedCoachingProgramDto);
-    }
 
 }

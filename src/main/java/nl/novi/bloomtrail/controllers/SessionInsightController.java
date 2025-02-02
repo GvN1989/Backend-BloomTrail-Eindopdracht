@@ -1,14 +1,13 @@
 package nl.novi.bloomtrail.controllers;
 
+import jakarta.validation.Valid;
 import nl.novi.bloomtrail.dtos.SessionInsightDto;
+import nl.novi.bloomtrail.dtos.SessionInsightInputDto;
 import nl.novi.bloomtrail.enums.FileContext;
 import nl.novi.bloomtrail.mappers.SessionInsightsMapper;
 import nl.novi.bloomtrail.models.SessionInsight;
 import nl.novi.bloomtrail.services.SessionInsightService;
-import org.springframework.http.ContentDisposition;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -43,6 +42,16 @@ public class SessionInsightController {
                 .toList();
 
         return ResponseEntity.ok(sessionInsightDtos);
+    }
+
+    @PostMapping
+    public ResponseEntity<SessionInsightDto> createSessionInsight(
+            @Valid @RequestBody SessionInsightInputDto inputDto) {
+
+        SessionInsight sessionInsight = sessionInsightService.createSessionInsight(inputDto);
+        SessionInsightDto response = SessionInsightsMapper.toSessionInsightDto(sessionInsight);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/{id}/client-reflection")

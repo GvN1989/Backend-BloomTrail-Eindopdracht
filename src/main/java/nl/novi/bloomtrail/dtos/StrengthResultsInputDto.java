@@ -1,7 +1,9 @@
 package nl.novi.bloomtrail.dtos;
 
 import jakarta.persistence.ElementCollection;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import nl.novi.bloomtrail.enums.FileContext;
 
 import java.util.List;
 
@@ -11,8 +13,12 @@ public class StrengthResultsInputDto {
     private String summary;
     @ElementCollection
     private List<String> topStrengthNames;
-
+    @NotNull(message = "CoachingProgram ID is required")
     private Long coachingProgramId;
+
+    public boolean isValid() {
+        return coachingProgramId != null;
+    }
 
     public String getFilename() {
         return filename;

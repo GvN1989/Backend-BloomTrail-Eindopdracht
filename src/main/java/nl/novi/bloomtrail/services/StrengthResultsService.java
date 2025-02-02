@@ -2,7 +2,6 @@ package nl.novi.bloomtrail.services;
 
 import nl.novi.bloomtrail.dtos.StrengthResultsInputDto;
 import nl.novi.bloomtrail.enums.FileContext;
-import nl.novi.bloomtrail.mappers.StrengthResultsMapper;
 import nl.novi.bloomtrail.models.*;
 import nl.novi.bloomtrail.repositories.ManagingStrengthRepository;
 import nl.novi.bloomtrail.repositories.StrengthResultsRepository;
@@ -33,8 +32,18 @@ public class StrengthResultsService {
     }
 
     public StrengthResults addStrengthResultsEntry(StrengthResultsInputDto inputDto) {
+        if (!inputDto.isValid()) {
+            throw new IllegalArgumentException("StrengthResults must be linked to a coaching program.");
+        }
+
         CoachingProgram coachingProgram = validationHelper.validateCoachingProgram(inputDto.getCoachingProgramId());
-        StrengthResults strengthResults = StrengthResultsMapper.toStrengthResultsEntity(inputDto, coachingProgram);
+
+        StrengthResults strengthResults = new StrengthResults();
+        strengthResults.setFilename(inputDto.getFilename());
+        strengthResults.setSummary(inputDto.getSummary());
+        strengthResults.setTopStrengthNames(inputDto.getTopStrengthNames());
+        strengthResults.setCoachingProgram(coachingProgram);
+
         return strengthResultsRepository.save(strengthResults);
     }
 
@@ -68,7 +77,7 @@ public class StrengthResultsService {
         byte[] pdfData = pdfGeneratorService.createPdf(topStrengths);
         String pdfFileName = "strength-results-" + userId + "-" + System.currentTimeMillis() + ".pdf";
         File savedFile = fileService.saveFile(pdfData, pdfFileName, FileContext.STRENGTH_RESULTS);
-        String savedFileUrl= savedFile.getUrl();
+        String savedFileUrl = savedFile.getUrl();
 
         List<String> topStrengthNames = topStrengths.stream()
                 .map(ManagingStrength::getStrengthEn)
@@ -97,8 +106,8 @@ public class StrengthResultsService {
         return strengthResultsRepository.findByCoachingProgram(coachingProgram);
     }
 
-    public byte[] downloadStrengthResults(Long strengthResultsId, boolean includeReport) throws IOException {
-        return downloadService.downloadStrengthResults(strengthResultsId, includeReport);
+    public byte[] downloadStrengthResults(Long resultsId, boolean includeReport) throws IOException {
+        return downloadService.downloadStrengthResults(resultsId, includeReport);
     }
 
 }

@@ -3,7 +3,6 @@ package nl.novi.bloomtrail.dtos;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.*;
 import lombok.NoArgsConstructor;
-import nl.novi.bloomtrail.models.Step;
 
 import java.time.LocalDate;
 import java.util.Date;
@@ -17,13 +16,13 @@ public class StepInputDto {
     @Size(max = 255)
     private String StepName;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy",timezone = "UTC")
     @Future
-    private LocalDate stepStartDate;
+    private Date stepStartDate;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy", timezone = "UTC")
     @Future
-    private LocalDate stepEndDate;
+    private Date stepEndDate;
 
     private Boolean completed;
 
@@ -54,19 +53,19 @@ public class StepInputDto {
         StepName = stepName;
     }
 
-    public LocalDate getStepStartDate() {
+    public Date getStepStartDate() {
         return stepStartDate;
     }
 
-    public void setStepStartDate(LocalDate stepStartDate) {
+    public void setStepStartDate(Date stepStartDate) {
         this.stepStartDate = stepStartDate;
     }
 
-    public LocalDate getStepEndDate() {
+    public Date getStepEndDate() {
         return stepEndDate;
     }
 
-    public void setStepEndDate(LocalDate stepEndDate) {
+    public void setStepEndDate(Date stepEndDate) {
         this.stepEndDate = stepEndDate;
     }
 

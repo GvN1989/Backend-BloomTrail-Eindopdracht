@@ -2,10 +2,12 @@ package nl.novi.bloomtrail.models;
 
 import jakarta.persistence.*;
 
+import java.io.Serializable;
+
 @Entity
 @IdClass(AuthorityKey.class)
 @Table(name = "authorities")
-public class Authority {
+public class Authority implements Serializable {
 
     @Id
     @Column(nullable = false)
