@@ -36,7 +36,7 @@ public class StepController {
     @PostMapping("/steps/batch")
     public ResponseEntity<List<StepDto>> addStepsToProgram(@Valid @RequestBody Object input) {
 
-        System.out.println("Received JSON: " + input); // ✅ Debugging step
+        System.out.println("Received JSON: " + input);
 
         ObjectMapper objectMapper = new ObjectMapper();
 

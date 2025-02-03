@@ -1,12 +1,9 @@
 package nl.novi.bloomtrail.dtos;
 
-import jakarta.validation.Valid;
 import nl.novi.bloomtrail.models.Authority;
 
-import java.util.List;
 import java.util.Set;
 
-@Valid
 public class UserDto {
 
     public String username;

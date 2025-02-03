@@ -25,12 +25,12 @@ CREATE TABLE IF NOT EXISTS authorities (
 
 INSERT INTO authorities (username, authority) VALUES (
                                                       'henk',
-                                                      'ROLE_ADMIN'),
-('alice', 'ROLE_COACH'),
-('bob', 'ROLE_USER'),
-('charlie', 'ROLE_USER'),
-('diana', 'ROLE_USER'),
-('edward', 'ROLE_USER');
+                                                      'ADMIN'),
+('alice', 'COACH'),
+('bob', 'USER')
+('charlie', 'USER'),
+('diana', 'USER'),
+('edward', 'USER');
 
 CREATE TABLE IF NOT EXISTS coaching_programs (
                                                  coaching_program_id SERIAL PRIMARY KEY,

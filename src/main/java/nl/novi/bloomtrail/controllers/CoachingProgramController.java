@@ -41,7 +41,7 @@ public class CoachingProgramController {
     }
 
     @GetMapping("/by-name")
-    public ResponseEntity<List<CoachingProgramDto>> getCoachingProgramByName(@PathVariable("name") String coachingProgramName) {
+    public ResponseEntity<List<CoachingProgramDto>> getCoachingProgramByName(@RequestParam("name") String coachingProgramName) {
         List<CoachingProgram> coachingPrograms = coachingProgramService.findByCoachingProgramNameIgnoreCase(coachingProgramName);
 
         if (coachingPrograms.isEmpty()) {

@@ -17,20 +17,7 @@ public class User {
     @NotBlank(message = "Password is mandatory")
     @Column(name = "password", nullable = false, length = 255)
     private String password;
-    @Column(name = "full_name")
-    private String fullName;
-    @Email
-    @NotBlank
-    @Column(name = "email", nullable = false, unique = true)
-    private String email;
-    @Column(name = "enabled", nullable = false)
-    @NotNull(message = "Enabled flag is required")
-    private boolean enabled = true;
-    @Column(name = "api_key")
-    @NotNull(message = "API key cannot be null")
-    @Size(min = 20, max = 40, message = "API key must be between 20 and 40 characters")
-    @Pattern(regexp = "^[a-zA-Z0-9]+$", message = "API key must be alphanumeric")
-    private String apikey;
+
     @OneToMany(
             targetEntity = Authority.class,
             mappedBy = "username",
@@ -38,6 +25,16 @@ public class User {
             orphanRemoval = true,
             fetch = FetchType.EAGER)
     private Set<Authority> authorities = new HashSet<>();
+    @Column(name = "full_name")
+    private String fullName;
+    @Email
+    @NotBlank
+    @Column(name = "email", nullable = false, unique = true)
+    private String email;
+    @Column(name = "enabled", nullable = false)
+    private boolean enabled = true;
+    @Column(name = "api_key")
+    private String apikey;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "upload_id")

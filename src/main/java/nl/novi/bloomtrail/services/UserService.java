@@ -8,11 +8,10 @@ import nl.novi.bloomtrail.helper.EntityValidationHelper;
 import nl.novi.bloomtrail.models.Authority;
 import nl.novi.bloomtrail.models.*;
 import nl.novi.bloomtrail.repositories.UserRepository;
-import org.springframework.http.HttpStatus;
+import nl.novi.bloomtrail.utils.RandomStringGenerator;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 
 import java.util.ArrayList;
@@ -63,18 +62,9 @@ public class UserService {
     }
 
     public String createUser(UserDto userDto) {
-
-        String hashedPassword = passwordEncoder.encode(userDto.getPassword());
-        userDto.setPassword(hashedPassword);
-
-        User newUser = toUser(userDto);
-
-        if (newUser.getAuthorities() == null || newUser.getAuthorities().isEmpty()) {
-            newUser.setAuthorities(Set.of(new Authority(newUser.getUsername(), "ROLE_USER")));
-        }
-
-
-        newUser = userRepository.save(newUser);
+        String randomString = RandomStringGenerator.generateAlphaNumeric(20);
+        userDto.setApikey(randomString);
+        User newUser = userRepository.save(toUser(userDto));
         return newUser.getUsername();
     }
 
@@ -97,37 +87,17 @@ public class UserService {
     }
 
     public void addAuthority(String username, String authority) {
-        User user = userRepository.findById(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
-
-        Set<Authority> authorities = user.getAuthorities();
-
-        if (authorities.stream().noneMatch(a -> a.getAuthority().equalsIgnoreCase(authority))) {
-            authorities.add(new Authority(username, authority));
-        }
-
-        user.setAuthorities(authorities);
+        if (!userRepository.existsById(username)) throw new UsernameNotFoundException(username);
+        User user = userRepository.findById(username).get();
+        user.addAuthority(new Authority(username, authority));
         userRepository.save(user);
     }
 
     public void removeAuthority(String username, String authority) {
-        User user = userRepository.findById(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
-
-        Set<Authority> authorities = user.getAuthorities();
-
-        Authority authorityToRemove = authorities.stream()
-                .filter(a -> a.getAuthority().equalsIgnoreCase(authority))
-                .findAny()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Authority not found: " + authority));
-
-        authorities.remove(authorityToRemove);
-
-        if (authorities.isEmpty()) {
-            authorities.add(new Authority(username, "ROLE_USER"));
-        }
-
-        user.setAuthorities(authorities);
+        if (!userRepository.existsById(username)) throw new UsernameNotFoundException(username);
+        User user = userRepository.findById(username).get();
+        Authority authorityToRemove = user.getAuthorities().stream().filter((a) -> a.getAuthority().equalsIgnoreCase(authority)).findAny().get();
+        user.removeAuthority(authorityToRemove);
         userRepository.save(user);
     }
 

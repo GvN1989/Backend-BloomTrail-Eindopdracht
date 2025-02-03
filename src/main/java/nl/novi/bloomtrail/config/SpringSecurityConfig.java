@@ -4,7 +4,8 @@ import nl.novi.bloomtrail.filter.JwtRequestFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -13,7 +14,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import nl.novi.bloomtrail.services.UserDetailsServiceImpl;
+import nl.novi.bloomtrail.services.CustomUserDetailsService;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -24,76 +25,56 @@ import java.util.List;
 @EnableWebSecurity
 public class SpringSecurityConfig {
 
-    private final UserDetailsServiceImpl userDetailsServiceImpl;
+    private final CustomUserDetailsService customUserDetailsService;
 
     private final JwtRequestFilter jwtRequestFilter;
 
-    private final PasswordEncoder passwordEncoder;
-
-    public SpringSecurityConfig(UserDetailsServiceImpl userDetailsServiceImpl, JwtRequestFilter jwtRequestFilter, PasswordEncoder passwordEncoder) {
-        this.userDetailsServiceImpl = userDetailsServiceImpl;
+    public SpringSecurityConfig(CustomUserDetailsService customUserDetailsService, JwtRequestFilter jwtRequestFilter, PasswordEncoder passwordEncoder) {
+        this.customUserDetailsService = customUserDetailsService;
         this.jwtRequestFilter = jwtRequestFilter;
-        this.passwordEncoder = passwordEncoder;
     }
 
+    @Bean
+    public AuthenticationManager authenticationManager(
+            CustomUserDetailsService customUserDetailsService,
+            PasswordEncoder passwordEncoder) {
+
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(customUserDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder);
+
+        return new ProviderManager(authProvider);
+    }
     @Bean
     protected SecurityFilterChain filter (HttpSecurity http) throws Exception {
 
         http
                 .csrf(csrf -> csrf.disable())
                 .httpBasic(basic -> basic.disable())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .cors(Customizer.withDefaults())
 
                 .authorizeHttpRequests(auth -> auth
                         // Wanneer je deze uncomments, staat je hele security open. Je hebt dan alleen nog een jwt nodig.
-                        .requestMatchers("/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/users").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/users").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/users/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/users/**").hasRole("ADMIN")
+                        .requestMatchers("/authenticate").permitAll()
 
-                        .requestMatchers(HttpMethod.POST, "/coaching-programs").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/coaching-programs/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/coaching-programs").hasAnyRole("ADMIN", "COACH")
-                        .requestMatchers(HttpMethod.GET, "/coaching-programs/{id}").hasAnyRole("ADMIN", "COACH", "USER")
+                        .requestMatchers(HttpMethod.POST, "/coaching-programs", "/steps", "/sessions", "/assignments").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/coaching-programs/**", "/steps/**", "/sessions/**", "/assignments/**").hasRole("DMIN")
+                        .requestMatchers(HttpMethod.POST, "/session-insights", "/strength-results").hasAnyRole("ADMIN", "COACH", "USER")
+                        .requestMatchers(HttpMethod.DELETE, "/session-insights/{id}", "/strength-results/{id}").hasAnyRole("ADMIN", "COACH", "USER")
 
-                        .requestMatchers(HttpMethod.POST, "/steps").hasAnyRole("ADMIN", "COACH")
-                        .requestMatchers(HttpMethod.DELETE, "/steps/**").hasAnyRole("ADMIN", "COACH")
-                        .requestMatchers(HttpMethod.GET, "/steps").hasAnyRole("ADMIN", "COACH")
-                        .requestMatchers(HttpMethod.GET, "/steps/{id}").hasAnyRole("ADMIN", "COACH", "USER")
+                        .requestMatchers(HttpMethod.GET, "/coaching-programs", "/steps", "/sessions", "/session-insights", "/strength-results", "/assignments").hasAnyRole("ADMIN", "COACH")
 
-                        .requestMatchers(HttpMethod.POST, "/sessions").hasAnyRole("ADMIN", "COACH")
-                        .requestMatchers(HttpMethod.DELETE, "/sessions/**").hasAnyRole("ADMIN", "COACH")
-                        .requestMatchers(HttpMethod.GET, "/sessions").hasAnyRole("ADMIN", "COACH")
-                        .requestMatchers(HttpMethod.GET, "/sessions/{id}").hasAnyRole("ADMIN", "COACH", "USER")
-
-                        .requestMatchers(HttpMethod.POST, "/session-insights").hasAnyRole("ADMIN", "COACH", "USER")
-                        .requestMatchers(HttpMethod.DELETE, "/session-insights/{id}").hasAnyRole("ADMIN", "COACH", "USER")
-                        .requestMatchers(HttpMethod.GET, "/session-insights").hasAnyRole("ADMIN", "COACH")
-                        .requestMatchers(HttpMethod.GET, "/session-insights/{id}").hasAnyRole("ADMIN", "COACH", "USER")
-
-
-                        .requestMatchers(HttpMethod.POST, "/strength-results").hasAnyRole("ADMIN", "COACH", "USER")
-                        .requestMatchers(HttpMethod.DELETE, "/strength-results/{id}").hasAnyRole("ADMIN", "COACH", "USER")
-                        .requestMatchers(HttpMethod.GET, "/strength-results").hasAnyRole("ADMIN", "COACH")
-                        .requestMatchers(HttpMethod.GET, "/strength-results/{id}").hasAnyRole("ADMIN", "COACH", "USER")
-
-
-                        .requestMatchers(HttpMethod.POST, "/assignments").hasAnyRole("ADMIN", "COACH")
-                        .requestMatchers(HttpMethod.DELETE, "/assignments/**").hasAnyRole("ADMIN", "COACH")
-                        .requestMatchers(HttpMethod.GET, "/assignments").hasAnyRole("ADMIN", "COACH")
-                        .requestMatchers(HttpMethod.GET, "/assignments/{id}").hasAnyRole("ADMIN", "COACH", "USER")
+                        .requestMatchers(HttpMethod.GET,
+                                "/coaching-programs/{id}",
+                                "/steps/{id}",
+                                "/sessions/{id}",
+                                "/session-insights/{id}",
+                                "/strength-results/{id}",
+                                "/assignments/{id}"
+                        ).hasAnyRole("ADMIN", "COACH", "USER")
 
                         .requestMatchers("/authenticated").authenticated()
-                        .requestMatchers("/authenticate").permitAll()
-                        .anyRequest().denyAll()
-                )
-                .exceptionHandling(exception -> exception
-                        .accessDeniedHandler((request, response, accessDeniedException) -> {
-                            response.setStatus(HttpStatus.FORBIDDEN.value());
-                            response.setContentType("application/json");
-                            response.getWriter().write("{\"error\": \"Forbidden\", \"message\": \"You do not have permission to access this resource.\"}");
-                        })
+                        .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
@@ -115,12 +96,6 @@ public class SpringSecurityConfig {
         return source;
     }
 
-    @Bean
-    public DaoAuthenticationProvider daoAuthenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsServiceImpl);
-        authProvider.setPasswordEncoder(passwordEncoder);
-        return authProvider;
-    }
+
 
 }
