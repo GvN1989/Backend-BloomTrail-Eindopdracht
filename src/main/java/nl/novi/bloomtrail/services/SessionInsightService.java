@@ -1,7 +1,7 @@
 package nl.novi.bloomtrail.services;
 
 import nl.novi.bloomtrail.dtos.SessionInsightInputDto;
-import nl.novi.bloomtrail.helper.EntityValidationHelper;
+import nl.novi.bloomtrail.helper.ValidationHelper;
 import nl.novi.bloomtrail.models.Session;
 import nl.novi.bloomtrail.models.SessionInsight;
 import nl.novi.bloomtrail.enums.FileContext;
@@ -16,10 +16,10 @@ import java.util.List;
 public class SessionInsightService {
     private final SessionInsightRepository sessionInsightRepository;
     private final FileService fileService;
-    private final EntityValidationHelper validationHelper;
+    private final ValidationHelper validationHelper;
     private final DownloadService downloadService;
 
-    public SessionInsightService(SessionInsightRepository sessionInsightRepository, FileService fileService, EntityValidationHelper validationHelper, DownloadService downloadService) {
+    public SessionInsightService(SessionInsightRepository sessionInsightRepository, FileService fileService, ValidationHelper validationHelper, DownloadService downloadService) {
         this.sessionInsightRepository = sessionInsightRepository;
         this.fileService = fileService;
         this.validationHelper = validationHelper;

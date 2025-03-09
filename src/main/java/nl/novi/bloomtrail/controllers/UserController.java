@@ -1,12 +1,15 @@
 package nl.novi.bloomtrail.controllers;
 
+import nl.novi.bloomtrail.dtos.UserInputDto;
 import nl.novi.bloomtrail.dtos.UserDto;
+import nl.novi.bloomtrail.helper.ValidationHelper;
 import nl.novi.bloomtrail.services.UserService;
 import nl.novi.bloomtrail.exceptions.BadRequestException;
 import org.springframework.http.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.ByteArrayInputStream;
@@ -22,43 +25,35 @@ public class UserController {
 
     private final UserService userService;
 
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
+    private final ValidationHelper validationHelper;
 
+    public UserController(UserService userService, ValidationHelper validationHelper) {
+        this.userService = userService;
+        this.validationHelper = validationHelper;
+    }
 
     @GetMapping(value = "")
     public ResponseEntity<List<UserDto>> getUsers() {
-
-        List<UserDto> userDtos = userService.getUsers();
-
-        return ResponseEntity.ok().body(userDtos);
+        List<UserDto> userProfiles = userService.getUsers();
+        return ResponseEntity.ok().body(userProfiles);
     }
 
     @GetMapping(value = "/{username}")
     public ResponseEntity<UserDto> getUser(@PathVariable("username") String username) {
+        UserDto userDto = userService.getUser(username);
+        return ResponseEntity.ok(userDto);
+    }
 
-        UserDto optionalUser = userService.getUser(username);
-
-
-        return ResponseEntity.ok().body(optionalUser);
-
+    @GetMapping("/profile")
+    public ResponseEntity<UserDto> getProfile(@AuthenticationPrincipal UserDetails userDetails) {
+        UserDto userDto = userService.getUser(userDetails.getUsername());
+        return ResponseEntity.ok(userDto);
     }
 
     @PostMapping(value = "/")
-    public ResponseEntity<UserDto> createUser(@RequestBody UserDto dto) throws BadRequestException {
+    public ResponseEntity<UserDto> createUser(@RequestBody UserInputDto dto) throws BadRequestException {
 
-        if (dto.getUsername() == null || dto.getUsername().isEmpty()) {
-            throw new BadRequestException( "Username cannot be null or empty");
-        }
-
-        if (dto.getPassword() == null || dto.getPassword().isEmpty()) {
-            throw new BadRequestException( "Password cannot be null or empty");
-        }
-
-        if (dto.getEmail() == null || dto.getEmail().isEmpty()) {
-            throw new BadRequestException("Email cannot be null or empty");
-        }
+        validationHelper.validateUserInput(dto);
 
         String newUsername = userService.createUser(dto);
 
@@ -73,11 +68,12 @@ public class UserController {
     }
 
     @PutMapping(value = "/{username}")
-    public ResponseEntity<UserDto> updateUser(@PathVariable("username") String username, @RequestBody UserDto dto) {
-
+    public ResponseEntity<UserDto> updateUser(@PathVariable("username") String username, @RequestBody UserInputDto dto) {
         userService.updateUser(username, dto);
 
-        return ResponseEntity.noContent().build();
+        UserDto updatedUser = userService.getUser(username);
+
+        return ResponseEntity.ok(updatedUser);
     }
 
     @DeleteMapping(value = "/{username}")
@@ -92,12 +88,19 @@ public class UserController {
     }
 
 
-    @PostMapping(value = "/{username}/authorities")
-    public ResponseEntity<Object> addUserAuthority(@PathVariable("username") String username, @RequestBody Map<String, Object> fields) {
+    @PutMapping(value = "/{username}/authorities")
+    public ResponseEntity<Object> updateUserAuthority(@PathVariable("username") String username, @RequestBody Map<String, Object> fields) {
         try {
             String authorityName = (String) fields.get("authority");
-            userService.addAuthority(username, authorityName);
-            return ResponseEntity.noContent().build();
+            validationHelper.validateAuthority(authorityName);
+            if (!userService.userExists(username)) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("User not found: " + username);
+            }
+
+            UserDto updatedUser = userService.updateAuthority(username, authorityName);
+
+            return ResponseEntity.ok("User " + username + " updated to role " + authorityName);
         }
         catch (Exception ex) {
             throw new BadRequestException();

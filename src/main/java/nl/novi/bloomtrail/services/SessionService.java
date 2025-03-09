@@ -3,7 +3,7 @@ package nl.novi.bloomtrail.services;
 import nl.novi.bloomtrail.dtos.SessionInputDto;
 import nl.novi.bloomtrail.exceptions.RecordNotFoundException;
 import nl.novi.bloomtrail.helper.DateConverter;
-import nl.novi.bloomtrail.helper.EntityValidationHelper;
+import nl.novi.bloomtrail.helper.ValidationHelper;
 import nl.novi.bloomtrail.helper.TimeConverter;
 import nl.novi.bloomtrail.mappers.SessionMapper;
 import nl.novi.bloomtrail.models.*;
@@ -20,10 +20,10 @@ public class SessionService {
 
     private final SessionRepository sessionRepository;
     private final CoachingProgramRepository coachingProgramRepository;
-    private final EntityValidationHelper validationHelper;
+    private final ValidationHelper validationHelper;
     private final DownloadService downloadService;
 
-    public SessionService(SessionRepository sessionRepository, CoachingProgramRepository coachingProgramRepository, EntityValidationHelper validationHelper, DownloadService downloadService) {
+    public SessionService(SessionRepository sessionRepository, CoachingProgramRepository coachingProgramRepository, ValidationHelper validationHelper, DownloadService downloadService) {
         this.sessionRepository = sessionRepository;
         this.coachingProgramRepository = coachingProgramRepository;
         this.validationHelper = validationHelper;

@@ -1,7 +1,7 @@
 package nl.novi.bloomtrail.controllers;
 
 import nl.novi.bloomtrail.dtos.StrengthResultsInputDto;
-import nl.novi.bloomtrail.helper.EntityValidationHelper;
+import nl.novi.bloomtrail.helper.ValidationHelper;
 import nl.novi.bloomtrail.models.File;
 import nl.novi.bloomtrail.models.StrengthResults;
 import nl.novi.bloomtrail.services.DownloadService;
@@ -19,11 +19,11 @@ public class StrengthResultsController {
 
     private final StrengthResultsService strengthResultsService;
 
-    private final EntityValidationHelper validationHelper;
+    private final ValidationHelper validationHelper;
 
     private final DownloadService downloadService;
 
-    public StrengthResultsController(StrengthResultsService strengthResultsService, EntityValidationHelper validationHelper, DownloadService downloadService) {
+    public StrengthResultsController(StrengthResultsService strengthResultsService, ValidationHelper validationHelper, DownloadService downloadService) {
         this.strengthResultsService = strengthResultsService;
         this.validationHelper = validationHelper;
         this.downloadService = downloadService;

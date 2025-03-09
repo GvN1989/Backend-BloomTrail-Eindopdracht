@@ -1,5 +1,7 @@
 package nl.novi.bloomtrail.helper;
 
+import nl.novi.bloomtrail.dtos.UserInputDto;
+import nl.novi.bloomtrail.exceptions.BadRequestException;
 import nl.novi.bloomtrail.exceptions.EntityNotFoundException;
 import nl.novi.bloomtrail.exceptions.RecordNotFoundException;
 import nl.novi.bloomtrail.exceptions.UsernameNotFoundException;
@@ -7,11 +9,12 @@ import nl.novi.bloomtrail.models.*;
 import nl.novi.bloomtrail.repositories.*;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public class EntityValidationHelper {
+public class ValidationHelper {
 
     private final AssignmentRepository assignmentRepository;
     private final SessionRepository sessionRepository;
@@ -21,7 +24,7 @@ public class EntityValidationHelper {
     private final StrengthResultsRepository strengthResultsRepository;
     private final SessionInsightRepository sessionInsightRepository;
 
-    public EntityValidationHelper(AssignmentRepository assignmentRepository, SessionRepository sessionRepository, UserRepository userRepository, CoachingProgramRepository coachingProgramRepository, StepRepository stepRepository, StrengthResultsRepository strengthResultsRepository, SessionInsightRepository sessionInsightRepository) {
+    public ValidationHelper(AssignmentRepository assignmentRepository, SessionRepository sessionRepository, UserRepository userRepository, CoachingProgramRepository coachingProgramRepository, StepRepository stepRepository, StrengthResultsRepository strengthResultsRepository, SessionInsightRepository sessionInsightRepository) {
         this.assignmentRepository = assignmentRepository;
         this.sessionRepository = sessionRepository;
         this.userRepository = userRepository;
@@ -160,6 +163,29 @@ public class EntityValidationHelper {
                     + session.getSessionDate() + " " + session.getSessionTime());
         }
     }
+
+    public void validateUserInput(UserInputDto dto) throws BadRequestException {
+        if (dto.getUsername() == null || dto.getUsername().isEmpty()) {
+            throw new BadRequestException("Username cannot be null or empty");
+        }
+        if (dto.getPassword() == null || dto.getPassword().isEmpty()) {
+            throw new BadRequestException("Password cannot be null or empty");
+        }
+        if (dto.getEmail() == null || dto.getEmail().isEmpty()) {
+            throw new BadRequestException("Email cannot be null or empty");
+        }
+        if (dto.getAuthorities() == null || dto.getAuthorities().isEmpty()) {
+            throw new BadRequestException("At least one role must be assigned.");
+        }
+    }
+
+    public void validateAuthority(String authorityName) throws BadRequestException {
+        List<String> validRoles = Arrays.asList("ROLE_USER", "ROLE_COACH", "ROLE_ADMIN");
+        if (!validRoles.contains(authorityName)) {
+            throw new BadRequestException("Invalid role: " + authorityName);
+        }
+    }
+
 
 
 }

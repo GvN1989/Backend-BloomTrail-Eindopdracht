@@ -6,7 +6,7 @@ import nl.novi.bloomtrail.dtos.SimpleCoachingProgramDto;
 import nl.novi.bloomtrail.exceptions.EntityNotFoundException;
 import nl.novi.bloomtrail.exceptions.RecordNotFoundException;
 import nl.novi.bloomtrail.helper.DateConverter;
-import nl.novi.bloomtrail.helper.EntityValidationHelper;
+import nl.novi.bloomtrail.helper.ValidationHelper;
 import nl.novi.bloomtrail.models.*;
 import nl.novi.bloomtrail.repositories.*;
 import org.junit.jupiter.api.Assertions;
@@ -32,7 +32,7 @@ public class CoachingProgramServiceUnitTest {
     private CoachingProgramRepository coachingProgramRepository;
 
     @Mock
-    private EntityValidationHelper validationHelper;
+    private ValidationHelper validationHelper;
 
     @Mock
     private StepRepository stepRepository;

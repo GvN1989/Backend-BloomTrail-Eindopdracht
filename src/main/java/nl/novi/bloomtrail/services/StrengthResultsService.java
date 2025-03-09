@@ -6,7 +6,7 @@ import nl.novi.bloomtrail.models.*;
 import nl.novi.bloomtrail.repositories.ManagingStrengthRepository;
 import nl.novi.bloomtrail.repositories.StrengthResultsRepository;
 import org.springframework.stereotype.Service;
-import nl.novi.bloomtrail.helper.EntityValidationHelper;
+import nl.novi.bloomtrail.helper.ValidationHelper;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -19,10 +19,10 @@ public class StrengthResultsService {
     private final ManagingStrengthRepository managingStrengthRepository;
     private final PdfGeneratorService pdfGeneratorService;
     private final FileService fileService;
-    private final EntityValidationHelper validationHelper;
+    private final ValidationHelper validationHelper;
     private final DownloadService downloadService;
 
-    public StrengthResultsService(StrengthResultsRepository strengthResultsRepository, PdfGeneratorService pdfGeneratorService, FileService fileService, ManagingStrengthRepository managingStrengthRepository, EntityValidationHelper validationHelper, DownloadService downloadService) {
+    public StrengthResultsService(StrengthResultsRepository strengthResultsRepository, PdfGeneratorService pdfGeneratorService, FileService fileService, ManagingStrengthRepository managingStrengthRepository, ValidationHelper validationHelper, DownloadService downloadService) {
         this.strengthResultsRepository = strengthResultsRepository;
         this.managingStrengthRepository = managingStrengthRepository;
         this.pdfGeneratorService = pdfGeneratorService;

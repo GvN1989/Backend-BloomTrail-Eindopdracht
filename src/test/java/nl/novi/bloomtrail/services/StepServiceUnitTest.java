@@ -3,14 +3,13 @@ package nl.novi.bloomtrail.services;
 import nl.novi.bloomtrail.dtos.StepInputDto;
 import nl.novi.bloomtrail.exceptions.RecordNotFoundException;
 import nl.novi.bloomtrail.helper.DateConverter;
-import nl.novi.bloomtrail.helper.EntityValidationHelper;
+import nl.novi.bloomtrail.helper.ValidationHelper;
 import nl.novi.bloomtrail.models.Assignment;
 import nl.novi.bloomtrail.models.CoachingProgram;
 import nl.novi.bloomtrail.models.Session;
 import nl.novi.bloomtrail.models.Step;
 import nl.novi.bloomtrail.repositories.CoachingProgramRepository;
 import nl.novi.bloomtrail.repositories.StepRepository;
-import nl.novi.bloomtrail.repositories.AssignmentRepository;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,13 +19,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,7 +38,7 @@ public class StepServiceUnitTest {
     @Mock
     private StepRepository stepRepository;
     @Mock
-    private EntityValidationHelper validationHelper;
+    private ValidationHelper validationHelper;
     @Mock
     private CoachingProgramService coachingProgramService;
     @Mock

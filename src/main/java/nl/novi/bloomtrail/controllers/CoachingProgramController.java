@@ -10,7 +10,6 @@ import nl.novi.bloomtrail.models.Step;
 import nl.novi.bloomtrail.services.CoachingProgramService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import nl.novi.bloomtrail.helper.EntityValidationHelper;
 
 import java.net.URI;
 import java.util.Comparator;

@@ -2,11 +2,10 @@ package nl.novi.bloomtrail.services;
 
 import nl.novi.bloomtrail.dtos.CoachingProgramInputDto;
 import nl.novi.bloomtrail.dtos.SimpleCoachingProgramDto;
-import nl.novi.bloomtrail.exceptions.EntityNotFoundException;
 import nl.novi.bloomtrail.exceptions.RecordNotFoundException;
 import nl.novi.bloomtrail.helper.DateConverter;
 import nl.novi.bloomtrail.mappers.CoachingProgramMapper;
-import nl.novi.bloomtrail.helper.EntityValidationHelper;
+import nl.novi.bloomtrail.helper.ValidationHelper;
 import nl.novi.bloomtrail.models.*;
 import nl.novi.bloomtrail.repositories.*;
 import org.springframework.stereotype.Service;
@@ -23,10 +22,10 @@ import java.util.Objects;
 public class CoachingProgramService {
 
     private final CoachingProgramRepository coachingProgramRepository;
-    private final EntityValidationHelper validationHelper;
+    private final ValidationHelper validationHelper;
     private final StepRepository stepRepository;
 
-    public CoachingProgramService(CoachingProgramRepository coachingProgramRepository, EntityValidationHelper validationHelper, StepRepository stepRepository) {
+    public CoachingProgramService(CoachingProgramRepository coachingProgramRepository, ValidationHelper validationHelper, StepRepository stepRepository) {
         this.coachingProgramRepository = coachingProgramRepository;
         this.validationHelper = validationHelper;
         this.stepRepository = stepRepository;

@@ -10,7 +10,7 @@ import nl.novi.bloomtrail.models.Step;
 import nl.novi.bloomtrail.models.CoachingProgram;
 import nl.novi.bloomtrail.repositories.CoachingProgramRepository;
 import nl.novi.bloomtrail.repositories.StepRepository;
-import nl.novi.bloomtrail.helper.EntityValidationHelper;
+import nl.novi.bloomtrail.helper.ValidationHelper;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -21,12 +21,12 @@ import java.util.List;
 public class StepService {
 
     private final StepRepository stepRepository;
-    private final EntityValidationHelper validationHelper;
+    private final ValidationHelper validationHelper;
     private final CoachingProgramService coachingProgramService;
     private final DownloadService downloadService;
     private final CoachingProgramRepository coachingProgramRepository;
 
-    public StepService( StepRepository stepRepository, EntityValidationHelper validationHelper, CoachingProgramService coachingProgramService, DownloadService downloadService, CoachingProgramRepository coachingProgramRepository) {
+    public StepService(StepRepository stepRepository, ValidationHelper validationHelper, CoachingProgramService coachingProgramService, DownloadService downloadService, CoachingProgramRepository coachingProgramRepository) {
         this.stepRepository = stepRepository;
         this.validationHelper = validationHelper;
         this.coachingProgramService = coachingProgramService;

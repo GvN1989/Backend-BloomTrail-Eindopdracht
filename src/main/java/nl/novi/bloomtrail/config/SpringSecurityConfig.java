@@ -25,12 +25,9 @@ import java.util.List;
 @EnableWebSecurity
 public class SpringSecurityConfig {
 
-    private final CustomUserDetailsService customUserDetailsService;
-
     private final JwtRequestFilter jwtRequestFilter;
 
-    public SpringSecurityConfig(CustomUserDetailsService customUserDetailsService, JwtRequestFilter jwtRequestFilter, PasswordEncoder passwordEncoder) {
-        this.customUserDetailsService = customUserDetailsService;
+    public SpringSecurityConfig(JwtRequestFilter jwtRequestFilter) {
         this.jwtRequestFilter = jwtRequestFilter;
     }
 
@@ -46,7 +43,7 @@ public class SpringSecurityConfig {
         return new ProviderManager(authProvider);
     }
     @Bean
-    protected SecurityFilterChain filter (HttpSecurity http) throws Exception {
+    protected SecurityFilterChain filter (HttpSecurity http, CustomAuthenticationEntryPoint authEntryPoint) throws Exception {
 
         http
                 .csrf(csrf -> csrf.disable())
@@ -54,27 +51,34 @@ public class SpringSecurityConfig {
                 .cors(Customizer.withDefaults())
 
                 .authorizeHttpRequests(auth -> auth
-                        // Wanneer je deze uncomments, staat je hele security open. Je hebt dan alleen nog een jwt nodig.
                         .requestMatchers("/authenticate").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/authenticated").authenticated()
 
-                        .requestMatchers(HttpMethod.POST, "/coaching-programs", "/steps", "/sessions", "/assignments").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/coaching-programs/**", "/steps/**", "/sessions/**", "/assignments/**").hasRole("DMIN")
+                        .requestMatchers(HttpMethod.POST, "/users/").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/users/{username}/authorities").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/users/{username}").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/users").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/users/{username}").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/users/me").authenticated()
+
+                        .requestMatchers(HttpMethod.POST, "/coaching-programs").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/coaching-programs/**").hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.POST, "/steps", "/sessions", "/assignments").hasAnyRole("ADMIN", "COACH")
+                        .requestMatchers(HttpMethod.DELETE, "/steps/**", "/sessions/**","/assignments/**").hasAnyRole("ADMIN", "COACH")
+
                         .requestMatchers(HttpMethod.POST, "/session-insights", "/strength-results").hasAnyRole("ADMIN", "COACH", "USER")
-                        .requestMatchers(HttpMethod.DELETE, "/session-insights/{id}", "/strength-results/{id}").hasAnyRole("ADMIN", "COACH", "USER")
+                        .requestMatchers(HttpMethod.DELETE, "/session-insights/**", "/strength-results/**").hasAnyRole("ADMIN", "COACH", "USER")
+                        .requestMatchers(HttpMethod.GET, "/session-insights/**", "/strength-results/**").hasAnyRole("ADMIN", "COACH", "USER")
 
-                        .requestMatchers(HttpMethod.GET, "/coaching-programs", "/steps", "/sessions", "/session-insights", "/strength-results", "/assignments").hasAnyRole("ADMIN", "COACH")
+                        .requestMatchers(HttpMethod.GET, "/coaching-programs", "/steps").hasAnyRole("ADMIN", "COACH", "USER")
+                        .requestMatchers(HttpMethod.GET, "/coaching-programs/{id}", "/steps/{id}", "/sessions/{id}", "/assignments/{id}").hasAnyRole("ADMIN", "COACH")
 
-                        .requestMatchers(HttpMethod.GET,
-                                "/coaching-programs/{id}",
-                                "/steps/{id}",
-                                "/sessions/{id}",
-                                "/session-insights/{id}",
-                                "/strength-results/{id}",
-                                "/assignments/{id}"
-                        ).hasAnyRole("ADMIN", "COACH", "USER")
-
-                        .requestMatchers("/authenticated").authenticated()
                         .anyRequest().authenticated()
+                )
+
+                        .exceptionHandling(exception -> exception
+                                .authenticationEntryPoint(authEntryPoint)
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);

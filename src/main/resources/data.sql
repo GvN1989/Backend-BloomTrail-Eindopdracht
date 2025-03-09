@@ -27,7 +27,7 @@ INSERT INTO authorities (username, authority) VALUES (
                                                       'henk',
                                                       'ADMIN'),
 ('alice', 'COACH'),
-('bob', 'USER')
+('bob', 'USER'),
 ('charlie', 'USER'),
 ('diana', 'USER'),
 ('edward', 'USER');

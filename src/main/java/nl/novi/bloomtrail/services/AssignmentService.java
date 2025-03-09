@@ -1,7 +1,7 @@
 package nl.novi.bloomtrail.services;
 
 import nl.novi.bloomtrail.dtos.AssignmentInputDto;
-import nl.novi.bloomtrail.helper.EntityValidationHelper;
+import nl.novi.bloomtrail.helper.ValidationHelper;
 import nl.novi.bloomtrail.models.Assignment;
 import nl.novi.bloomtrail.models.Session;
 import nl.novi.bloomtrail.models.File;
@@ -18,10 +18,10 @@ import java.util.List;
 public class AssignmentService {
     private final AssignmentRepository assignmentRepository;
     private final FileService fileService;
-    private final EntityValidationHelper validationHelper;
+    private final ValidationHelper validationHelper;
     private final DownloadService downloadService;
 
-    public AssignmentService(AssignmentRepository assignmentRepository, FileService fileService, EntityValidationHelper validationHelper, DownloadService downloadService) {
+    public AssignmentService(AssignmentRepository assignmentRepository, FileService fileService, ValidationHelper validationHelper, DownloadService downloadService) {
         this.assignmentRepository = assignmentRepository;
         this.fileService = fileService;
         this.validationHelper = validationHelper;

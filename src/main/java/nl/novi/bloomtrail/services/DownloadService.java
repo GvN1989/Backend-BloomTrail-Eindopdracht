@@ -1,7 +1,7 @@
 package nl.novi.bloomtrail.services;
 
 import nl.novi.bloomtrail.enums.FileContext;
-import nl.novi.bloomtrail.helper.EntityValidationHelper;
+import nl.novi.bloomtrail.helper.ValidationHelper;
 import nl.novi.bloomtrail.models.*;
 import org.springframework.stereotype.Service;
 
@@ -19,9 +19,9 @@ import java.util.zip.ZipOutputStream;
 public class DownloadService {
 
     private final FileService fileService;
-    private final EntityValidationHelper validationHelper;
+    private final ValidationHelper validationHelper;
 
-    public DownloadService(FileService fileService, EntityValidationHelper validationHelper) {
+    public DownloadService(FileService fileService, ValidationHelper validationHelper) {
         this.fileService = fileService;
         this.validationHelper = validationHelper;
     }

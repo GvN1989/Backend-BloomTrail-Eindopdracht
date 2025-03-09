@@ -4,7 +4,6 @@ import nl.novi.bloomtrail.dtos.StrengthResultsDto;
 import nl.novi.bloomtrail.dtos.StrengthResultsInputDto;
 import nl.novi.bloomtrail.exceptions.MappingException;
 import nl.novi.bloomtrail.models.CoachingProgram;
-import nl.novi.bloomtrail.models.File;
 import nl.novi.bloomtrail.models.StrengthResults;
 
 import java.util.stream.Collectors;
