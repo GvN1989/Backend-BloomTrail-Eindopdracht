@@ -2,9 +2,11 @@ package nl.novi.bloomtrail.mappers;
 
 import nl.novi.bloomtrail.dtos.UserDto;
 import nl.novi.bloomtrail.dtos.UserInputDto;
+import nl.novi.bloomtrail.models.Authority;
 import nl.novi.bloomtrail.models.User;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class UserMapper {
@@ -13,25 +15,16 @@ public class UserMapper {
         return new UserDto(
                 user.getUsername(),
                 user.getEmail(),
+                user.getFullName(),
                 user.isEnabled(),
-                user.getAuthorities(),
+                user.getAuthority() != null ? user.getAuthority().getAuthority() : null,
                 user.getProfilePicture() != null ? user.getProfilePicture().getUrl() : null
+
         );
     }
 
     public static List<UserDto> toUserDtoList(List<User> users) {
         return users.stream().map(UserMapper::toUserDto).collect(Collectors.toList());
-    }
-
-    public static UserInputDto toUserInputDto(User user) {
-        return new UserInputDto(
-                user.getUsername(),
-                user.getPassword(),
-                user.isEnabled(),
-                user.getApikey(),
-                user.getEmail(),
-                user.getAuthorities()
-        );
     }
 
     public static User toUserEntity(UserInputDto userInputDto) {
@@ -41,9 +34,15 @@ public class UserMapper {
         user.setEnabled(userInputDto.getEnabled());
         user.setApikey(userInputDto.getApikey());
         user.setEmail(userInputDto.getEmail());
+        user.setFullName(userInputDto.getFullName());
+
+        Authority authority = new Authority();
+        authority.setAuthority(userInputDto.getAuthority());
+        authority.setUser(user);
+
+        user.setAuthority(authority);
 
         return user;
     }
-
 
 }

@@ -23,7 +23,7 @@ public class ManagingStrength {
     private String misManaged;
 
     @ManyToOne
-    @JoinColumn(name = "strength_results_id", insertable = false, updatable = false)
+    @JoinColumn(name = "strength_results_id", nullable = false)
     private StrengthResults strengthResults;
 
     public Long getStrengthId() {

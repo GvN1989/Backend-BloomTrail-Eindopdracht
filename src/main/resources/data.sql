@@ -7,30 +7,35 @@ CREATE TABLE IF NOT EXISTS users (
                                      api_key VARCHAR(255)
 );
 
-INSERT INTO users (username, password, full_name, email, enabled, api_key) VALUES
-('henk','$2a$10$Pq2fS8wJ/s5morEL6YZW6.MHQD3jTU4G62HdD4F4cryO7UXV3cIuW','Henk Jansen','test@testy.tst',true,'7847493'),
-('alice','$2a$10$a66zyevDCm5FGEFO630R.u6n0t39vnSu0PAOboGwD1y1tkSO3pK9G', 'Alice Johnson', 'alice@example.com', true, '1234567'),
-('bob','$2a$10$KJX3hu08ZWdYjpmfRaV.CO5yHkZMSw588GyQbrz6Xfe1fq7TZ1JsG', 'Bob Smith', 'bob@example.com', true, '2345678'),
-('charlie','$2a$10$Bl6CuP6cutZCT5ecLyN/N.PuLy5qDChvt7NlhsvbACBUZn9JuIipm', 'Charlie Brown', 'charlie@example.com', true, '3456789'),
-('diana','$2a$12$R2vF1GmkXWrAkeLxNbcZKO4Tk1gKrOgD6WZ3hskHEkFgCFmdzXz/O', 'Diana Prince', 'diana@example.com', true, '4567890'),
-('edward','$2a$10$B9OklibPTW4pf1U4jnFuxeCoSa0MKoFNESn.9teiLJYcoyNjDNJzG', 'Edward Norton', 'edward@example.com', true, '5678901');
-
 
 CREATE TABLE IF NOT EXISTS authorities (
                                            username VARCHAR(50) NOT NULL,
                                            authority VARCHAR(50) NOT NULL,
                                            PRIMARY KEY (username, authority),
-                                           FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
+                                           CONSTRAINT fk_authorities_user FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
 );
 
+INSERT INTO users (username, password, full_name, email, enabled, api_key) VALUES
+                                                                                             ('henk','$2a$10$Pq2fS8wJ/s5morEL6YZW6.MHQD3jTU4G62HdD4F4cryO7UXV3cIuW','Henk Jansen','test@testy.tst',true,'7847493'),
+                                                                                             ('alice','$2a$10$a66zyevDCm5FGEFO630R.u6n0t39vnSu0PAOboGwD1y1tkSO3pK9G', 'Alice Johnson', 'alice@example.com', true, '1234567'),
+                                                                                             ('bob','$2a$10$KJX3hu08ZWdYjpmfRaV.CO5yHkZMSw588GyQbrz6Xfe1fq7TZ1JsG', 'Bob Smith', 'bob@example.com', true, '2345678'),
+                                                                                             ('charlie','$2a$10$Bl6CuP6cutZCT5ecLyN/N.PuLy5qDChvt7NlhsvbACBUZn9JuIipm', 'Charlie Brown', 'charlie@example.com', true, '3456789'),
+                                                                                             ('diana','$2a$12$R2vF1GmkXWrAkeLxNbcZKO4Tk1gKrOgD6WZ3hskHEkFgCFmdzXz/O', 'Diana Prince', 'diana@example.com', true, '4567890'),
+                                                                                             ('edward','$2a$10$B9OklibPTW4pf1U4jnFuxeCoSa0MKoFNESn.9teiLJYcoyNjDNJzG', 'Edward Norton', 'edward@example.com', true, '5678901');
 INSERT INTO authorities (username, authority) VALUES (
-                                                      'henk',
-                                                      'ADMIN'),
-('alice', 'COACH'),
-('bob', 'USER'),
-('charlie', 'USER'),
-('diana', 'USER'),
-('edward', 'USER');
+                                                         'henk',
+                                                         'ADMIN'),
+                                                     ('alice', 'COACH'),
+                                                     ('bob', 'USER'),
+                                                     ('charlie', 'USER'),
+                                                     ('diana', 'USER'),
+                                                     ('edward', 'USER');
+
+
+
+
+
+
 
 CREATE TABLE IF NOT EXISTS coaching_programs (
                                                  coaching_program_id SERIAL PRIMARY KEY,

@@ -1,13 +1,16 @@
 package nl.novi.bloomtrail.controllers;
 
+import jakarta.validation.Valid;
 import nl.novi.bloomtrail.dtos.UserInputDto;
 import nl.novi.bloomtrail.dtos.UserDto;
 import nl.novi.bloomtrail.helper.ValidationHelper;
+import nl.novi.bloomtrail.models.Authority;
 import nl.novi.bloomtrail.services.UserService;
 import nl.novi.bloomtrail.exceptions.BadRequestException;
 import org.springframework.http.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -51,9 +54,7 @@ public class UserController {
     }
 
     @PostMapping(value = "/")
-    public ResponseEntity<UserDto> createUser(@RequestBody UserInputDto dto) throws BadRequestException {
-
-        validationHelper.validateUserInput(dto);
+    public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserInputDto dto) throws BadRequestException {
 
         String newUsername = userService.createUser(dto);
 
@@ -66,12 +67,11 @@ public class UserController {
 
         return ResponseEntity.created(location).body(createdUser);
     }
-
+    @Transactional
     @PutMapping(value = "/{username}")
-    public ResponseEntity<UserDto> updateUser(@PathVariable("username") String username, @RequestBody UserInputDto dto) {
-        userService.updateUser(username, dto);
+    public ResponseEntity<UserDto> updateUserProfile( @PathVariable("username") String username, @RequestBody UserInputDto dto) {
 
-        UserDto updatedUser = userService.getUser(username);
+        UserDto updatedUser = userService.updateUserProfile(username, dto);
 
         return ResponseEntity.ok(updatedUser);
     }
@@ -82,34 +82,41 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping(value = "/{username}/authorities")
+    @GetMapping(value = "/{username}/authority")
     public ResponseEntity<Object> getUserAuthorities(@PathVariable("username") String username) {
-        return ResponseEntity.ok().body(userService.getAuthorities(username));
+        Authority authority = userService.getAuthority(username);
+
+        if (authority == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("User " + username + " has no assigned role.");
+        }
+
+        return ResponseEntity.ok(authority);
     }
 
 
-    @PutMapping(value = "/{username}/authorities")
+    @PutMapping(value = "/{username}/authority")
     public ResponseEntity<Object> updateUserAuthority(@PathVariable("username") String username, @RequestBody Map<String, Object> fields) {
         try {
-            String authorityName = (String) fields.get("authority");
-            validationHelper.validateAuthority(authorityName);
-            if (!userService.userExists(username)) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("User not found: " + username);
+
+            if (!(fields.get("authority") instanceof String authorityName) || authorityName.trim().isEmpty()) {
+                throw new BadRequestException("Authority cannot be empty or missing.");
             }
+
+            validationHelper.validateAuthority(authorityName);
 
             UserDto updatedUser = userService.updateAuthority(username, authorityName);
 
-            return ResponseEntity.ok("User " + username + " updated to role " + authorityName);
+            return ResponseEntity.ok(updatedUser);
         }
         catch (Exception ex) {
-            throw new BadRequestException();
+            throw new BadRequestException("Invalid request format: " + ex.getMessage());
         }
     }
 
-    @DeleteMapping(value = "/{username}/authorities/{authority}")
-    public ResponseEntity<Object> deleteUserAuthority(@PathVariable("username") String username, @PathVariable("authority") String authority) {
-        userService.removeAuthority(username, authority);
+    @DeleteMapping(value = "/{username}/authority")
+    public ResponseEntity<Object> deleteUserAuthority(@PathVariable("username") String username) {
+        userService.removeAuthority(username);
         return ResponseEntity.noContent().build();
     }
 
@@ -142,6 +149,4 @@ public class UserController {
         userService.deleteProfilePicture(username);
         return ResponseEntity.ok("Profile picture deleted successfully for user: " + username);
     }
-
-
 }

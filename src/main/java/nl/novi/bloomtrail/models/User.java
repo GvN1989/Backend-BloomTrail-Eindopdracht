@@ -3,7 +3,6 @@ package nl.novi.bloomtrail.models;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
-import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -18,13 +17,8 @@ public class User {
     @Column(name = "password", nullable = false, length = 255)
     private String password;
 
-    @OneToMany(
-            targetEntity = Authority.class,
-            mappedBy = "username",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true,
-            fetch = FetchType.EAGER)
-    private Set<Authority> authorities = new HashSet<>();
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Authority authority;
     @Column(name = "full_name")
     private String fullName;
     @Email
@@ -39,6 +33,17 @@ public class User {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "upload_id")
     private File profilePicture;
+
+    public User() {}
+
+    public User(String username, String password, String fullName, String email, boolean enabled, String authority) {
+        this.username = username;
+        this.password = password;
+        this.fullName = fullName;
+        this.email = email;
+        this.enabled = enabled;
+        this.authority = new Authority(this, authority); // Assign Authority Automatically
+    }
 
     public String getUsername() {
         return username;
@@ -80,20 +85,12 @@ public class User {
         this.email = email;
     }
 
-    public Set<Authority> getAuthorities() {
-        return authorities;
+    public Authority getAuthority() {
+        return authority;
     }
 
-    public void addAuthority(Authority authority) {
-        this.authorities.add(authority);
-    }
-
-    public void removeAuthority(Authority authority) {
-        this.authorities.remove(authority);
-    }
-
-    public void setAuthorities(Set<Authority> authorities) {
-        this.authorities = authorities;
+    public void setAuthority(Authority authority) {
+        this.authority = authority;
     }
 
     public String getFullName() {

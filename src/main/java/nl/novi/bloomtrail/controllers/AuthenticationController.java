@@ -1,9 +1,7 @@
 package nl.novi.bloomtrail.controllers;
 
-import jakarta.validation.Valid;
 import nl.novi.bloomtrail.dtos.AuthenticationRequest;
 import nl.novi.bloomtrail.dtos.AuthenticationResponse;
-import nl.novi.bloomtrail.exceptions.BadRequestException;
 import nl.novi.bloomtrail.utils.JwtUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

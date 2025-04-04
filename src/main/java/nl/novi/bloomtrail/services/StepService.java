@@ -1,7 +1,7 @@
 package nl.novi.bloomtrail.services;
 
 import nl.novi.bloomtrail.dtos.StepInputDto;
-import nl.novi.bloomtrail.exceptions.RecordNotFoundException;
+import nl.novi.bloomtrail.exceptions.NotFoundException;
 import nl.novi.bloomtrail.helper.DateConverter;
 import nl.novi.bloomtrail.mappers.StepMapper;
 import nl.novi.bloomtrail.models.Assignment;
@@ -139,7 +139,7 @@ public class StepService {
 
     public Step markStepCompletionStatus(Long stepId, boolean isCompleted) {
         Step step = stepRepository.findById(stepId)
-                .orElseThrow(() -> new RecordNotFoundException("Step with ID " + stepId + " not found"));
+                .orElseThrow(() -> new NotFoundException("Step with ID " + stepId + " not found"));
         step.setCompleted(isCompleted);
         return stepRepository.save(step);
     }

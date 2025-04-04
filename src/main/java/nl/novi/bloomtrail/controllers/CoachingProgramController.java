@@ -2,7 +2,7 @@ package nl.novi.bloomtrail.controllers;
 
 import jakarta.validation.Valid;
 import nl.novi.bloomtrail.dtos.*;
-import nl.novi.bloomtrail.exceptions.EntityNotFoundException;
+import nl.novi.bloomtrail.exceptions.NotFoundException;
 import nl.novi.bloomtrail.mappers.CoachingProgramMapper;
 import nl.novi.bloomtrail.mappers.StepMapper;
 import nl.novi.bloomtrail.models.CoachingProgram;
@@ -44,7 +44,7 @@ public class CoachingProgramController {
         List<CoachingProgram> coachingPrograms = coachingProgramService.findByCoachingProgramNameIgnoreCase(coachingProgramName);
 
         if (coachingPrograms.isEmpty()) {
-            throw new EntityNotFoundException("No coaching programs found with this name.");
+            throw new NotFoundException("No coaching programs found with this name.");
         }
 
         List<CoachingProgramDto> dtos = coachingPrograms.stream()

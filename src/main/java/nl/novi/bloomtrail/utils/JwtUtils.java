@@ -1,6 +1,7 @@
 package nl.novi.bloomtrail.utils;
 
-
+import java.util.List;
+import java.util.stream.Collectors;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
@@ -8,12 +9,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-
 import nl.novi.bloomtrail.filter.JwtRequestFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import org.springframework.security.core.GrantedAuthority;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -50,7 +51,7 @@ public class JwtUtils {
         return claimsResolver.apply(claims);
     }
 
-    private Claims extractAllClaims(String token) {
+    public Claims extractAllClaims(String token) {
         return Jwts.parser().setSigningKey(getSigningKey()).parseClaimsJws(token).getBody();
     }
 
@@ -60,6 +61,11 @@ public class JwtUtils {
 
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
+
+        List<String> roles= userDetails.getAuthorities().stream()
+                .map(GrantedAuthority:: getAuthority)
+                .collect(Collectors.toList());
+        claims.put("roles", roles);
         return createToken(claims, userDetails.getUsername());
     }
 

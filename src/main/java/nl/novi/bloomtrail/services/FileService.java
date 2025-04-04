@@ -86,18 +86,29 @@ public class FileService {
             throw new IllegalArgumentException("Parent entity cannot be null");
         }
 
-        List<File> files = getUploadsForParentEntity(parentEntity);
-
-        files.forEach(file -> {
-            Path filePath = Paths.get(file.getUrl());
-            try {
-                Files.deleteIfExists(filePath);
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to delete file: " + file.getUrl(), e);
+        if (parentEntity instanceof User user) {
+            if (user.getProfilePicture() != null) {
+                deleteFile(user.getProfilePicture());
             }
-        });
+        } else {
+            List<File> files = getUploadsForParentEntity(parentEntity);
 
-        fileRepository.deleteAll(files);
+            files.forEach(this::deleteFile);
+        }
+    }
+
+    public void deleteFile(File file) {
+        if (file == null) {
+            throw new IllegalArgumentException("File cannot be null");
+        }
+
+        Path filePath = Paths.get(file.getUrl());
+        try {
+            Files.deleteIfExists(filePath);
+            fileRepository.delete(file);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to delete file: " + file.getUrl(), e);
+        }
     }
 
 }

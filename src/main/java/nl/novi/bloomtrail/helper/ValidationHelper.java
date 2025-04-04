@@ -2,9 +2,7 @@ package nl.novi.bloomtrail.helper;
 
 import nl.novi.bloomtrail.dtos.UserInputDto;
 import nl.novi.bloomtrail.exceptions.BadRequestException;
-import nl.novi.bloomtrail.exceptions.EntityNotFoundException;
-import nl.novi.bloomtrail.exceptions.RecordNotFoundException;
-import nl.novi.bloomtrail.exceptions.UsernameNotFoundException;
+import nl.novi.bloomtrail.exceptions.NotFoundException;
 import nl.novi.bloomtrail.models.*;
 import nl.novi.bloomtrail.repositories.*;
 import org.springframework.stereotype.Component;
@@ -36,17 +34,17 @@ public class ValidationHelper {
 
     public Assignment validateAssignment(Long assignmentId) {
         return assignmentRepository.findById(assignmentId)
-                .orElseThrow(() -> new EntityNotFoundException("Assignment", assignmentId));
+                .orElseThrow(() -> new NotFoundException("Assignment" + assignmentId));
     }
 
     public Session validateSession(Long sessionId) {
         return sessionRepository.findById(sessionId)
-                .orElseThrow(() -> new EntityNotFoundException("Session", sessionId));
+                .orElseThrow(() -> new NotFoundException("Session" + sessionId));
     }
 
     public User validateUser(String username) {
         return userRepository.findById(username)
-                .orElseThrow(() -> new UsernameNotFoundException(username));
+                .orElseThrow(() -> new NotFoundException("User not found: " + username));
     }
 
     public CoachingProgram validateCoachingProgram(Long coachingProgramId) {
@@ -55,14 +53,14 @@ public class ValidationHelper {
         }
 
         return coachingProgramRepository.findById(coachingProgramId)
-                .orElseThrow(() -> new EntityNotFoundException("CoachingProgram", coachingProgramId));
+                .orElseThrow(() -> new NotFoundException("CoachingProgram" + coachingProgramId));
     }
 
     public List<CoachingProgram> validateCoachingProgramName(String coachingProgramName) {
         List<CoachingProgram> programs = coachingProgramRepository.findByCoachingProgramNameIgnoreCase(coachingProgramName);
 
         if (programs.isEmpty()) {
-            throw new EntityNotFoundException("No Coaching Program found with name: " + coachingProgramName);
+            throw new NotFoundException("No Coaching Program found with name: " + coachingProgramName);
         }
 
         return programs;
@@ -71,7 +69,7 @@ public class ValidationHelper {
 
     public Step validateStep(Long StepId) {
         return stepRepository.findById(StepId)
-                .orElseThrow(() -> new EntityNotFoundException("Step with ID", StepId));
+                .orElseThrow(() -> new NotFoundException("Step with ID" + StepId));
     }
 
 
@@ -91,7 +89,7 @@ public class ValidationHelper {
 
         List<Session> sessions = sessionRepository.findAllById(sessionIds);
         if (sessions.size() != sessionIds.size()) {
-            throw new RecordNotFoundException("Some session IDs are invalid: " + sessionIds);
+            throw new NotFoundException("Some session IDs are invalid: " + sessionIds);
         }
         return sessions;
     }
@@ -102,7 +100,7 @@ public class ValidationHelper {
         }
         List<Assignment> assignments = assignmentRepository.findAllById(assignmentIds);
         if (assignments.size() != assignmentIds.size()) {
-            throw new RecordNotFoundException("Some assignment IDs are invalid: " + assignmentIds);
+            throw new NotFoundException("Some assignment IDs are invalid: " + assignmentIds);
         }
 
         return assignments;
@@ -124,7 +122,7 @@ public class ValidationHelper {
 
     public StrengthResults validateStrengthResult(Long resultId) {
         return strengthResultsRepository.findById(resultId)
-                .orElseThrow(() -> new EntityNotFoundException("StrengthResults", resultId));
+                .orElseThrow(() -> new NotFoundException("StrengthResults" + resultId));
     }
 
     public List<StrengthResults> validateStrengthResults(List<Long> resultsIds) {
@@ -138,7 +136,7 @@ public class ValidationHelper {
 
     public SessionInsight validateSessionInsight(Long sessionInsightId) {
         return sessionInsightRepository.findById(sessionInsightId)
-                .orElseThrow(() -> new EntityNotFoundException("StrengthResults", sessionInsightId));
+                .orElseThrow(() -> new NotFoundException("StrengthResults" + sessionInsightId));
 
     }
 
@@ -161,21 +159,6 @@ public class ValidationHelper {
         if (hasConflict) {
             throw new IllegalArgumentException("A session already exists for the same date and time: "
                     + session.getSessionDate() + " " + session.getSessionTime());
-        }
-    }
-
-    public void validateUserInput(UserInputDto dto) throws BadRequestException {
-        if (dto.getUsername() == null || dto.getUsername().isEmpty()) {
-            throw new BadRequestException("Username cannot be null or empty");
-        }
-        if (dto.getPassword() == null || dto.getPassword().isEmpty()) {
-            throw new BadRequestException("Password cannot be null or empty");
-        }
-        if (dto.getEmail() == null || dto.getEmail().isEmpty()) {
-            throw new BadRequestException("Email cannot be null or empty");
-        }
-        if (dto.getAuthorities() == null || dto.getAuthorities().isEmpty()) {
-            throw new BadRequestException("At least one role must be assigned.");
         }
     }
 

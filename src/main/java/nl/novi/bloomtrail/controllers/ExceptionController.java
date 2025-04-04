@@ -1,9 +1,9 @@
 package nl.novi.bloomtrail.controllers;
 
 import jakarta.validation.ConstraintViolationException;
-import nl.novi.bloomtrail.exceptions.EntityNotFoundException;
-import nl.novi.bloomtrail.exceptions.MappingException;
-import nl.novi.bloomtrail.exceptions.RecordNotFoundException;
+import nl.novi.bloomtrail.exceptions.BadRequestException;
+import nl.novi.bloomtrail.exceptions.NotFoundException;
+import nl.novi.bloomtrail.exceptions.ForbiddenException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -17,14 +17,16 @@ import java.util.Map;
 @RestControllerAdvice
     public class ExceptionController {
 
-        @ExceptionHandler(value = RecordNotFoundException.class)
-        public ResponseEntity <Object> exception(RecordNotFoundException exception) {
-            return new ResponseEntity<>(exception.getMessage(),HttpStatus.NOT_FOUND);
-        }
+
 
         @ExceptionHandler(value = IndexOutOfBoundsException.class)
         public ResponseEntity<Object> exception (IndexOutOfBoundsException exception) {
-            return new ResponseEntity<> ("Dit id staat niet in de database", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<> ("This ID does not exist in the database", HttpStatus.NOT_FOUND);
+        }
+
+        @ExceptionHandler(BadRequestException.class)
+        public ResponseEntity<String> handleBadRequestException(BadRequestException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
         }
 
         @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -42,13 +44,13 @@ import java.util.Map;
             return ResponseEntity.badRequest().body(errors);
         }
 
-        @ExceptionHandler(EntityNotFoundException.class)
-        public ResponseEntity<String> handleEntityNotFoundException(EntityNotFoundException ex) {
+        @ExceptionHandler(NotFoundException.class)
+        public ResponseEntity<String> handleEntityNotFoundException(NotFoundException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
         }
 
-        @ExceptionHandler(MappingException.class)
-        public ResponseEntity<String> handleMappingException(MappingException ex) {
+        @ExceptionHandler(ForbiddenException.class)
+        public ResponseEntity<String> handleMappingException(ForbiddenException ex) {
             return ResponseEntity.internalServerError().body(ex.getMessage());
         }
         @ExceptionHandler(HttpMessageNotReadableException.class)

@@ -2,7 +2,7 @@ package nl.novi.bloomtrail.services;
 
 import nl.novi.bloomtrail.dtos.CoachingProgramInputDto;
 import nl.novi.bloomtrail.dtos.SimpleCoachingProgramDto;
-import nl.novi.bloomtrail.exceptions.RecordNotFoundException;
+import nl.novi.bloomtrail.exceptions.NotFoundException;
 import nl.novi.bloomtrail.helper.DateConverter;
 import nl.novi.bloomtrail.mappers.CoachingProgramMapper;
 import nl.novi.bloomtrail.helper.ValidationHelper;
@@ -52,7 +52,7 @@ public class CoachingProgramService {
         CoachingProgram coachingProgram = validationHelper.validateCoachingProgram(coachingProgramId);
         List<Step> steps = stepRepository.findStepsByCoachingProgram(coachingProgramId);
         if (steps.isEmpty()) {
-            throw new RecordNotFoundException("No steps found for CoachingProgram with ID: " + coachingProgramId);
+            throw new NotFoundException("No steps found for CoachingProgram with ID: " + coachingProgramId);
         }
         return steps;
     }
@@ -60,7 +60,7 @@ public class CoachingProgramService {
     @Transactional
     public CoachingProgram getCoachingProgramWithSteps(Long programId) {
         return coachingProgramRepository.findByIdWithSteps(programId)
-                .orElseThrow(() -> new RecordNotFoundException("Coaching program not found"));
+                .orElseThrow(() -> new NotFoundException("Coaching program not found"));
     }
 
     public CoachingProgram saveCoachingProgram(CoachingProgramInputDto inputDto) {

@@ -3,8 +3,7 @@ package nl.novi.bloomtrail.services;
 import jakarta.validation.*;
 import nl.novi.bloomtrail.dtos.CoachingProgramInputDto;
 import nl.novi.bloomtrail.dtos.SimpleCoachingProgramDto;
-import nl.novi.bloomtrail.exceptions.EntityNotFoundException;
-import nl.novi.bloomtrail.exceptions.RecordNotFoundException;
+import nl.novi.bloomtrail.exceptions.NotFoundException;
 import nl.novi.bloomtrail.helper.DateConverter;
 import nl.novi.bloomtrail.helper.ValidationHelper;
 import nl.novi.bloomtrail.models.*;
@@ -131,13 +130,13 @@ public class CoachingProgramServiceUnitTest {
 
         Long coachingProgramId = 6L;
 
-        when(validationHelper.validateCoachingProgram(coachingProgramId)).thenThrow(new EntityNotFoundException("CoachingProgram" , coachingProgramId));
+        when(validationHelper.validateCoachingProgram(coachingProgramId)).thenThrow(new NotFoundException("Coaching Program not found with ID: " + coachingProgramId));
 
-        EntityNotFoundException exception = Assertions.assertThrows(EntityNotFoundException.class, () -> {
+        NotFoundException exception = Assertions.assertThrows(NotFoundException.class, () -> {
             coachingProgramService.findById(coachingProgramId);
         });
 
-        Assertions.assertEquals("CoachingProgram with ID 6 not found. ", exception.getMessage(), "Exception message should match");
+        Assertions.assertEquals("Coaching Program not found with ID: 6", exception.getMessage(), "Exception message should match");
     }
 
     @Tag("unit")
@@ -260,9 +259,9 @@ public class CoachingProgramServiceUnitTest {
         when(validationHelper.validateCoachingProgram(coachingProgramId)).thenReturn(coachingProgram);
         when(stepRepository.findStepsByCoachingProgram(coachingProgramId)).thenReturn(Collections.emptyList());
 
-        Assertions.assertThrows(RecordNotFoundException.class, () -> {
+        Assertions.assertThrows(NotFoundException.class, () -> {
             coachingProgramService.getStepsByCoachingProgram(coachingProgramId);
-        }, "Expected RecordNotFoundException when no steps are found.");
+        }, "Expected NotFoundException when no steps are found.");
     }
 
     @Tag("unit")
@@ -387,9 +386,9 @@ public class CoachingProgramServiceUnitTest {
     public void testDeleteCoachingProgram_NotFound() {
         Long coachingProgramId = 6L;
 
-        when(validationHelper.validateCoachingProgram(coachingProgramId)).thenThrow(new RecordNotFoundException("CoachingProgram with ID " + coachingProgramId + " not found."));
+        when(validationHelper.validateCoachingProgram(coachingProgramId)).thenThrow(new NotFoundException("CoachingProgram with ID " + coachingProgramId + " not found."));
 
-        RecordNotFoundException exception = Assertions.assertThrows(RecordNotFoundException.class, () -> {
+        NotFoundException exception = Assertions.assertThrows(NotFoundException.class, () -> {
             coachingProgramService.deleteCoachingProgram(coachingProgramId);
         });
 
@@ -428,11 +427,11 @@ public class CoachingProgramServiceUnitTest {
         CoachingProgramInputDto inputDto = new CoachingProgramInputDto();
 
         when(validationHelper.validateCoachingProgram(invalidCoachingProgramId))
-                .thenThrow(new RecordNotFoundException("Coaching program not found"));
+                .thenThrow(new NotFoundException("Coaching program not found"));
 
-        Assertions.assertThrows(RecordNotFoundException.class, () -> {
+        Assertions.assertThrows(NotFoundException.class, () -> {
             coachingProgramService.updateCoachingProgram(invalidCoachingProgramId, inputDto);
-        }, "Expected RecordNotFoundException when coaching program ID is invalid.");
+        }, "Expected NotFoundException when coaching program ID is invalid.");
     }
 
     @Tag("unit")

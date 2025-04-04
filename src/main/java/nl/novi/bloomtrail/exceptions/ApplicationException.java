@@ -1,25 +1,16 @@
 package nl.novi.bloomtrail.exceptions;
 
-public class ApplicationException extends RuntimeException {
-    private final int statusCode;
+import org.springframework.http.HttpStatus;
 
-    public ApplicationException(String message) {
+public abstract class ApplicationException extends RuntimeException {
+    private final HttpStatus status;
+
+    public ApplicationException(String message, HttpStatus status) {
         super(message);
-        this.statusCode = 500;
+        this.status = status;
     }
 
-    public ApplicationException(String message, Throwable cause) {
-        super(message, cause);
-        this.statusCode = 500;
+    public HttpStatus getStatus() {
+        return status;
     }
-
-    public ApplicationException(String message, int statusCode) {
-        super(message);
-        this.statusCode = statusCode;
-    }
-
-    public int getStatusCode() {
-        return statusCode;
-    }
-
 }

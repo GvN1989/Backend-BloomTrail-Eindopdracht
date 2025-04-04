@@ -2,7 +2,7 @@ package nl.novi.bloomtrail.mappers;
 
 import nl.novi.bloomtrail.dtos.SessionDto;
 import nl.novi.bloomtrail.dtos.SessionInputDto;
-import nl.novi.bloomtrail.exceptions.MappingException;
+import nl.novi.bloomtrail.exceptions.ForbiddenException;
 import nl.novi.bloomtrail.models.Assignment;
 import nl.novi.bloomtrail.models.Session;
 import nl.novi.bloomtrail.models.SessionInsight;
@@ -56,7 +56,7 @@ public class SessionMapper {
 
     public static Session toSessionEntity(SessionInputDto inputDto, Step step, List<SessionInsight> sessionInsights, List<Assignment> assignments) {
         if (inputDto == null) {
-            throw new MappingException("SessionInputDto cannot be null");
+            throw new ForbiddenException("SessionInputDto cannot be null");
         }
         try {
 
@@ -75,7 +75,7 @@ public class SessionMapper {
 
         return session;
         }catch (Exception e) {
-            throw new MappingException("Error mapping SessionInputDto to Session", e);
+            throw new ForbiddenException("Error mapping SessionInputDto to Session" + e);
         }
 
     }

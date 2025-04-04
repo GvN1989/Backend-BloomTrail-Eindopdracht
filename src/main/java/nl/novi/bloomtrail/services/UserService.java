@@ -3,18 +3,25 @@ package nl.novi.bloomtrail.services;
 import nl.novi.bloomtrail.dtos.UserInputDto;
 import nl.novi.bloomtrail.dtos.UserDto;
 import nl.novi.bloomtrail.enums.FileContext;
-import nl.novi.bloomtrail.exceptions.RecordNotFoundException;
-import nl.novi.bloomtrail.exceptions.UsernameNotFoundException;
+import nl.novi.bloomtrail.exceptions.NotFoundException;
+import nl.novi.bloomtrail.exceptions.BadRequestException;
 import nl.novi.bloomtrail.helper.ValidationHelper;
 import nl.novi.bloomtrail.mappers.UserMapper;
 import nl.novi.bloomtrail.models.Authority;
 import nl.novi.bloomtrail.models.*;
+import nl.novi.bloomtrail.repositories.AuthorityRepository;
 import nl.novi.bloomtrail.repositories.UserRepository;
 import nl.novi.bloomtrail.utils.RandomStringGenerator;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 
@@ -22,14 +29,18 @@ import java.util.*;
 public class UserService {
     private final UserRepository userRepository;
     private final ValidationHelper validationHelper;
+    private final AuthorityRepository authorityRepository;
     private final FileService fileService;
     private final DownloadService downloadService;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, ValidationHelper validationHelper, FileService fileService, DownloadService downloadService) {
+    public UserService(UserRepository userRepository, ValidationHelper validationHelper, AuthorityRepository authorityRepository, FileService fileService, DownloadService downloadService, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.validationHelper = validationHelper;
+        this.authorityRepository = authorityRepository;
         this.fileService = fileService;
         this.downloadService = downloadService;
+        this.passwordEncoder = passwordEncoder;
     }
 
 
@@ -40,7 +51,12 @@ public class UserService {
 
     public UserDto getUser(String username) {
         User user = userRepository.findById(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+                .orElseThrow(() -> new NotFoundException("User not found: " + username));
+
+        if (user.getAuthority() == null) {
+            throw new BadRequestException("User has no assigned role.");
+        }
+
         return UserMapper.toUserDto(user);
     }
 
@@ -56,49 +72,70 @@ public class UserService {
     }
 
     public void deleteUser(String username) {
+        validationHelper.validateUser(username);
         userRepository.deleteById(username);
     }
+    @Transactional
+    public UserDto updateUserProfile(String username, UserInputDto dto) {
+        User user = validationHelper.validateUser(username);
 
-    public void updateUser(String username, UserInputDto newUser) {
-        if (!userRepository.existsById(username)) throw new RecordNotFoundException();
-        User user = userRepository.findById(username).get();
-        user.setPassword(newUser.getPassword());
+        if (dto.getFullName() != null && !dto.getFullName().isEmpty()) {
+            user.setFullName(dto.getFullName());
+        }
+
+        if (dto.getEmail() != null && !dto.getEmail().isEmpty()) {
+            user.setEmail(dto.getEmail());
+        }
+
+        if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
+            user.setPassword(dto.getPassword());
+        }
+
+        if (dto.getUsername() != null && !dto.getUsername().equals(user.getUsername())) {
+            throw new BadRequestException("Username cannot be changed.");
+        }
+
         userRepository.save(user);
+
+        return UserMapper.toUserDto(user);
+
     }
 
-    public Set<Authority> getAuthorities(String username) {
-        User user = userRepository.findById(username)
-                .orElseThrow(() -> new UsernameNotFoundException(username));
-        return user.getAuthorities();
+    public Authority getAuthority(String username) {
+        User user = validationHelper.validateUser(username);
+        return user.getAuthority();
     }
 
     public UserDto updateAuthority(String username, String newAuthority) {
-        User user = userRepository.findById(username)
-                .orElseThrow(() -> new RecordNotFoundException("User not found: " + username));
+        User user = validationHelper.validateUser(username);
+        validationHelper.validateAuthority(newAuthority);
 
-        List<String> validRoles = Arrays.asList("ROLE_USER", "ROLE_COACH", "ROLE_ADMIN");
-        if (!validRoles.contains(newAuthority)) {
-            throw new IllegalArgumentException("Invalid role: " + newAuthority);
+        if (user.getAuthority() != null) {
+            authorityRepository.delete(user.getAuthority());
         }
 
-        user.getAuthorities().clear();
-        user.addAuthority(new Authority(username, newAuthority));
+        Authority newRole = new Authority();
+        newRole.setAuthority(newAuthority);
+        newRole.setUser(user);
+        newRole.setUsername(user.getUsername());
+
+        user.setAuthority(newRole);
 
         userRepository.save(user);
 
         return UserMapper.toUserDto(user);
     }
 
-    public void removeAuthority(String username, String authority) {
-        User user = userRepository.findById(username)
-                .orElseThrow(() -> new UsernameNotFoundException(username));
+    public void removeAuthority(String username) {
+        User user = validationHelper.validateUser(username);
 
-        Authority authorityToRemove = user.getAuthorities().stream()
-                .filter(a -> a.getAuthority().equalsIgnoreCase(authority))
-                .findAny()
-                .orElseThrow(() -> new IllegalArgumentException("Authority not found: " + authority));
+        if (user.getAuthority() == null) {
+            throw new NotFoundException("User " + username + " does not have an assigned role.");
+        }
 
-        user.removeAuthority(authorityToRemove);
+        authorityRepository.delete(user.getAuthority());
+
+        user.setAuthority(null);
         userRepository.save(user);
     }
 
@@ -123,16 +160,23 @@ public class UserService {
     public void deleteProfilePicture(String username) {
         User user = validationHelper.validateUser(username);
 
-        if (user.getProfilePicture() != null) {
-            try {
-                fileService.deleteFilesForParentEntity(user.getProfilePicture().getFileId());
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to delete the profile picture for user '" + username + "'", e);
-            }
+        if (user.getProfilePicture() == null) {
+            throw new NotFoundException("User '" + username + "' does not have a profile picture to delete.");
+        }
+
+        try {
+            File profilePicture = user.getProfilePicture();
+
+            Path filePath = Paths.get(profilePicture.getUrl());
+            Files.deleteIfExists(filePath);
+
             user.setProfilePicture(null);
             userRepository.save(user);
-        } else {
-            throw new IllegalStateException("User '" + username + "' does not have a profile picture to delete");
+
+            fileService.deleteFile(profilePicture);
+
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to delete profile picture file for user '" + username + "'", e);
         }
     }
 

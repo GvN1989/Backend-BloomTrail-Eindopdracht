@@ -7,15 +7,17 @@ import java.util.Set;
 public class UserDto {
     private String username;
     private String email;
+    private String fullName;
     private Boolean enabled;
-    private Set<Authority> authorities;
+    private String authority;
     public String profilePictureUrl;
 
-    public UserDto(String username, String email, Boolean enabled, Set<Authority> authorities, String profilePictureUrl) {
+    public UserDto(String username, String email, String fullName,Boolean enabled, String authority, String profilePictureUrl) {
         this.username = username;
         this.email = email;
+        this.fullName= fullName;
         this.enabled = enabled;
-        this.authorities = authorities;
+        this.authority = authority;
         this.profilePictureUrl= profilePictureUrl;
     }
 
@@ -27,6 +29,13 @@ public class UserDto {
         this.username = username;
     }
 
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
     public String getEmail() {
         return email;
     }
@@ -51,11 +60,11 @@ public class UserDto {
         this.profilePictureUrl = profilePictureUrl;
     }
 
-    public Set<Authority> getAuthorities() {
-        return authorities;
+    public String getAuthority() {
+        return authority;
     }
 
-    public void setAuthorities(Set<Authority> authorities) {
-        this.authorities = authorities;
+    public void setAuthority(String authority) {
+        this.authority = authority;
     }
 }

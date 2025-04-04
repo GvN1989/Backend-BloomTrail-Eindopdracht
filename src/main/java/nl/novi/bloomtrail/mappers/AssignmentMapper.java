@@ -2,7 +2,7 @@ package nl.novi.bloomtrail.mappers;
 
 import nl.novi.bloomtrail.dtos.AssignmentDto;
 import nl.novi.bloomtrail.dtos.AssignmentInputDto;
-import nl.novi.bloomtrail.exceptions.MappingException;
+import nl.novi.bloomtrail.exceptions.ForbiddenException;
 import nl.novi.bloomtrail.models.Assignment;
 import nl.novi.bloomtrail.models.File;
 import nl.novi.bloomtrail.models.Session;
@@ -34,7 +34,7 @@ public class AssignmentMapper {
 
     public static Assignment toAssignmentEntity(AssignmentInputDto inputDto, Session session, Step step) {
         if (inputDto == null) {
-            throw new MappingException("AssignmentInputDto cannot be null");
+            throw new ForbiddenException("AssignmentInputDto cannot be null");
         }
 
         try {
@@ -51,7 +51,7 @@ public class AssignmentMapper {
             return assignment;
 
         } catch (Exception e) {
-            throw new MappingException("Error mapping AssignmentInputDto to Assignment", e);
+            throw new ForbiddenException("Error mapping AssignmentInputDto to Assignment" + e);
         }
     }
 }

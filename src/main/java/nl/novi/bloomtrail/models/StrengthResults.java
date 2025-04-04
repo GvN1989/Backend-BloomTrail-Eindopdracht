@@ -39,13 +39,7 @@ public class StrengthResults {
     @JoinColumn(name = "coaching_program", insertable = false, updatable = false)
     private CoachingProgram coachingProgram;
 
-    @ManyToMany
-    @JoinTable(
-            name = "strength_results_managing_strengths",
-            joinColumns = @JoinColumn(name = "strength_results_id"),
-            inverseJoinColumns = @JoinColumn(name = "managing_strength_id")
-    )
-
+    @OneToMany(mappedBy = "strengthResults", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ManagingStrength> managingStrengths = new ArrayList<>();
 
     public Long getResultsId() {

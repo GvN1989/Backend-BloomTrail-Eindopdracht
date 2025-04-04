@@ -17,10 +17,16 @@ public class Authority implements Serializable {
     @Column(nullable = false)
     private String authority;
 
+    @OneToOne
+    @MapsId("username")
+    @JoinColumn(name = "username",referencedColumnName = "username")
+    private User user;
+
     public Authority() {}
 
-    public Authority(String username, String authority) {
-        this.username = username;
+    public Authority(User user, String authority) {
+        this.user = user;
+        this.username = user.getUsername();
         this.authority = authority;
     }
 
@@ -38,5 +44,14 @@ public class Authority implements Serializable {
 
     public void setAuthority(String authority) {
         this.authority = authority;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+        this.username = user.getUsername();
     }
 }

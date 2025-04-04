@@ -2,7 +2,7 @@ package nl.novi.bloomtrail.mappers;
 
 import nl.novi.bloomtrail.dtos.CoachingProgramDto;
 import nl.novi.bloomtrail.dtos.CoachingProgramInputDto;
-import nl.novi.bloomtrail.exceptions.MappingException;
+import nl.novi.bloomtrail.exceptions.ForbiddenException;
 import nl.novi.bloomtrail.models.CoachingProgram;
 import nl.novi.bloomtrail.models.File;
 import nl.novi.bloomtrail.models.User;
@@ -51,7 +51,7 @@ public class CoachingProgramMapper {
 
     public static CoachingProgram toCoachingProgramEntity(CoachingProgramInputDto inputDto, User client, User coach) {
         if (inputDto == null) {
-            throw new MappingException("CoachingProgramInputDto cannot be null");
+            throw new ForbiddenException("CoachingProgramInputDto cannot be null");
         }
         try{
 
@@ -66,7 +66,7 @@ public class CoachingProgramMapper {
 
         return coachingProgram;
         } catch (Exception e) {
-            throw new MappingException("Error mapping CoachingProgramInputDto to CoachingProgram", e);
+            throw new ForbiddenException("Error mapping CoachingProgramInputDto to CoachingProgram" + e);
         }
 
 

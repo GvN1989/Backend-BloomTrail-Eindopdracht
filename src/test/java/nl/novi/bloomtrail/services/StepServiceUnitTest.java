@@ -1,7 +1,7 @@
 package nl.novi.bloomtrail.services;
 
 import nl.novi.bloomtrail.dtos.StepInputDto;
-import nl.novi.bloomtrail.exceptions.RecordNotFoundException;
+import nl.novi.bloomtrail.exceptions.NotFoundException;
 import nl.novi.bloomtrail.helper.DateConverter;
 import nl.novi.bloomtrail.helper.ValidationHelper;
 import nl.novi.bloomtrail.models.Assignment;
@@ -223,9 +223,9 @@ public class StepServiceUnitTest {
     @Tag("unit")
     @Test
     void testFindById_ThrowsException_WhenStepNotFound() {
-        when(validationHelper.validateStep(99L)).thenThrow(new RecordNotFoundException("Step not found"));
+        when(validationHelper.validateStep(99L)).thenThrow(new NotFoundException("Step not found"));
 
-        RecordNotFoundException exception = Assertions.assertThrows(RecordNotFoundException.class, () -> {
+        NotFoundException exception = Assertions.assertThrows(NotFoundException.class, () -> {
             stepService.findById(99L);
         });
 

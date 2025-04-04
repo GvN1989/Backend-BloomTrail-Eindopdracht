@@ -1,12 +1,10 @@
 package nl.novi.bloomtrail.exceptions;
 
-public class BadRequestException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
-    public BadRequestException() {
-        super();
-    }
-
+public class BadRequestException extends ApplicationException {
     public BadRequestException(String message) {
-        super(message);
+        super(message, HttpStatus.BAD_REQUEST);
     }
 }

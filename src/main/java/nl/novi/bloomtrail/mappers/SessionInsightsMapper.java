@@ -2,7 +2,7 @@ package nl.novi.bloomtrail.mappers;
 
 import nl.novi.bloomtrail.dtos.SessionInsightDto;
 import nl.novi.bloomtrail.dtos.SessionInsightInputDto;
-import nl.novi.bloomtrail.exceptions.MappingException;
+import nl.novi.bloomtrail.exceptions.ForbiddenException;
 import nl.novi.bloomtrail.models.File;
 import nl.novi.bloomtrail.models.Session;
 import nl.novi.bloomtrail.models.SessionInsight;
@@ -30,7 +30,7 @@ public class SessionInsightsMapper {
 
     public static SessionInsight toSessionInsightEntity(SessionInsightInputDto inputDto, Session session, List<File> files) {
         if (inputDto == null) {
-            throw new MappingException("SessionInsightInputDto cannot be null");
+            throw new ForbiddenException("SessionInsightInputDto cannot be null");
         }
         try {
             SessionInsight entity = new SessionInsight();
@@ -41,7 +41,7 @@ public class SessionInsightsMapper {
             entity.setFiles(files);
             return entity;
         } catch (Exception e) {
-            throw new MappingException("Error mapping SessionInsightInputDto to SessionInsight", e);
+            throw new ForbiddenException("Error mapping SessionInsightInputDto to SessionInsight" + e);
         }
     }
 }

@@ -1,25 +1,37 @@
 package nl.novi.bloomtrail.dtos;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 import nl.novi.bloomtrail.models.Authority;
 
 import java.util.Set;
 
 public class UserInputDto {
 
+    @NotEmpty(message = "Username cannot be empty")
     public String username;
+
+    @NotEmpty(message = "Password cannot be empty")
+    @Size(min = 8, message = "Password must be at least 8 characters long")
     public String password;
     public Boolean enabled;
     public String apikey;
+    @NotEmpty(message = "Email cannot be empty")
+    @Email(message = "Email must be valid")
     public String email;
-    public Set<Authority> authorities;
+    public String fullName;
+    @NotEmpty(message = "At least one authority must be assigned")
+    public String authority;
 
-    public UserInputDto(String username, String password, Boolean enabled, String apikey, String email, Set<Authority> authorities) {
+    public UserInputDto(String username, String password, Boolean enabled, String apikey, String email, String authority, String fullName) {
         this.username = username;
         this.password = password;
         this.enabled = enabled;
         this.apikey = apikey;
         this.email = email;
-        this.authorities = authorities;
+        this.fullName = fullName;
+        this.authority = authority;
     }
 
     public String getUsername() {
@@ -42,9 +54,14 @@ public class UserInputDto {
         return email;
     }
 
-    public Set<Authority> getAuthorities() {
-        return authorities;
+    public String getAuthority() {
+        return authority;
     }
+
+    public void setAuthority(String authority) {
+        this.authority = authority;
+    }
+
     public void setUsername(String username) {
         this.username = username;
     }
@@ -65,8 +82,12 @@ public class UserInputDto {
         this.email = email;
     }
 
-    public void setAuthorities(Set<Authority> authorities) {
-        this.authorities = authorities;
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
 }

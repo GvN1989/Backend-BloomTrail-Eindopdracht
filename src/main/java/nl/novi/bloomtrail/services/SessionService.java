@@ -1,7 +1,7 @@
 package nl.novi.bloomtrail.services;
 
 import nl.novi.bloomtrail.dtos.SessionInputDto;
-import nl.novi.bloomtrail.exceptions.RecordNotFoundException;
+import nl.novi.bloomtrail.exceptions.NotFoundException;
 import nl.novi.bloomtrail.helper.DateConverter;
 import nl.novi.bloomtrail.helper.ValidationHelper;
 import nl.novi.bloomtrail.helper.TimeConverter;
@@ -35,7 +35,7 @@ public class SessionService {
 
         List<CoachingProgram> programs = coachingProgramRepository.findByUserUsername(username);
         if (programs.isEmpty()) {
-            throw new RecordNotFoundException("The user with username " + username + " does not have any coaching programs");
+            throw new NotFoundException("The user with username " + username + " does not have any coaching programs");
         }
 
         List<Step> steps = programs.stream()
@@ -43,7 +43,7 @@ public class SessionService {
                 .toList();
 
         if (steps.isEmpty()) {
-            throw new RecordNotFoundException("The user with username " + username + " does not have any steps");
+            throw new NotFoundException("The user with username " + username + " does not have any steps");
         }
 
         return steps.stream()
@@ -72,7 +72,7 @@ public class SessionService {
 
     public Session updateSession(Long sessionId, SessionInputDto inputDto) {
         Session session = sessionRepository.findById(sessionId)
-                .orElseThrow(() -> new RecordNotFoundException("Session with ID " + sessionId + " not found"));
+                .orElseThrow(() -> new NotFoundException("Session with ID " + sessionId + " not found"));
 
         if (inputDto.getSessionDate() != null) {
             session.setSessionDate(DateConverter.convertToLocalDate(inputDto.getSessionDate()));
@@ -92,7 +92,7 @@ public class SessionService {
 
     public void deleteSession(Long sessionId) {
         if (!sessionRepository.existsById(sessionId)) {
-            throw new RecordNotFoundException("No session found with ID " + sessionId);
+            throw new NotFoundException("No session found with ID " + sessionId);
         }
         sessionRepository.deleteById(sessionId);
     }

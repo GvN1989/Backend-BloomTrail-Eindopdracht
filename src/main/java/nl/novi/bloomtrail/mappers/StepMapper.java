@@ -2,7 +2,7 @@ package nl.novi.bloomtrail.mappers;
 
 import nl.novi.bloomtrail.dtos.StepDto;
 import nl.novi.bloomtrail.dtos.StepInputDto;
-import nl.novi.bloomtrail.exceptions.MappingException;
+import nl.novi.bloomtrail.exceptions.ForbiddenException;
 import nl.novi.bloomtrail.models.CoachingProgram;
 import nl.novi.bloomtrail.models.Step;
 import nl.novi.bloomtrail.models.Session;
@@ -46,7 +46,7 @@ public class StepMapper {
 
     public static Step toStepEntity(StepInputDto inputDto, CoachingProgram coachingProgramId, List<Session> sessions, List<Assignment> assignments) {
         if (inputDto == null) {
-            throw new MappingException("StepInputDto cannot be null");
+            throw new ForbiddenException("StepInputDto cannot be null");
         }
         try {
 
@@ -64,7 +64,7 @@ public class StepMapper {
 
         return step;
         } catch (Exception e) {
-            throw new MappingException("Error mapping StepInputDto to Step", e);
+            throw new ForbiddenException("Error mapping StepInputDto to Step" + e);
         }
 
     }
