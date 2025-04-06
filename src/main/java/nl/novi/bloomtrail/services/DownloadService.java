@@ -1,6 +1,7 @@
 package nl.novi.bloomtrail.services;
 
 import nl.novi.bloomtrail.enums.FileContext;
+import nl.novi.bloomtrail.exceptions.NotFoundException;
 import nl.novi.bloomtrail.helper.ValidationHelper;
 import nl.novi.bloomtrail.models.*;
 import org.springframework.stereotype.Service;
@@ -30,7 +31,7 @@ public class DownloadService {
         try {
             return Files.readAllBytes(Paths.get(url));
         } catch (IOException e) {
-            throw new RuntimeException("Failed to read file from local system: " + url, e);
+            throw new NotFoundException("The requested file could not be found at: " + url);
         }
     }
 

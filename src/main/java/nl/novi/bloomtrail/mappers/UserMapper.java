@@ -2,6 +2,7 @@ package nl.novi.bloomtrail.mappers;
 
 import nl.novi.bloomtrail.dtos.UserDto;
 import nl.novi.bloomtrail.dtos.UserInputDto;
+import nl.novi.bloomtrail.exceptions.BadRequestException;
 import nl.novi.bloomtrail.models.Authority;
 import nl.novi.bloomtrail.models.User;
 
@@ -36,11 +37,15 @@ public class UserMapper {
         user.setEmail(userInputDto.getEmail());
         user.setFullName(userInputDto.getFullName());
 
-        Authority authority = new Authority();
-        authority.setAuthority(userInputDto.getAuthority());
-        authority.setUser(user);
+        if (userInputDto.getAuthority() == null || userInputDto.getAuthority().isBlank()) {
+            throw new BadRequestException("User must be assigned a valid role.");}
 
-        user.setAuthority(authority);
+            Authority authority = new Authority();
+            authority.setAuthority(userInputDto.getAuthority());
+            authority.setUser(user);
+            authority.setUsername(user.getUsername());
+
+            user.setAuthority(authority);
 
         return user;
     }

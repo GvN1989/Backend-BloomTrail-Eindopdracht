@@ -39,7 +39,7 @@ public class CoachingProgramController {
         return ResponseEntity.ok(dto);
     }
 
-    @GetMapping("/by-name")
+    @GetMapping("/name")
     public ResponseEntity<List<CoachingProgramDto>> getCoachingProgramByName(@RequestParam("name") String coachingProgramName) {
         List<CoachingProgram> coachingPrograms = coachingProgramService.findByCoachingProgramNameIgnoreCase(coachingProgramName);
 
@@ -54,18 +54,11 @@ public class CoachingProgramController {
         return ResponseEntity.ok(dtos);
     }
     @GetMapping("/user/{username}")
-    public List<CoachingProgram> getCoachingProgramsByUser(@PathVariable String username) {
-        return coachingProgramService.getCoachingProgramsByUser(username);
-    }
-
-    @GetMapping("/{id}/steps")
-    public ResponseEntity<List<StepDto>> getStepsByCoachingProgram(@PathVariable("id") Long coachingProgramId) {
-        List<Step> steps = coachingProgramService.getStepsByCoachingProgram(coachingProgramId);
-        List<StepDto> response = steps.stream()
-                .sorted(Comparator.comparingInt(Step::getSequence))
-                .map(StepMapper::toStepDto)
+    public List<CoachingProgramDto> getCoachingProgramsByUser(@PathVariable String username) {
+        return coachingProgramService.getCoachingProgramsByUser(username)
+                .stream()
+                .map(CoachingProgramMapper::toCoachingProgramDto)
                 .toList();
-        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}/progress")
@@ -90,13 +83,15 @@ public class CoachingProgramController {
 
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity <CoachingProgramDto> updateCoachingProgram (@Valid @PathVariable("id") Long coachingProgramId, @RequestBody CoachingProgramInputDto inputDto) {
-        CoachingProgram updatedCoachingProgram = coachingProgramService.updateCoachingProgram(coachingProgramId, inputDto);
+    @PutMapping("/{username}/{id}")
+    public ResponseEntity <CoachingProgramDto> updateCoachingProgram (
+            @PathVariable Long id,
+            @PathVariable String username,
+            @Valid @RequestBody CoachingProgramPatchDto inputDto
+    ) {
+        CoachingProgram updatedCoachingProgram = coachingProgramService.updateCoachingProgram(username,id,inputDto);
         CoachingProgramDto updatedCoachingProgramDto = CoachingProgramMapper.toCoachingProgramDto(updatedCoachingProgram);
         return ResponseEntity.ok().body(updatedCoachingProgramDto);
-
     }
-
 
 }

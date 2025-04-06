@@ -1,10 +1,14 @@
 package nl.novi.bloomtrail.helper;
 
+import nl.novi.bloomtrail.dtos.StepInputDto;
 import nl.novi.bloomtrail.dtos.UserInputDto;
 import nl.novi.bloomtrail.exceptions.BadRequestException;
 import nl.novi.bloomtrail.exceptions.NotFoundException;
 import nl.novi.bloomtrail.models.*;
 import nl.novi.bloomtrail.repositories.*;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -52,8 +56,8 @@ public class ValidationHelper {
             throw new IllegalArgumentException("Coaching program ID cannot be null.");
         }
 
-        return coachingProgramRepository.findById(coachingProgramId)
-                .orElseThrow(() -> new NotFoundException("CoachingProgram" + coachingProgramId));
+        return coachingProgramRepository.findByCoachingProgramId(coachingProgramId)
+                .orElseThrow(() -> new NotFoundException("CoachingProgram not found with ID:" + coachingProgramId));
     }
 
     public List<CoachingProgram> validateCoachingProgramName(String coachingProgramName) {
@@ -66,20 +70,9 @@ public class ValidationHelper {
         return programs;
     }
 
-
     public Step validateStep(Long StepId) {
         return stepRepository.findById(StepId)
                 .orElseThrow(() -> new NotFoundException("Step with ID" + StepId));
-    }
-
-
-    public List<Step> validateSteps(List<Long> stepIds) {
-        if (stepIds == null || stepIds.isEmpty()) {
-            return List.of();
-        }
-        return stepIds.stream()
-                .map(this::validateStep)
-                .collect(Collectors.toList());
     }
 
     public List<Session> validateSessions(List<Long> sessionIds) {
@@ -106,32 +99,9 @@ public class ValidationHelper {
         return assignments;
     }
 
-    public void validateStepAssignment(CoachingProgram coachingProgram, Step step) {
-        List<Step> timeline = coachingProgram.getTimeline();
-
-        if (timeline.contains(step)) {
-            throw new IllegalArgumentException("Step is already part of the timeline.");
-        }
-
-        boolean stepNameExists = timeline.stream()
-                .anyMatch(existingStep -> existingStep.getStepName().equalsIgnoreCase(step.getStepName()));
-        if (stepNameExists) {
-            throw new IllegalArgumentException("A step with the name '" + step.getStepName() + "' already exists in the timeline.");
-        }
-    }
-
     public StrengthResults validateStrengthResult(Long resultId) {
         return strengthResultsRepository.findById(resultId)
                 .orElseThrow(() -> new NotFoundException("StrengthResults" + resultId));
-    }
-
-    public List<StrengthResults> validateStrengthResults(List<Long> resultsIds) {
-        if (resultsIds == null || resultsIds.isEmpty()) {
-            return List.of();
-        }
-        return resultsIds.stream()
-                .map(this::validateStrengthResult)
-                .collect(Collectors.toList());
     }
 
     public SessionInsight validateSessionInsight(Long sessionInsightId) {
@@ -169,6 +139,58 @@ public class ValidationHelper {
         }
     }
 
+    public User getAuthenticatedUser() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (principal instanceof UserDetails userDetails) {
+            return userRepository.findByUsername(userDetails.getUsername())
+                    .orElseThrow(() -> new NotFoundException("User not found: " + userDetails.getUsername()));
+        }
+
+        throw new AccessDeniedException("Unable to determine authenticated user.");
+    }
+
+    public void validateCoachOwnsProgramOrIsAdmin(CoachingProgram program) {
+        User currentUser = getAuthenticatedUser();
+
+        boolean isAdmin = currentUser.getAuthority().getAuthority().equals("ADMIN");
+        boolean isCoach = program.getCoach().getUsername().equals(currentUser.getUsername());
+
+        if (!isAdmin && !isCoach) {
+            throw new AccessDeniedException("You do not have permission to modify this coaching program.");
+        }
+    }
+
+    public void validateStepCreationInput(StepInputDto inputDto) {
+        if (inputDto.getStepName() == null || inputDto.getStepName().isBlank()) {
+            throw new IllegalArgumentException("Step name is required.");
+        }
+        if (inputDto.getStepGoal() == null || inputDto.getStepGoal().isBlank()) {
+            throw new IllegalArgumentException("Step goal is required.");
+        }
+        if (inputDto.getCoachingProgramId() == null) {
+            throw new IllegalArgumentException("Coaching program ID is required.");
+        }
+        if (inputDto.getStepStartDate() == null || inputDto.getStepEndDate() == null) {
+            throw new IllegalArgumentException("Step start date and end date cannot be null.");
+        }
+    }
+
+    public void validateStepSequence(CoachingProgram coachingProgram, Step newStep) {
+
+        validateCoachOwnsProgramOrIsAdmin(coachingProgram);
+        List<Step> existingSteps = stepRepository.findByCoachingProgram(coachingProgram);
+
+        for (Step step : existingSteps) {
+            if (!step.getStepId().equals(newStep.getStepId()) && step.getSequence().equals(newStep.getSequence())) {
+                throw new IllegalArgumentException("A step with sequence " + newStep.getSequence() + " already exists in this program.");
+            }
+
+            if (step.getStepStartDate().isAfter(newStep.getStepStartDate()) && step.getSequence() < newStep.getSequence()) {
+                throw new IllegalArgumentException("The step's start date conflicts with the provided sequence.");
+            }
+        }
+    }
 
 
 }

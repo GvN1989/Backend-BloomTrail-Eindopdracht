@@ -38,7 +38,7 @@ public class File {
     @JoinColumn(name = "session_insight_id", insertable = false, updatable = false)
     private SessionInsight sessionInsight;
 
-    @OneToOne(mappedBy = "profilePicture", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "profilePicture")
     private User user;
 
     public Long getFileId() {

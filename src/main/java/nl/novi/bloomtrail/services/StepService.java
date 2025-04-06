@@ -1,6 +1,7 @@
 package nl.novi.bloomtrail.services;
 
 import nl.novi.bloomtrail.dtos.StepInputDto;
+import nl.novi.bloomtrail.dtos.StepReorderDto;
 import nl.novi.bloomtrail.exceptions.NotFoundException;
 import nl.novi.bloomtrail.helper.DateConverter;
 import nl.novi.bloomtrail.mappers.StepMapper;
@@ -38,6 +39,22 @@ public class StepService {
         return validationHelper.validateStep(stepId);
     }
 
+    public List<Step> getStepsForUserAndProgram(String username, Long programId) {
+        validationHelper.validateUser(username);
+
+        CoachingProgram program = coachingProgramRepository
+                .findByCoachingProgramIdAndClientUsername(programId, username)
+                .orElseThrow(() -> new NotFoundException("Program not found for user"));
+
+        List<Step> steps = stepRepository.findByCoachingProgram(program);
+
+        if (steps.isEmpty()) {
+            throw new NotFoundException("No steps found for CoachingProgram with ID: " + programId);
+        }
+
+        return steps;
+    }
+
     public List<Step> addStepsToProgram(List<StepInputDto> inputDtos) {
         List<Step> savedSteps = new ArrayList<>();
 
@@ -49,13 +66,21 @@ public class StepService {
             List<Session> sessions = (inputDto.getSessionIds() != null) ? validationHelper.validateSessions(inputDto.getSessionIds()) : new ArrayList<>();
             List<Assignment> assignments = (inputDto.getAssignmentIds() != null) ? validationHelper.validateAssignments(inputDto.getAssignmentIds()) : new ArrayList<>();
 
-            if (inputDto.getStepStartDate() == null || inputDto.getStepEndDate() == null) {
-                throw new IllegalArgumentException("Step start date and end date cannot be null.");
-            }
+            validationHelper.validateStepCreationInput(inputDto);
 
             Step step = StepMapper.toStepEntity(inputDto, coachingProgram, sessions, assignments);
 
-            validateStepSequence(coachingProgramId, step);
+            if (inputDto.getSequence() == null) {
+                int max = stepRepository.findByCoachingProgram(coachingProgram).stream()
+                        .mapToInt(Step::getSequence)
+                        .max()
+                        .orElse(0);
+                step.setSequence(max + 1);
+            } else {
+                step.setSequence(inputDto.getSequence());
+            }
+
+            validationHelper.validateStepSequence(coachingProgram, step);
 
             step.setCoachingProgram(coachingProgram);
             coachingProgram.getTimeline().add(step);
@@ -71,9 +96,12 @@ public class StepService {
         return savedSteps;
     }
 
-    public Step updateStep(Long stepId, StepInputDto inputDto) {
+    public Step updateStepDetails(Long stepId, StepInputDto inputDto) {
 
         Step existingStep = validationHelper.validateStep(stepId);
+        CoachingProgram coachingProgram = existingStep.getCoachingProgram();
+
+        validationHelper.validateCoachOwnsProgramOrIsAdmin(coachingProgram);
 
         if (inputDto.getStepName() != null) {
             existingStep.setStepName(inputDto.getStepName());
@@ -84,27 +112,8 @@ public class StepService {
         if (inputDto.getStepEndDate() != null) {
             existingStep.setStepEndDate(DateConverter.convertToLocalDate(inputDto.getStepEndDate()));
         }
-        if (inputDto.getCompleted() != null) {
-            existingStep.setCompleted(inputDto.getCompleted());
-        }
         if (inputDto.getStepGoal() != null) {
             existingStep.setStepGoal(inputDto.getStepGoal());
-        }
-        if (inputDto.getSequence() != null) {
-            validateStepSequence(existingStep.getCoachingProgram().getCoachingProgramId(), existingStep);
-            existingStep.setSequence(inputDto.getSequence());
-        }
-        if (inputDto.getCoachingProgramId() != null) {
-            CoachingProgram coachingProgram = validationHelper.validateCoachingProgram(inputDto.getCoachingProgramId());
-            existingStep.setCoachingProgram(coachingProgram);
-        }
-        if (inputDto.getSessionIds() != null && !inputDto.getSessionIds().isEmpty()) {
-            List<Session> sessions = validationHelper.validateSessions(inputDto.getSessionIds());
-            existingStep.setSession(sessions);
-        }
-        if (inputDto.getAssignmentIds() != null && !inputDto.getAssignmentIds().isEmpty()) {
-            List<Assignment> assignments = validationHelper.validateAssignments(inputDto.getAssignmentIds());
-            existingStep.setAssignment(assignments);
         }
 
         Step updatedStep = stepRepository.save(existingStep);
@@ -113,18 +122,26 @@ public class StepService {
 
         return updatedStep;
     }
-    private void validateStepSequence(Long coachingProgramId, Step newStep) {
-        List<Step> existingSteps = stepRepository.findStepsByCoachingProgram(coachingProgramId);
 
-        for (Step step : existingSteps) {
-            if (step.getSequence().equals(newStep.getSequence())) {
-                throw new IllegalArgumentException("A step with sequence " + newStep.getSequence() + " already exists in this program.");
-            }
-
-            if (step.getStepStartDate().isAfter(newStep.getStepStartDate()) && step.getSequence() < newStep.getSequence()) {
-                throw new IllegalArgumentException("The step's start date conflicts with the provided sequence.");
-            }
+    public List<Step> reorderStepSequence(List<StepReorderDto> reorderDtos) {
+        if (reorderDtos == null || reorderDtos.isEmpty()) {
+            throw new IllegalArgumentException("No steps provided for reordering.");
         }
+        List<Step> updatedSteps = new ArrayList<>();
+
+        for (StepReorderDto dto : reorderDtos) {
+            Step step = validationHelper.validateStep(dto.getStepId());
+            CoachingProgram coachingProgram = step.getCoachingProgram();
+
+            validationHelper.validateCoachOwnsProgramOrIsAdmin(coachingProgram);
+
+            step.setSequence(dto.getNewSequence());
+            validationHelper.validateStepSequence(coachingProgram, step);
+
+            updatedSteps.add(step);
+        }
+
+        return stepRepository.saveAll(updatedSteps);
     }
 
     public void deleteStep(Long stepId) {

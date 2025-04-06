@@ -1,6 +1,7 @@
 package nl.novi.bloomtrail.services;
 
 import nl.novi.bloomtrail.dtos.CoachingProgramInputDto;
+import nl.novi.bloomtrail.dtos.CoachingProgramPatchDto;
 import nl.novi.bloomtrail.dtos.SimpleCoachingProgramDto;
 import nl.novi.bloomtrail.exceptions.NotFoundException;
 import nl.novi.bloomtrail.helper.DateConverter;
@@ -45,16 +46,11 @@ public class CoachingProgramService {
     }
 
     public List<CoachingProgram> getCoachingProgramsByUser(String username) {
-        return coachingProgramRepository.findByUserUsername(username);
-    }
-
-    public List<Step> getStepsByCoachingProgram(Long coachingProgramId) {
-        CoachingProgram coachingProgram = validationHelper.validateCoachingProgram(coachingProgramId);
-        List<Step> steps = stepRepository.findStepsByCoachingProgram(coachingProgramId);
-        if (steps.isEmpty()) {
-            throw new NotFoundException("No steps found for CoachingProgram with ID: " + coachingProgramId);
+        if (username == null) {
+            throw new IllegalArgumentException("Username cannot be null");
         }
-        return steps;
+        validationHelper.validateUser(username);
+        return coachingProgramRepository.findByUserUsername(username);
     }
 
     @Transactional
@@ -72,18 +68,16 @@ public class CoachingProgramService {
         return coachingProgramRepository.save(coachingProgram);
     }
 
-    public CoachingProgram updateCoachingProgram(Long coachingProgramId, @Valid CoachingProgramInputDto inputDto) {
+    public CoachingProgram updateCoachingProgram(String username, Long coachingProgramId, @Valid CoachingProgramPatchDto patchInputDto) {
+        User user = validationHelper.validateUser(username);
         CoachingProgram coachingProgram = validationHelper.validateCoachingProgram(coachingProgramId);
 
-        User client = validationHelper.validateUser(inputDto.getClientUsername());
-        User coach = validationHelper.validateUser(inputDto.getCoachUsername());
+        if (patchInputDto.getCoachUsername() != null) {
+            User coach = validationHelper.validateUser(patchInputDto.getCoachUsername());
+            coachingProgram.setCoach(coach);
+        }
 
-        coachingProgram.setCoachingProgramName(inputDto.getCoachingProgramName());
-        coachingProgram.setGoal(inputDto.getGoal());
-        coachingProgram.setStartDate(DateConverter.convertToLocalDate(inputDto.getStartDate()));
-        coachingProgram.setEndDate(DateConverter.convertToLocalDate(inputDto.getEndDate()));
-        coachingProgram.setClient(client);
-        coachingProgram.setCoach(coach);
+        CoachingProgramMapper.updateCoachingProgramFromPatchDto(coachingProgram, patchInputDto);
 
         return coachingProgramRepository.save(coachingProgram);
     }

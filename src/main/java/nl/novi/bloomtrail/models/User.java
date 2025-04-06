@@ -30,8 +30,8 @@ public class User {
     @Column(name = "api_key")
     private String apikey;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "upload_id")
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
+    @JoinColumn(name = "profile_picture_id")
     private File profilePicture;
 
     public User() {}

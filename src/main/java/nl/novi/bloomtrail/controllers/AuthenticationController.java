@@ -2,6 +2,8 @@ package nl.novi.bloomtrail.controllers;
 
 import nl.novi.bloomtrail.dtos.AuthenticationRequest;
 import nl.novi.bloomtrail.dtos.AuthenticationResponse;
+import nl.novi.bloomtrail.exceptions.ConflictException;
+import nl.novi.bloomtrail.helper.ErrorResponseBuilder;
 import nl.novi.bloomtrail.utils.JwtUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,14 +12,11 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.time.LocalDateTime;
-import java.util.HashMap;
+
 import java.util.Map;
 
 @RestController
@@ -36,27 +35,26 @@ public class AuthenticationController {
     public ResponseEntity<Object> authenticated(Authentication authentication, Principal principal) {
         if (authentication == null || !authentication.isAuthenticated()) {
 
-            Map<String, Object> response = new HashMap<>();
-            response.put("timestamp", LocalDateTime.now());
-            response.put("status", 401);
-            response.put("error", "Unauthorized");
-            response.put("message", "User is not authenticated.");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ErrorResponseBuilder.build(401, "User is not authenticated."));
         }
-        return ResponseEntity.ok().body(principal);
+        return ResponseEntity.ok(principal);
     }
 
     @PostMapping(value = "/authenticate")
-    public ResponseEntity<?> createAuthenticationToken(@RequestBody (required = false) AuthenticationRequest authenticationRequest) {
+    public ResponseEntity<?> createAuthenticationToken(@RequestBody(required = false) AuthenticationRequest authenticationRequest) {
 
-        if (authenticationRequest == null || authenticationRequest.getUsername() == null || authenticationRequest.getPassword() == null) {
-            Map<String, Object> errorDetails = new HashMap<>();
-            errorDetails.put("timestamp", LocalDateTime.now());
-            errorDetails.put("status", 400);
-            errorDetails.put("error", "Bad Request");
-            errorDetails.put("message", "The full request body has not been provided. Please enter 'username' and 'password'.");
+        if (authenticationRequest == null) {
+            return ResponseEntity.badRequest().body(
+                    ErrorResponseBuilder.build(400, "The request body is missing. Please provide 'username' and 'password'.")
+            );
+        }
 
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDetails);
+        if (authenticationRequest.getUsername() == null || authenticationRequest.getUsername().trim().isEmpty()
+                || authenticationRequest.getPassword() == null || authenticationRequest.getPassword().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(
+                    ErrorResponseBuilder.build(400, "Username and password must not be null or empty.")
+            );
         }
 
         try {
@@ -71,13 +69,21 @@ public class AuthenticationController {
             final String jwt = jwtUtils.generateToken(userDetails);
 
             return ResponseEntity.ok(new AuthenticationResponse(jwt));
-        } catch (BadCredentialsException ex) {
-            Map<String, Object> errorDetails = new HashMap<>();
-            errorDetails.put("timestamp", LocalDateTime.now());
-            errorDetails.put("status", 401);
-            errorDetails.put("error", "Unauthorized");
-            errorDetails.put("message", "Invalid username or password.");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorDetails);
+        } catch (BadCredentialsException | UsernameNotFoundException ex) {
+            ex.printStackTrace();
+            return ResponseEntity.status(401).body(
+                    ErrorResponseBuilder.build(401, "Invalid username or password.")
+            );
         }
+    }
+    @PostMapping("/logout/{username}")
+    public ResponseEntity<?> logout(@RequestHeader(value= "Authorization", required = false) String authHeader, Authentication authentication){
+        String username = (authentication != null) ? authentication.getName() : null;
+
+        String message = (username != null)
+                ? "User '" + username + "' logged out successfully."
+                : "Logout request received.";
+
+        return ResponseEntity.ok(ErrorResponseBuilder.build(200, message));
     }
 }

@@ -2,6 +2,7 @@ package nl.novi.bloomtrail.services;
 
 import jakarta.validation.*;
 import nl.novi.bloomtrail.dtos.CoachingProgramInputDto;
+import nl.novi.bloomtrail.dtos.CoachingProgramPatchDto;
 import nl.novi.bloomtrail.dtos.SimpleCoachingProgramDto;
 import nl.novi.bloomtrail.exceptions.NotFoundException;
 import nl.novi.bloomtrail.helper.DateConverter;
@@ -210,71 +211,31 @@ public class CoachingProgramServiceUnitTest {
 
     @Tag("unit")
     @Test
-    void getCoachingProgramsByUser_NullUsername() {
-        when(coachingProgramRepository.findByUserUsername(null)).thenReturn(Collections.emptyList());
-
-        List<CoachingProgram> result = coachingProgramService.getCoachingProgramsByUser(null);
-
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.isEmpty(), "Expected an empty list when username is null.");
-    }
-
-    @Tag("unit")
-    @Test
-    void getStepsByCoachingProgram_Success() {
-        Long coachingProgramId = 1L;
-
-        CoachingProgram coachingProgram = new CoachingProgram();
-        coachingProgram.setCoachingProgramId(coachingProgramId);
-
-        Step step1 = new Step();
-        step1.setStepId(1L);
-        step1.setStepName("Step 1");
-
-        Step step2 = new Step();
-        step2.setStepId(2L);
-        step2.setStepName("Step 2");
-
-        List<Step> mockSteps = List.of(step1, step2);
-
-        when(validationHelper.validateCoachingProgram(coachingProgramId)).thenReturn(coachingProgram);
-        when(stepRepository.findStepsByCoachingProgram(coachingProgramId)).thenReturn(mockSteps);
-
-        List<Step> result = coachingProgramService.getStepsByCoachingProgram(coachingProgramId);
-
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(2, result.size());
-        Assertions.assertEquals("Step 1", result.get(0).getStepName());
-        Assertions.assertEquals("Step 2", result.get(1).getStepName());
-    }
-
-    @Tag("unit")
-    @Test
-    void getStepsByCoachingProgram_NoStepsFound() {
-        Long coachingProgramId = 2L;
-
-        CoachingProgram coachingProgram = new CoachingProgram();
-        coachingProgram.setCoachingProgramId(coachingProgramId);
-
-        when(validationHelper.validateCoachingProgram(coachingProgramId)).thenReturn(coachingProgram);
-        when(stepRepository.findStepsByCoachingProgram(coachingProgramId)).thenReturn(Collections.emptyList());
-
-        Assertions.assertThrows(NotFoundException.class, () -> {
-            coachingProgramService.getStepsByCoachingProgram(coachingProgramId);
-        }, "Expected NotFoundException when no steps are found.");
-    }
-
-    @Tag("unit")
-    @Test
-    void getStepsByCoachingProgram_InvalidCoachingProgram() {
-        Long invalidCoachingProgramId = 99L;
-
-        when(validationHelper.validateCoachingProgram(invalidCoachingProgramId))
-                .thenThrow(new IllegalArgumentException("Invalid coaching program"));
-
+    void getCoachingProgramsByUser_NullUsername_ShouldThrowIllegalArgumentException() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            coachingProgramService.getStepsByCoachingProgram(invalidCoachingProgramId);
-        }, "Expected IllegalArgumentException when coaching program is invalid.");
+            coachingProgramService.getCoachingProgramsByUser(null);
+        });
+    }
+
+    @Tag("unit")
+    @Test
+    void getCoachingProgramsByUser_ValidUsername_ShouldReturnList() {
+        String username = "charlie";
+        User mockUser = new User();
+        mockUser.setUsername(username);
+
+        CoachingProgram cp1 = new CoachingProgram();
+        cp1.setCoachingProgramName("Program A");
+
+        List<CoachingProgram> programs = List.of(cp1);
+
+        when(validationHelper.validateUser(username)).thenReturn(mockUser);
+        when(coachingProgramRepository.findByUserUsername(username)).thenReturn(programs);
+
+        List<CoachingProgram> result = coachingProgramService.getCoachingProgramsByUser(username);
+
+        Assertions.assertEquals(1, result.size());
+        Assertions.assertEquals("Program A", result.get(0).getCoachingProgramName());
     }
 
     @Tag("unit")
@@ -401,15 +362,31 @@ public class CoachingProgramServiceUnitTest {
     @Test
     void updateCoachingProgram_Success() {
 
-        CoachingProgramInputDto inputDto = new CoachingProgramInputDto();
-        inputDto.setClientUsername("clientUser");
+        CoachingProgramPatchDto inputDto = new CoachingProgramPatchDto();
         inputDto.setCoachUsername("coachUser");
         inputDto.setCoachingProgramName("Updated Program");
         inputDto.setGoal("Updated Goal");
         inputDto.setStartDate(DateConverter.convertToDate(LocalDate.parse("2024-03-01")));
         inputDto.setEndDate(DateConverter.convertToDate(LocalDate.parse("2024-06-01")));
 
-        CoachingProgram result = coachingProgramService.updateCoachingProgram(1L, inputDto);
+        String clientUsername = "clientUser";
+        Long programId = 1L;
+
+        User client = new User();
+        client.setUsername("clientUser");
+
+        User coach = new User();
+        coach.setUsername("coachUser");
+
+        CoachingProgram program = new CoachingProgram();
+        program.setClient(client);
+
+        Mockito.when(validationHelper.validateUser("clientUser")).thenReturn(client);
+        Mockito.when(validationHelper.validateUser("coachUser")).thenReturn(coach);
+        Mockito.when(validationHelper.validateCoachingProgram(programId)).thenReturn(program);
+        Mockito.when(coachingProgramRepository.save(Mockito.any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        CoachingProgram result = coachingProgramService.updateCoachingProgram("clientUser",1L, inputDto);
 
         Assertions.assertNotNull(result);
         Assertions.assertEquals("Updated Program", result.getCoachingProgramName());
@@ -424,76 +401,58 @@ public class CoachingProgramServiceUnitTest {
     @Test
     void updateCoachingProgram_InvalidCoachingProgramId() {
         Long invalidCoachingProgramId = 99L;
-        CoachingProgramInputDto inputDto = new CoachingProgramInputDto();
+        String username = "clientUser";
 
+        CoachingProgramPatchDto inputDto = new CoachingProgramPatchDto();
+
+        when(validationHelper.validateUser(username)).thenReturn(new User());
         when(validationHelper.validateCoachingProgram(invalidCoachingProgramId))
                 .thenThrow(new NotFoundException("Coaching program not found"));
 
         Assertions.assertThrows(NotFoundException.class, () -> {
-            coachingProgramService.updateCoachingProgram(invalidCoachingProgramId, inputDto);
-        }, "Expected NotFoundException when coaching program ID is invalid.");
+            coachingProgramService.updateCoachingProgram(username, invalidCoachingProgramId, inputDto);
+        });
     }
 
     @Tag("unit")
     @Test
     void updateCoachingProgram_InvalidClientUsername() {
         Long coachingProgramId = 1L;
-        CoachingProgramInputDto inputDto = new CoachingProgramInputDto();
-        inputDto.setClientUsername("invalidClient");
-        inputDto.setCoachUsername("coachUser");
+        String invalidClientUsername = "invalidClient";
 
-        CoachingProgram coachingProgram = new CoachingProgram();
-        coachingProgram.setCoachingProgramId(coachingProgramId);
+        CoachingProgramPatchDto inputDto = new CoachingProgramPatchDto();
 
-        when(validationHelper.validateCoachingProgram(coachingProgramId)).thenReturn(coachingProgram);
-        when(validationHelper.validateUser("invalidClient"))
+        when(validationHelper.validateUser(invalidClientUsername))
                 .thenThrow(new IllegalArgumentException("Client user not found"));
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            coachingProgramService.updateCoachingProgram(coachingProgramId, inputDto);
-        }, "Expected IllegalArgumentException when client username is invalid.");
-    }
-
-    @Tag("unit")
-    @Test
-    void updateCoachingProgram_NullStartDate() {
-        Long coachingProgramId = 1L;
-        CoachingProgramInputDto inputDto = new CoachingProgramInputDto();
-        inputDto.setClientUsername("clientUser");
-        inputDto.setCoachUsername("coachUser");
-        inputDto.setCoachingProgramName("TestProgram");
-
-        inputDto.setStartDate(null);
-        inputDto.setEndDate(DateConverter.convertToDate(LocalDate.parse("2025-12-01")));
-
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        Validator validator = factory.getValidator();
-
-        Set<ConstraintViolation<CoachingProgramInputDto>> violations = validator.validate(inputDto);
-
-        Assertions.assertFalse(violations.isEmpty(), "Expected validation violations for null startDate.");
+            coachingProgramService.updateCoachingProgram(invalidClientUsername, coachingProgramId, inputDto);
+        });
     }
 
     @Tag("unit")
     @Test
     void updateCoachingProgram_DatabaseError() {
         Long coachingProgramId = 1L;
+        String username = "clientUser";
 
-        CoachingProgramInputDto inputDto = new CoachingProgramInputDto();
-        inputDto.setClientUsername("clientUser");
-        inputDto.setCoachUsername("coachUser");
-        inputDto.setCoachingProgramName("TestProgram");
+        CoachingProgramPatchDto inputDto = new CoachingProgramPatchDto();
+        inputDto.setGoal("Test goal");
 
-        CoachingProgram coachingProgram = new CoachingProgram();
-        coachingProgram.setCoachingProgramId(coachingProgramId);
+        User client = new User();
+        client.setUsername(username);
 
-        when(validationHelper.validateCoachingProgram(coachingProgramId)).thenReturn(coachingProgram);
+        CoachingProgram program = new CoachingProgram();
+        program.setClient(client);
+
+        when(validationHelper.validateUser(username)).thenReturn(client);
+        when(validationHelper.validateCoachingProgram(coachingProgramId)).thenReturn(program);
         when(coachingProgramRepository.save(any(CoachingProgram.class)))
                 .thenThrow(new RuntimeException("Database error"));
 
         Assertions.assertThrows(RuntimeException.class, () -> {
-            coachingProgramService.updateCoachingProgram(coachingProgramId, inputDto);
-        }, "Expected RuntimeException when database save fails.");
+            coachingProgramService.updateCoachingProgram(username, coachingProgramId, inputDto);
+        });
     }
 
     @Tag ("unit")

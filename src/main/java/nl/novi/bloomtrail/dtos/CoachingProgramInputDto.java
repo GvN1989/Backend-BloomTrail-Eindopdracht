@@ -32,7 +32,10 @@ public class CoachingProgramInputDto {
     @Future
     private Date endDate;
 
+    @NotBlank(message = "Client username is required")
     private String clientUsername;
+
+    @NotBlank(message = "Coach username is required")
     private String coachUsername;
 
 

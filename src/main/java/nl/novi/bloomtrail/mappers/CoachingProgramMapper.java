@@ -2,6 +2,7 @@ package nl.novi.bloomtrail.mappers;
 
 import nl.novi.bloomtrail.dtos.CoachingProgramDto;
 import nl.novi.bloomtrail.dtos.CoachingProgramInputDto;
+import nl.novi.bloomtrail.dtos.CoachingProgramPatchDto;
 import nl.novi.bloomtrail.exceptions.ForbiddenException;
 import nl.novi.bloomtrail.models.CoachingProgram;
 import nl.novi.bloomtrail.models.File;
@@ -68,8 +69,25 @@ public class CoachingProgramMapper {
         } catch (Exception e) {
             throw new ForbiddenException("Error mapping CoachingProgramInputDto to CoachingProgram" + e);
         }
-
-
     }
 
+    public static void updateCoachingProgramFromPatchDto(CoachingProgram program, CoachingProgramPatchDto dto) {
+
+        if (dto.getCoachingProgramName() != null) {
+            program.setCoachingProgramName(dto.getCoachingProgramName());
+        }
+
+        if (dto.getGoal() != null) {
+            program.setGoal(dto.getGoal());
+        }
+
+        if (dto.getStartDate() != null) {
+            program.setStartDate(DateConverter.convertToLocalDate(dto.getStartDate()));
+        }
+
+        if (dto.getEndDate() != null) {
+            program.setEndDate(DateConverter.convertToLocalDate(dto.getEndDate()));
+        }
+
+    }
 }

@@ -1,13 +1,11 @@
 package nl.novi.bloomtrail.services;
 
 import nl.novi.bloomtrail.dtos.StepInputDto;
+import nl.novi.bloomtrail.dtos.StepReorderDto;
 import nl.novi.bloomtrail.exceptions.NotFoundException;
 import nl.novi.bloomtrail.helper.DateConverter;
 import nl.novi.bloomtrail.helper.ValidationHelper;
-import nl.novi.bloomtrail.models.Assignment;
-import nl.novi.bloomtrail.models.CoachingProgram;
-import nl.novi.bloomtrail.models.Session;
-import nl.novi.bloomtrail.models.Step;
+import nl.novi.bloomtrail.models.*;
 import nl.novi.bloomtrail.repositories.CoachingProgramRepository;
 import nl.novi.bloomtrail.repositories.StepRepository;
 
@@ -23,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,10 +46,13 @@ public class StepServiceUnitTest {
     private DownloadService downloadService;
     @InjectMocks
     private StepService stepService;
+    @Mock
     private Step mockStep;
+    @Mock
     private StepInputDto mockStepInputDto;
+    @Mock
     private Assignment mockAssignment;
-
+    @Mock
     private CoachingProgram mockCoachingProgram;
 
     @BeforeEach
@@ -95,12 +97,69 @@ public class StepServiceUnitTest {
 
     @Tag("unit")
     @Test
+    void returnsSteps_whenStepsExistForUserAndProgram() {
+        String username = "testuser";
+        Long programId = 1L;
+
+        CoachingProgram mockProgram = new CoachingProgram();
+        mockProgram.setCoachingProgramId(programId);
+
+        Step mockStep = new Step();
+        mockStep.setStepId(1L);
+        mockStep.setStepName("Step 1");
+
+        when(validationHelper.validateUser(username)).thenReturn(new User());
+        when(coachingProgramRepository.findByCoachingProgramIdAndClientUsername(programId, username))
+                .thenReturn(Optional.of(mockProgram));
+        when(stepRepository.findByCoachingProgram(mockProgram)).thenReturn(List.of(mockStep));
+
+        List<Step> result = stepService.getStepsForUserAndProgram(username, programId);
+
+        Assertions.assertEquals(1, result.size());
+        Assertions.assertEquals("Step 1", result.get(0).getStepName());
+    }
+
+    @Tag("unit")
+    @Test
+    void throwsNotFound_whenProgramNotFoundForUser() {
+        String username = "ghost";
+        Long programId = 99L;
+
+        when(validationHelper.validateUser(username)).thenReturn(new User());
+        when(coachingProgramRepository.findByCoachingProgramIdAndClientUsername(programId, username))
+                .thenReturn(Optional.empty());
+
+        Assertions.assertThrows(NotFoundException.class, () ->
+                stepService.getStepsForUserAndProgram(username, programId));
+    }
+
+    @Tag("unit")
+    @Test
+    void throwsNotFound_whenNoStepsExistForProgram() {
+        String username = "testuser";
+        Long programId = 1L;
+
+        CoachingProgram mockProgram = new CoachingProgram();
+        mockProgram.setCoachingProgramId(programId);
+
+        when(validationHelper.validateUser(username)).thenReturn(new User());
+        when(coachingProgramRepository.findByCoachingProgramIdAndClientUsername(programId, username))
+                .thenReturn(Optional.of(mockProgram));
+        when(stepRepository.findByCoachingProgram(mockProgram)).thenReturn(List.of());
+
+        Assertions.assertThrows(NotFoundException.class, () ->
+                stepService.getStepsForUserAndProgram(username, programId));
+    }
+
+
+
+    @Tag("unit")
+    @Test
     void testAddStepsToProgram_Success() {
 
         when(validationHelper.validateCoachingProgram(1L)).thenReturn(mockCoachingProgram);
-        when(stepRepository.findStepsByCoachingProgram(1L)).thenReturn(List.of());
         when(stepRepository.save(any(Step.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(coachingProgramRepository.save(any(CoachingProgram.class))).thenReturn(mockCoachingProgram);
+        doNothing().when(validationHelper).validateStepCreationInput(any(StepInputDto.class));
 
         StepInputDto stepDto = new StepInputDto();
         stepDto.setCoachingProgramId(1L);
@@ -112,9 +171,41 @@ public class StepServiceUnitTest {
         Assertions.assertDoesNotThrow(() -> stepService.addStepsToProgram(List.of(stepDto)));
 
         Mockito.verify(validationHelper, Mockito.times(1)).validateCoachingProgram(1L);
+        Mockito.verify(validationHelper, Mockito.times(1)).validateStepCreationInput(any(StepInputDto.class));
         Mockito.verify(stepRepository, Mockito.times(1)).save(any(Step.class));
         Mockito.verify(coachingProgramRepository, Mockito.times(1)).save(any(CoachingProgram.class));
         Mockito.verify(coachingProgramService, Mockito.times(1)).updateProgramEndDate(1L);
+    }
+
+    @Tag("unit")
+    @Test
+    void testAddMultipleStepsToProgram_Success() {
+        when(validationHelper.validateCoachingProgram(1L)).thenReturn(mockCoachingProgram);
+        doNothing().when(validationHelper).validateStepCreationInput(any(StepInputDto.class));
+        when(stepRepository.findByCoachingProgram(any(CoachingProgram.class))).thenReturn(List.of());
+        when(stepRepository.save(any(Step.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(coachingProgramRepository.save(any(CoachingProgram.class))).thenReturn(mockCoachingProgram);
+
+        StepInputDto step1 = new StepInputDto();
+        step1.setCoachingProgramId(1L);
+        step1.setStepName("Step A");
+        step1.setSequence(1);
+        step1.setStepStartDate(DateConverter.convertToDate(LocalDate.parse("2025-01-01")));
+        step1.setStepEndDate(DateConverter.convertToDate(LocalDate.parse("2025-02-01")));
+
+        StepInputDto step2 = new StepInputDto();
+        step2.setCoachingProgramId(1L);
+        step2.setStepName("Step B");
+        step2.setSequence(2);
+        step2.setStepStartDate(DateConverter.convertToDate(LocalDate.parse("2025-02-02")));
+        step2.setStepEndDate(DateConverter.convertToDate(LocalDate.parse("2025-03-01")));
+
+        List<Step> result = stepService.addStepsToProgram(List.of(step1, step2));
+
+        Assertions.assertEquals(2, result.size());
+        verify(stepRepository, times(2)).save(any(Step.class));
+        verify(coachingProgramRepository, times(2)).save(any(CoachingProgram.class));
+        verify(coachingProgramService, times(2)).updateProgramEndDate(1L);
     }
 
 
@@ -127,7 +218,10 @@ public class StepServiceUnitTest {
         existingStep.setStepEndDate(LocalDate.parse("2025-09-01"));
 
         when(validationHelper.validateCoachingProgram(1L)).thenReturn(mockCoachingProgram);
-        when(stepRepository.findStepsByCoachingProgram(1L)).thenReturn(List.of(existingStep));
+        doNothing().when(validationHelper).validateStepCreationInput(any(StepInputDto.class));
+
+        doThrow(new IllegalArgumentException("A step with sequence 1 already exists in this program."))
+                .when(validationHelper).validateStepSequence(eq(mockCoachingProgram), any(Step.class));
 
         StepInputDto newStepDto = new StepInputDto();
         newStepDto.setCoachingProgramId(1L);
@@ -142,30 +236,57 @@ public class StepServiceUnitTest {
         assertEquals("A step with sequence 1 already exists in this program.", exception.getMessage());
 
         Mockito.verify(validationHelper, Mockito.times(1)).validateCoachingProgram(1L);
-        Mockito.verify(stepRepository, Mockito.times(1)).findStepsByCoachingProgram(1L);
+        Mockito.verify(stepRepository, never()).save(any(Step.class));
+        Mockito.verify(coachingProgramRepository, never()).save(any(CoachingProgram.class));
     }
+
+    @Tag("unit")
+    @Test
+    void testAddStepsToProgram_AutoIncrementsSequence_WhenNoneProvided() {
+        when(validationHelper.validateCoachingProgram(1L)).thenReturn(mockCoachingProgram);
+        doNothing().when(validationHelper).validateStepCreationInput(any(StepInputDto.class));
+        when(stepRepository.findByCoachingProgram(any(CoachingProgram.class))).thenReturn(List.of());
+
+        StepInputDto stepDto = new StepInputDto();
+        stepDto.setCoachingProgramId(1L);
+        stepDto.setStepName("Auto Step");
+        stepDto.setSequence(null);
+        stepDto.setStepStartDate(DateConverter.convertToDate(LocalDate.parse("2025-06-15")));
+        stepDto.setStepEndDate(DateConverter.convertToDate(LocalDate.parse("2025-07-15")));
+
+        Assertions.assertDoesNotThrow(() -> stepService.addStepsToProgram(List.of(stepDto)));
+
+        verify(stepRepository).findByCoachingProgram(any(CoachingProgram.class));
+    }
+
+
+
     @Tag("unit")
     @Test
     void testAddStepsToProgram_WhenStartDateConflictsWithSequence() {
-
         Step existingStep = new Step();
+        existingStep.setStepId(99L);
         existingStep.setSequence(1);
         existingStep.setStepStartDate(LocalDate.of(2025, 7, 1));
 
-        when(stepRepository.findStepsByCoachingProgram(1L)).thenReturn(List.of(existingStep));
+        when(validationHelper.validateCoachingProgram(1L)).thenReturn(mockCoachingProgram);
+        lenient().when(stepRepository.findByCoachingProgram(mockCoachingProgram)).thenReturn(List.of());
+        doNothing().when(validationHelper).validateStepCreationInput(any(StepInputDto.class));
+        doThrow(new IllegalArgumentException("The step's start date conflicts with the provided sequence."))
+                .when(validationHelper).validateStepSequence(eq(mockCoachingProgram), any(Step.class));
 
         StepInputDto newStepDto = new StepInputDto();
         newStepDto.setCoachingProgramId(1L);
         newStepDto.setStepName("Conflicting Start Date Step");
-        newStepDto.setSequence(2);
+        newStepDto.setSequence(1);
         newStepDto.setStepStartDate(DateConverter.convertToDate(LocalDate.of(2025, 6, 20)));
         newStepDto.setStepEndDate(DateConverter.convertToDate(LocalDate.of(2025, 8, 20)));
         Exception exception = Assertions.assertThrows(IllegalArgumentException.class,
                 () -> stepService.addStepsToProgram(List.of(newStepDto)));
 
         assertEquals("The step's start date conflicts with the provided sequence.", exception.getMessage());
-
-        Mockito.verify(stepRepository, Mockito.times(1)).findStepsByCoachingProgram(1L);
+        verify(validationHelper).validateCoachingProgram(1L);
+        verify(validationHelper).validateStepSequence(eq(mockCoachingProgram), any(Step.class));
     }
 
     @Tag("unit")
@@ -180,7 +301,10 @@ public class StepServiceUnitTest {
         existingStep2.setStepStartDate(LocalDate.of(2025, 6, 10));
 
         when(validationHelper.validateCoachingProgram(1L)).thenReturn(mockCoachingProgram);
-        when(stepRepository.findStepsByCoachingProgram(1L)).thenReturn(List.of(existingStep1, existingStep2));
+        when(stepRepository.save(any(Step.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(coachingProgramRepository.save(any(CoachingProgram.class))).thenReturn(mockCoachingProgram);
+        doNothing().when(validationHelper).validateStepCreationInput(any(StepInputDto.class));
+        doNothing().when(validationHelper).validateStepSequence(eq(mockCoachingProgram), any(Step.class));
 
         StepInputDto newStepDto = new StepInputDto();
         newStepDto.setCoachingProgramId(1L);
@@ -191,32 +315,7 @@ public class StepServiceUnitTest {
 
         Assertions.assertDoesNotThrow(() -> stepService.addStepsToProgram(List.of(newStepDto)));
 
-        Mockito.verify(stepRepository, Mockito.times(1)).findStepsByCoachingProgram(1L);
         Mockito.verify(stepRepository, Mockito.times(1)).save(any(Step.class));
-        Mockito.verify(coachingProgramRepository, Mockito.times(1)).save(any(CoachingProgram.class));
-    }
-
-
-    @Test
-    void shouldThrowExceptionWhenStepDatesAreNull() {
-
-        StepInputDto inputDto = new StepInputDto();
-        inputDto.setCoachingProgramId(1L);
-        inputDto.setStepStartDate(null);
-        inputDto.setStepEndDate(null);
-
-
-        when(validationHelper.validateCoachingProgram(1L)).thenReturn(new CoachingProgram());
-
-        Exception exception = Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            stepService.addStepsToProgram(List.of(inputDto));
-        });
-
-
-        assertEquals("Step start date and end date cannot be null.", exception.getMessage());
-
-        verify(validationHelper, times(1)).validateCoachingProgram(1L);
-        verifyNoInteractions(stepRepository, coachingProgramRepository, coachingProgramService);
     }
 
 
@@ -240,7 +339,7 @@ public class StepServiceUnitTest {
         when(validationHelper.validateCoachingProgram(1L)).thenReturn(mockCoachingProgram);
         when(stepRepository.save(any(Step.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Step result = stepService.updateStep(1L, mockStepInputDto);
+        Step result = stepService.updateStepDetails(1L, mockStepInputDto);
 
         Assertions.assertNotNull(result);
         Assertions.assertEquals("Updated Step", result.getStepName());
@@ -251,59 +350,79 @@ public class StepServiceUnitTest {
     @Tag("unit")
     @Test
     void testUpdateStep_CoversAllFields() {
-
         mockStepInputDto.setStepName("Updated Step");
         mockStepInputDto.setStepStartDate(DateConverter.convertToDate(LocalDate.parse("2025-01-01")));
         mockStepInputDto.setStepEndDate(DateConverter.convertToDate(LocalDate.parse("2025-01-10")));
-        mockStepInputDto.setCompleted(true);
         mockStepInputDto.setStepGoal("New Goal");
-        mockStepInputDto.setSequence(2);
 
-        List<Long> sessionIds = List.of(101L, 102L);
-        List<Long> assignmentIds = List.of(201L, 202L);
-
-        mockStepInputDto.setSessionIds(sessionIds);
-        mockStepInputDto.setAssignmentIds(assignmentIds);
-
-        Session session1 = new Session();
-        session1.setSessionId(101L);
-        Session session2 = new Session();
-        session2.setSessionId(102L);
-
-        Assignment assignment1 = new Assignment();
-        assignment1.setAssignmentId(201L);
-        Assignment assignment2 = new Assignment();
-        assignment2.setAssignmentId(202L);
-
-        mockStep.setSession(new ArrayList<>());
-        mockStep.setAssignment(new ArrayList<>());
+        mockCoachingProgram.setCoachingProgramId(1L);
         mockStep.setCoachingProgram(mockCoachingProgram);
 
         when(validationHelper.validateStep(1L)).thenReturn(mockStep);
-        when(validationHelper.validateCoachingProgram(1L)).thenReturn(mockCoachingProgram);
-        when(validationHelper.validateSessions(sessionIds)).thenReturn(List.of(session1, session2));
-        when(validationHelper.validateAssignments(assignmentIds)).thenReturn(List.of(assignment1, assignment2));
-
         when(stepRepository.save(any(Step.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Step result = stepService.updateStep(1L, mockStepInputDto);
+        Step result = stepService.updateStepDetails(1L, mockStepInputDto);
 
         Assertions.assertNotNull(result);
         Assertions.assertEquals("Updated Step", result.getStepName());
         Assertions.assertEquals(LocalDate.parse("2025-01-01"), result.getStepStartDate());
         Assertions.assertEquals(LocalDate.parse("2025-01-10"), result.getStepEndDate());
-        Assertions.assertTrue(result.getCompleted());
         Assertions.assertEquals("New Goal", result.getStepGoal());
-        Assertions.assertEquals(2, result.getSequence());
-        Assertions.assertEquals(2, result.getSession().size());
-        Assertions.assertEquals(2, result.getAssignment().size());
 
         Mockito.verify(validationHelper, Mockito.times(1)).validateStep(1L);
-        Mockito.verify(validationHelper, Mockito.times(1)).validateSessions(sessionIds);
-        Mockito.verify(validationHelper, Mockito.times(1)).validateAssignments(assignmentIds);
         Mockito.verify(stepRepository, Mockito.times(1)).save(any(Step.class));
-        Mockito.verify(coachingProgramService, Mockito.times(1)).updateProgramEndDate(anyLong());
+        Mockito.verify(coachingProgramService, Mockito.times(1)).updateProgramEndDate(1L);
     }
+
+    @Tag("unit")
+    @Test
+    void testReorderStepSequence_Success() {
+        StepReorderDto dto = new StepReorderDto();
+        dto.setStepId(1L);
+        dto.setNewSequence(3);
+
+        mockStep.setStepId(1L);
+        mockStep.setSequence(1);
+
+        mockCoachingProgram.setCoachingProgramId(42L);
+        mockStep.setCoachingProgram(mockCoachingProgram);
+
+        when(validationHelper.validateStep(1L)).thenReturn(mockStep);
+        doNothing().when(validationHelper).validateCoachOwnsProgramOrIsAdmin(mockCoachingProgram);
+        doNothing().when(validationHelper).validateStepSequence(mockCoachingProgram, mockStep);
+        when(stepRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        List<Step> result = stepService.reorderStepSequence(List.of(dto));
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(1, result.size());
+        Assertions.assertEquals(3, result.get(0).getSequence());
+
+        verify(validationHelper).validateStep(1L);
+        verify(validationHelper).validateCoachOwnsProgramOrIsAdmin(mockCoachingProgram);
+        verify(validationHelper).validateStepSequence(mockCoachingProgram, mockStep);
+        verify(stepRepository).saveAll(anyList());
+    }
+
+    @Tag("unit")
+    @Test
+    void testReorderStepSequence_NullInput_ThrowsException() {
+        Exception exception = Assertions.assertThrows(IllegalArgumentException.class, () ->
+                stepService.reorderStepSequence(null));
+
+        Assertions.assertEquals("No steps provided for reordering.", exception.getMessage());
+    }
+
+    @Tag("unit")
+    @Test
+    void testReorderStepSequence_EmptyInput_ThrowsException() {
+        Exception exception = Assertions.assertThrows(IllegalArgumentException.class, () ->
+                stepService.reorderStepSequence(Collections.emptyList()));
+
+        Assertions.assertEquals("No steps provided for reordering.", exception.getMessage());
+    }
+
+
 
     @Tag("unit")
     @Test
@@ -335,8 +454,6 @@ public class StepServiceUnitTest {
         Mockito.verify(stepRepository, times(1)).findById(1L);
         Mockito.verify(stepRepository, times(1)).save(any(Step.class));
     }
-
-
 
     @Tag("unit")
     @Test

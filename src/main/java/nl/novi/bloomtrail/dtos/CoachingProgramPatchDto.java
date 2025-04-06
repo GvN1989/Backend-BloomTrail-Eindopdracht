@@ -1,32 +1,19 @@
 package nl.novi.bloomtrail.dtos;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 import java.util.Date;
 
-public class CoachingProgramRoleDto {
-
-    private Long coachingProgramId;
+public class CoachingProgramPatchDto {
     private String coachingProgramName;
     private String goal;
     private Date startDate;
     private Date endDate;
-    private String role;
-
-    public CoachingProgramRoleDto(Long coachingProgramId, String coachingProgramName, String goal, Date startDate, Date endDate, String role) {
-        this.coachingProgramId = coachingProgramId;
-        this.coachingProgramName = coachingProgramName;
-        this.goal = goal;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.role = role;
-    }
-
-    public Long getCoachingProgramId() {
-        return coachingProgramId;
-    }
-
-    public void setCoachingProgramId(Long coachingProgramId) {
-        this.coachingProgramId = coachingProgramId;
-    }
+    private String coachUsername;
 
     public String getCoachingProgramName() {
         return coachingProgramName;
@@ -60,11 +47,12 @@ public class CoachingProgramRoleDto {
         this.endDate = endDate;
     }
 
-    public String getRole() {
-        return role;
+    public String getCoachUsername() {
+        return coachUsername;
     }
 
-    public void setRole(String role) {
-        this.role = role;
+    public void setCoachUsername(String coachUsername) {
+        this.coachUsername = coachUsername;
     }
+
 }

@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
+import nl.novi.bloomtrail.helper.ErrorResponseBuilder;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -15,17 +16,14 @@ import java.util.Map;
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
-        System.out.println("🔥 CustomAuthenticationEntryPoint triggered for unauthorized access!");
 
         response.setContentType("application/json");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
-        Map<String, Object> errorDetails = new HashMap<>();
+        Map<String, Object> error = ErrorResponseBuilder.build(401,
+                "Authentication failed, please login or provide (correct) token.");
 
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        errorDetails.put("error", "Authentication failed, please login or provide (correct) token.");
-        errorDetails.put("status", 401);
         ObjectMapper mapper = new ObjectMapper();
-        response.getWriter().write(mapper.writeValueAsString(errorDetails));
+        response.getWriter().write(mapper.writeValueAsString(error));
     }
 }

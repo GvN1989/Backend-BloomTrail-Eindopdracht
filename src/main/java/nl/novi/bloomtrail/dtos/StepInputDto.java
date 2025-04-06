@@ -12,16 +12,11 @@ import java.util.List;
 public class StepInputDto {
     private Long StepId;
 
-    @NotBlank(message = "Step name is mandatory")
-    @Size(max = 255)
     private String StepName;
-
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy",timezone = "UTC")
-    @Future
     private Date stepStartDate;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy", timezone = "UTC")
-    @Future
     private Date stepEndDate;
 
     private Boolean completed;
@@ -30,7 +25,6 @@ public class StepInputDto {
 
     private Integer sequence;
 
-    @NotNull(message = "CoachingProgram ID is required")
     private Long coachingProgramId;
 
     private List<Long> sessionIds;

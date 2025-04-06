@@ -3,14 +3,16 @@ package nl.novi.bloomtrail.controllers;
 import jakarta.validation.Valid;
 import nl.novi.bloomtrail.dtos.UserInputDto;
 import nl.novi.bloomtrail.dtos.UserDto;
+import nl.novi.bloomtrail.exceptions.ConflictException;
+import nl.novi.bloomtrail.exceptions.NotFoundException;
 import nl.novi.bloomtrail.helper.ValidationHelper;
 import nl.novi.bloomtrail.models.Authority;
 import nl.novi.bloomtrail.services.UserService;
 import nl.novi.bloomtrail.exceptions.BadRequestException;
 import org.springframework.http.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -23,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping(value="/users")
+@RequestMapping(value = "/users")
 public class UserController {
 
     private final UserService userService;
@@ -67,17 +69,16 @@ public class UserController {
 
         return ResponseEntity.created(location).body(createdUser);
     }
-    @Transactional
+
     @PutMapping(value = "/{username}")
-    public ResponseEntity<UserDto> updateUserProfile( @PathVariable("username") String username, @RequestBody UserInputDto dto) {
-
+    public ResponseEntity<UserDto> updateUserProfile(@PathVariable("username") String username, @RequestBody UserInputDto dto) {
         UserDto updatedUser = userService.updateUserProfile(username, dto);
-
         return ResponseEntity.ok(updatedUser);
     }
 
-    @DeleteMapping(value = "/{username}")
-    public ResponseEntity<Object> deleteUser(@PathVariable("username") String username) {
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{username}")
+    public ResponseEntity<Void> deleteUser(@PathVariable String username) {
         userService.deleteUser(username);
         return ResponseEntity.noContent().build();
     }
@@ -87,35 +88,25 @@ public class UserController {
         Authority authority = userService.getAuthority(username);
 
         if (authority == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("User " + username + " has no assigned role.");
+            throw new NotFoundException("User " + username + " has no assigned role.");
         }
 
         return ResponseEntity.ok(authority);
     }
 
-
     @PutMapping(value = "/{username}/authority")
     public ResponseEntity<Object> updateUserAuthority(@PathVariable("username") String username, @RequestBody Map<String, Object> fields) {
-        try {
-
-            if (!(fields.get("authority") instanceof String authorityName) || authorityName.trim().isEmpty()) {
-                throw new BadRequestException("Authority cannot be empty or missing.");
-            }
-
-            validationHelper.validateAuthority(authorityName);
-
-            UserDto updatedUser = userService.updateAuthority(username, authorityName);
-
-            return ResponseEntity.ok(updatedUser);
+        if (!(fields.get("authority") instanceof String authorityName) || authorityName.trim().isEmpty()) {
+            throw new BadRequestException("Authority cannot be empty or missing.");
         }
-        catch (Exception ex) {
-            throw new BadRequestException("Invalid request format: " + ex.getMessage());
-        }
+
+        validationHelper.validateAuthority(authorityName);
+        UserDto updatedUser = userService.updateAuthority(username, authorityName);
+        return ResponseEntity.ok(updatedUser);
     }
 
-    @DeleteMapping(value = "/{username}/authority")
-    public ResponseEntity<Object> deleteUserAuthority(@PathVariable("username") String username) {
+    @DeleteMapping(value = "/{username}/authorities/{authority}")
+    public ResponseEntity<Object> deleteUserAuthority(@PathVariable("username") String username, @PathVariable("authority") String authority) {
         userService.removeAuthority(username);
         return ResponseEntity.noContent().build();
     }
@@ -123,7 +114,13 @@ public class UserController {
     @PostMapping("/{username}/profile-picture")
     public ResponseEntity<String> uploadProfilePicture(
             @PathVariable String username,
-            @RequestPart("file") MultipartFile file) {
+            @RequestPart("file") List<MultipartFile> files) {
+
+        if (files == null || files.size() != 1) {
+            throw new BadRequestException("Exactly one file must be uploaded as a profile picture.");
+        }
+
+        MultipartFile file = files.get(0);
         userService.uploadProfilePicture(username, file);
         return ResponseEntity.ok("Profile picture uploaded successfully for user: " + username);
     }
@@ -131,6 +128,10 @@ public class UserController {
     @GetMapping("/{username}/profile-picture")
     public ResponseEntity<byte[]> getProfilePicture(@PathVariable String username) throws IOException {
         byte[] profilePicture = userService.getProfilePicture(username);
+
+        if (profilePicture == null || profilePicture.length == 0) {
+            throw new NotFoundException("No profile picture found for user: " + username);
+        }
 
         String fileType = URLConnection.guessContentTypeFromStream(new ByteArrayInputStream(profilePicture));
         MediaType mediaType = fileType != null ? MediaType.parseMediaType(fileType) : MediaType.APPLICATION_OCTET_STREAM;

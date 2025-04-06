@@ -3,6 +3,7 @@ package nl.novi.bloomtrail.services;
 import nl.novi.bloomtrail.dtos.UserInputDto;
 import nl.novi.bloomtrail.dtos.UserDto;
 import nl.novi.bloomtrail.enums.FileContext;
+import nl.novi.bloomtrail.exceptions.ConflictException;
 import nl.novi.bloomtrail.exceptions.NotFoundException;
 import nl.novi.bloomtrail.exceptions.BadRequestException;
 import nl.novi.bloomtrail.helper.ValidationHelper;
@@ -10,8 +11,10 @@ import nl.novi.bloomtrail.mappers.UserMapper;
 import nl.novi.bloomtrail.models.Authority;
 import nl.novi.bloomtrail.models.*;
 import nl.novi.bloomtrail.repositories.AuthorityRepository;
+import nl.novi.bloomtrail.repositories.FileRepository;
 import nl.novi.bloomtrail.repositories.UserRepository;
 import nl.novi.bloomtrail.utils.RandomStringGenerator;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,14 +31,16 @@ import java.util.*;
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final FileRepository fileRepository;
     private final ValidationHelper validationHelper;
     private final AuthorityRepository authorityRepository;
     private final FileService fileService;
     private final DownloadService downloadService;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, ValidationHelper validationHelper, AuthorityRepository authorityRepository, FileService fileService, DownloadService downloadService, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, FileRepository fileRepository, ValidationHelper validationHelper, AuthorityRepository authorityRepository, FileService fileService, DownloadService downloadService, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.fileRepository = fileRepository;
         this.validationHelper = validationHelper;
         this.authorityRepository = authorityRepository;
         this.fileService = fileService;
@@ -65,15 +70,22 @@ public class UserService {
     }
 
     public String createUser(UserInputDto userInputDto) {
+        if (userExists(userInputDto.getUsername())) {
+            throw new ConflictException("Username already exists.");
+        }
+
         String randomString = RandomStringGenerator.generateAlphaNumeric(20);
         userInputDto.setApikey(randomString);
+
+        String encodedPassword = passwordEncoder.encode(userInputDto.getPassword());
+        userInputDto.setPassword(encodedPassword);
+
         User newUser = userRepository.save(UserMapper.toUserEntity(userInputDto));
         return newUser.getUsername();
     }
-
     public void deleteUser(String username) {
-        validationHelper.validateUser(username);
-        userRepository.deleteById(username);
+        User user = validationHelper.validateUser(username);
+        userRepository.delete(user);
     }
     @Transactional
     public UserDto updateUserProfile(String username, UserInputDto dto) {
@@ -88,7 +100,7 @@ public class UserService {
         }
 
         if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
-            user.setPassword(dto.getPassword());
+            user.setPassword(passwordEncoder.encode(dto.getPassword()));
         }
 
         if (dto.getUsername() != null && !dto.getUsername().equals(user.getUsername())) {
@@ -98,7 +110,6 @@ public class UserService {
         userRepository.save(user);
 
         return UserMapper.toUserDto(user);
-
     }
 
     public Authority getAuthority(String username) {
@@ -140,10 +151,29 @@ public class UserService {
     }
 
     public void uploadProfilePicture(String username, MultipartFile file) {
-        User user = validationHelper.validateUser(username);
+        if (file == null || file.isEmpty()) {
+            throw new BadRequestException("No file uploaded.");
+        }
 
-        File profilePicture = fileService.saveFile(file, FileContext.PROFILE_PICTURE, user);
-        user.setProfilePicture(profilePicture);
+        String contentType = file.getContentType();
+        if (!contentType.equals("image/jpeg") && !contentType.equals("image/png")) {
+            throw new BadRequestException("Only JPEG and PNG image files are allowed.");
+        }
+
+        User user = validationHelper.validateUser(username);
+        if (user.getProfilePicture() != null) {
+
+            File oldFile = user.getProfilePicture();
+
+            user.setProfilePicture(null);
+            userRepository.save(user);
+
+            fileService.deleteFile(oldFile);
+            fileRepository.delete(oldFile);
+        }
+
+        File savedFile = fileService.saveFile(file, FileContext.PROFILE_PICTURE, user);
+        user.setProfilePicture(savedFile);
         userRepository.save(user);
     }
 
@@ -151,7 +181,7 @@ public class UserService {
         User user = validationHelper.validateUser(username);
 
         if (user.getProfilePicture() == null) {
-            throw new IllegalArgumentException("Profile picture not set");
+            throw new NotFoundException("The requested profile picture is not set");
         }
 
         return downloadService.downloadFile(user.getProfilePicture().getUrl());

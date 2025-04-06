@@ -48,7 +48,7 @@ public class FileService {
             case Assignment assignment -> file.setAssignment(assignment);
             case StrengthResults strengthResults -> file.setStrengthResults(strengthResults);
             case SessionInsight sessionInsight -> file.setSessionInsights(sessionInsight);
-            case User user when context == FileContext.PROFILE_PICTURE -> file.setUser(user);
+            case User user -> file.setUser(user);
             case null, default -> throw new IllegalArgumentException("Unsupported parent entity type or context");
         }
 

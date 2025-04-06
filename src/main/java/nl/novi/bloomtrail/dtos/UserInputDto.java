@@ -21,6 +21,7 @@ public class UserInputDto {
     @Email(message = "Email must be valid")
     public String email;
     public String fullName;
+
     @NotEmpty(message = "At least one authority must be assigned")
     public String authority;
 
