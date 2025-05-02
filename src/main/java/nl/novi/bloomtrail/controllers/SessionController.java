@@ -58,19 +58,19 @@ public class SessionController {
 
     @PostMapping("/{sessionId}/client-reflection")
     public ResponseEntity<String> uploadClientReflectionFile(
-            @PathVariable("id") Long sessionInsightId,
+            @PathVariable Long sessionId,
             @RequestParam("file") MultipartFile file) {
 
-        sessionInsightService.uploadClientReflectionFile(file, sessionInsightId);
+        sessionInsightService.uploadClientReflectionFile(sessionId,file);
         return ResponseEntity.ok("Client reflection file uploaded successfully.");
     }
 
     @PostMapping("/{sessionId}/coach-notes")
     public ResponseEntity<String> uploadCoachNotesFile(
-            @PathVariable("id") Long sessionInsightId,
+            @PathVariable Long sessionId,
             @RequestParam("file") MultipartFile file) {
 
-        sessionInsightService.uploadCoachNotesFile(file, sessionInsightId);
+        sessionInsightService.uploadCoachNotesFile(sessionId,file);
         return ResponseEntity.ok("Coach notes file uploaded successfully.");
     }
 

@@ -23,7 +23,6 @@ public class SessionInsight {
     @CreationTimestamp
     private LocalDateTime createdAt;
     private String description;
-    private FileContext fileContext;
     @OneToOne
     @JoinColumn(name = "session_id")
     private Session session;
@@ -76,13 +75,5 @@ public class SessionInsight {
 
     public void setFiles(List<File> files) {
         this.files = files;
-    }
-
-    public FileContext getFileContext() {
-        return fileContext;
-    }
-
-    public void setFileContext(FileContext fileContext) {
-        this.fileContext = fileContext;
     }
 }

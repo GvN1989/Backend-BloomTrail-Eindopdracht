@@ -1,6 +1,5 @@
 package nl.novi.bloomtrail.services;
 
-import nl.novi.bloomtrail.dtos.SessionInsightInputDto;
 import nl.novi.bloomtrail.helper.ValidationHelper;
 import nl.novi.bloomtrail.models.Session;
 import nl.novi.bloomtrail.models.SessionInsight;
@@ -8,22 +7,18 @@ import nl.novi.bloomtrail.enums.FileContext;
 import nl.novi.bloomtrail.repositories.SessionInsightRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.util.List;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @Service
 public class SessionInsightService {
     private final SessionInsightRepository sessionInsightRepository;
     private final FileService fileService;
     private final ValidationHelper validationHelper;
-    private final DownloadService downloadService;
 
-    public SessionInsightService(SessionInsightRepository sessionInsightRepository, FileService fileService, ValidationHelper validationHelper, DownloadService downloadService) {
+    public SessionInsightService(SessionInsightRepository sessionInsightRepository, FileService fileService, ValidationHelper validationHelper) {
         this.sessionInsightRepository = sessionInsightRepository;
         this.fileService = fileService;
         this.validationHelper = validationHelper;
-        this.downloadService = downloadService;
     }
 
     public SessionInsight getSessionInsightBySession(Long sessionId) {
@@ -32,50 +27,29 @@ public class SessionInsightService {
         return session.getSessionInsight();
     }
 
-    public SessionInsight createSessionInsight(SessionInsightInputDto inputDto) {
-        if (!inputDto.isValid()) {
-            throw new IllegalArgumentException("SessionInsight must be linked to a session.");
-        }
+    public void uploadClientReflectionFile(Long sessionId,MultipartFile file) {
+        Session session = validationHelper.validateSession(sessionId);
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        Session session = validationHelper.validateSession(inputDto.getSessionId());
-
-        SessionInsight sessionInsight = new SessionInsight();
-        sessionInsight.setAuthor(inputDto.getAuthor());
-        sessionInsight.setDescription(inputDto.getDescription());
-        sessionInsight.setSession(session);
-
-        return sessionInsightRepository.save(sessionInsight);
-    }
-
-    public void uploadClientReflectionFile(MultipartFile file, Long sessionInsightId) {
-        SessionInsight sessionInsight = validationHelper.validateSessionInsight(sessionInsightId);
+        SessionInsight sessionInsight = getOrCreateBySession(session, username);
         fileService.saveFile(file, FileContext.SESSION_INSIGHTS_CLIENT_REFLECTION, sessionInsight);
     }
 
-    public void uploadCoachNotesFile(MultipartFile file, Long sessionInsightId) {
-        SessionInsight sessionInsight = validationHelper.validateSessionInsight(sessionInsightId);
+    public void uploadCoachNotesFile(Long sessionId, MultipartFile file) {
+        Session session = validationHelper.validateSession(sessionId);
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        SessionInsight sessionInsight = getOrCreateBySession(session, username);
         fileService.saveFile(file, FileContext.SESSION_INSIGHTS_COACH_NOTES, sessionInsight);
     }
 
-    public void deleteSessionInsight(Long sessionInsightId) {
-        SessionInsight sessionInsight = validationHelper.validateSessionInsight(sessionInsightId);
-        fileService.deleteFilesForParentEntity(sessionInsight);
-        sessionInsightRepository.delete(sessionInsight);
-    }
-
-    public byte[] downloadSessionInsightFiles(Long sessionInsightId, FileContext context) throws IOException {
-        SessionInsight sessionInsight = validationHelper.validateSessionInsight(sessionInsightId);
-        return downloadService.downloadSessionInsightFiles(sessionInsightId, context);
-    }
-
-    public SessionInsight getOrCreateBySession(Session session) {
+    public SessionInsight getOrCreateBySession(Session session, String username) {
         return sessionInsightRepository.findBySession(session)
                 .orElseGet(() -> {
-                    SessionInsight si = new SessionInsight();
-                    si.setSession(session);
-                    return sessionInsightRepository.save(si);
+                    SessionInsight insight = new SessionInsight();
+                    insight.setSession(session);
+                    insight.setAuthor(username);
+                    return sessionInsightRepository.save(insight);
                 });
     }
-
-
 }

@@ -3,10 +3,11 @@ package nl.novi.bloomtrail.mappers;
 import nl.novi.bloomtrail.dtos.SessionInsightDto;
 import nl.novi.bloomtrail.dtos.SessionInsightInputDto;
 import nl.novi.bloomtrail.enums.FileContext;
+import nl.novi.bloomtrail.models.File;
 import nl.novi.bloomtrail.models.Session;
 import nl.novi.bloomtrail.models.SessionInsight;
 
-import java.util.Collections;
+import java.util.List;
 
 public class SessionInsightMapper {
 
@@ -17,17 +18,23 @@ public class SessionInsightMapper {
         dto.setAuthor(sessionInsight.getAuthor());
         dto.setCreatedAt(sessionInsight.getCreatedAt());
         dto.setDescription(sessionInsight.getDescription());
-        dto.setFileContext(sessionInsight.getFileContext().name());
         dto.setSessionId(sessionInsight.getSession() != null ? sessionInsight.getSession().getSessionId() : null);
 
-        if (sessionInsight.getFiles() != null && !sessionInsight.getFiles().isEmpty()) {
-            dto.setFileUrls(
-                    sessionInsight.getFiles().stream()
-                            .map(file -> "/files/" + file.getFileId())
+        List<File> files = sessionInsight.getFiles();
+        if (files != null && !files.isEmpty()) {
+            dto.setClientReflectionUrls(
+                    files.stream()
+                            .filter(f -> f.getContext() == FileContext.SESSION_INSIGHTS_CLIENT_REFLECTION)
+                            .map(f -> "/files/" + f.getFileId())
                             .toList()
             );
-        } else {
-            dto.setFileUrls(Collections.emptyList());
+
+            dto.setCoachNotesUrls(
+                    files.stream()
+                            .filter(f -> f.getContext() == FileContext.SESSION_INSIGHTS_COACH_NOTES)
+                            .map(f -> "/files/" + f.getFileId())
+                            .toList()
+            );
         }
 
         return dto;
@@ -39,10 +46,6 @@ public class SessionInsightMapper {
         sessionInsight.setAuthor(inputDto.getAuthor());
         sessionInsight.setDescription(inputDto.getDescription());
         sessionInsight.setSession(session);
-
-        if (inputDto.getFileContext() != null) {
-            sessionInsight.setFileContext(inputDto.getFileContext());
-        }
 
         return sessionInsight;
     }

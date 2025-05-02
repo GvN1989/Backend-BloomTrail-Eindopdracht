@@ -9,8 +9,9 @@ public class SessionInsightDto {
     private String author;
     private LocalDateTime createdAt;
     private String description;
-    private String fileContext;
     private Long sessionId;
+    private List<String> clientReflectionUrls;
+    private List<String> coachNotesUrls;
     private List<String> fileUrls;
 
     public Long getSessionInsightId() {
@@ -45,14 +46,6 @@ public class SessionInsightDto {
         this.description = description;
     }
 
-    public String getFileContext() {
-        return fileContext;
-    }
-
-    public void setFileContext(String fileContext) {
-        this.fileContext = fileContext;
-    }
-
     public Long getSessionId() {
         return sessionId;
     }
@@ -67,5 +60,21 @@ public class SessionInsightDto {
 
     public void setFileUrls(List<String> fileUrls) {
         this.fileUrls = fileUrls;
+    }
+
+    public List<String> getClientReflectionUrls() {
+        return clientReflectionUrls;
+    }
+
+    public void setClientReflectionUrls(List<String> clientReflectionUrls) {
+        this.clientReflectionUrls = clientReflectionUrls;
+    }
+
+    public List<String> getCoachNotesUrls() {
+        return coachNotesUrls;
+    }
+
+    public void setCoachNotesUrls(List<String> coachNotesUrls) {
+        this.coachNotesUrls = coachNotesUrls;
     }
 }
