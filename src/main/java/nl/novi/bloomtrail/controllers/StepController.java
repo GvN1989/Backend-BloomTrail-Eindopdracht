@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import nl.novi.bloomtrail.dtos.StepDto;
 import nl.novi.bloomtrail.dtos.StepInputDto;
-import nl.novi.bloomtrail.dtos.StepReorderDto;
 import nl.novi.bloomtrail.mappers.StepMapper;
 import nl.novi.bloomtrail.models.Step;
 import nl.novi.bloomtrail.services.StepService;
@@ -85,27 +84,6 @@ public class StepController {
         Step updatedStep = stepService.updateStepDetails(stepId, inputDto);
         StepDto updatedStepDto = StepMapper.toStepDto(updatedStep);
         return ResponseEntity.ok().body(updatedStepDto);
-    }
-
-    @PatchMapping("/reorder")
-    public ResponseEntity<List<StepDto>> reorderStepSequence(@RequestBody List<StepReorderDto> reorderDtos) {
-        List<Step> updatedSequence = stepService.reorderStepSequence(reorderDtos);
-        List<StepDto> result = updatedSequence.stream().map(StepMapper::toStepDto).toList();
-        return ResponseEntity.ok(result);
-    }
-
-    @PatchMapping("/{id}/completion")
-    public ResponseEntity<StepDto> markStepCompletionStatus(
-            @PathVariable("id") Long stepId,
-            @RequestBody Map<String, Boolean> body) {
-
-        boolean isCompleted = body.getOrDefault("completed", false);
-
-        Step updatedStep = stepService.markStepCompletionStatus(stepId, isCompleted);
-
-        StepDto stepDto = StepMapper.toStepDto(updatedStep);
-
-        return ResponseEntity.ok(stepDto);
     }
 
     @DeleteMapping("/{id}")

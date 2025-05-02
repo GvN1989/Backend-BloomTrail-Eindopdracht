@@ -163,34 +163,17 @@ public class ValidationHelper {
 
     public void validateStepCreationInput(StepInputDto inputDto) {
         if (inputDto.getStepName() == null || inputDto.getStepName().isBlank()) {
-            throw new IllegalArgumentException("Step name is required.");
+            throw new BadRequestException("Step name is required.");
         }
         if (inputDto.getStepGoal() == null || inputDto.getStepGoal().isBlank()) {
-            throw new IllegalArgumentException("Step goal is required.");
+            throw new BadRequestException("Step goal is required.");
         }
         if (inputDto.getCoachingProgramId() == null) {
-            throw new IllegalArgumentException("Coaching program ID is required.");
+            throw new BadRequestException("Coaching program ID is required.");
         }
         if (inputDto.getStepStartDate() == null || inputDto.getStepEndDate() == null) {
-            throw new IllegalArgumentException("Step start date and end date cannot be null.");
+            throw new BadRequestException("Step start date and end date cannot be null.");
         }
     }
-
-    public void validateStepSequence(CoachingProgram coachingProgram, Step newStep) {
-
-        validateCoachOwnsProgramOrIsAdmin(coachingProgram);
-        List<Step> existingSteps = stepRepository.findByCoachingProgram(coachingProgram);
-
-        for (Step step : existingSteps) {
-            if (!step.getStepId().equals(newStep.getStepId()) && step.getSequence().equals(newStep.getSequence())) {
-                throw new IllegalArgumentException("A step with sequence " + newStep.getSequence() + " already exists in this program.");
-            }
-
-            if (step.getStepStartDate().isAfter(newStep.getStepStartDate()) && step.getSequence() < newStep.getSequence()) {
-                throw new IllegalArgumentException("The step's start date conflicts with the provided sequence.");
-            }
-        }
-    }
-
 
 }

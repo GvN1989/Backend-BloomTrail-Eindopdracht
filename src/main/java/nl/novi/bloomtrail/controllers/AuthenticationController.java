@@ -1,5 +1,6 @@
 package nl.novi.bloomtrail.controllers;
 
+import nl.novi.bloomtrail.dtos.AuthenticatedUserDto;
 import nl.novi.bloomtrail.dtos.AuthenticationRequest;
 import nl.novi.bloomtrail.dtos.AuthenticationResponse;
 import nl.novi.bloomtrail.exceptions.ConflictException;
@@ -32,13 +33,19 @@ public class AuthenticationController {
     }
 
     @GetMapping(value = "/authenticated")
-    public ResponseEntity<Object> authenticated(Authentication authentication, Principal principal) {
+    public ResponseEntity<Object> authenticated(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
 
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(ErrorResponseBuilder.build(401, "User is not authenticated."));
         }
-        return ResponseEntity.ok(principal);
+        String username = authentication.getName();
+        String authority = authentication.getAuthorities().stream()
+                .findFirst()
+                .map(granted -> granted.getAuthority())
+                .orElse("UNKNOWN");
+
+        return ResponseEntity.ok(new AuthenticatedUserDto(username, authority, true));
     }
 
     @PostMapping(value = "/authenticate")

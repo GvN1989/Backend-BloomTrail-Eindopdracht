@@ -71,7 +71,6 @@ public class StepServiceIntegrationTest {
         StepInputDto stepInputDto = new StepInputDto();
         stepInputDto.setCoachingProgramId(coachingProgram.getCoachingProgramId());
         stepInputDto.setStepName("Integration Test Step");
-        stepInputDto.setSequence(1);
         stepInputDto.setStepStartDate(DateConverter.convertToDate(LocalDate.parse("2025-01-08")));
         stepInputDto.setStepEndDate(DateConverter.convertToDate(LocalDate.parse("2025-02-01")));
 

@@ -23,8 +23,6 @@ public class StepInputDto {
 
     private String stepGoal;
 
-    private Integer sequence;
-
     private Long coachingProgramId;
 
     private List<Long> sessionIds;
@@ -77,14 +75,6 @@ public class StepInputDto {
 
     public void setStepGoal(String stepGoal) {
         this.stepGoal = stepGoal;
-    }
-
-    public Integer getSequence() {
-        return sequence;
-    }
-
-    public void setSequence(Integer sequence) {
-        this.sequence = sequence;
     }
 
     public Long getCoachingProgramId() {

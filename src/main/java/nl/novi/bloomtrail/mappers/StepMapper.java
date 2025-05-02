@@ -57,7 +57,6 @@ public class StepMapper {
         step.setStepEndDate(DateConverter.convertToLocalDate(inputDto.getStepEndDate()));
         step.setCompleted(inputDto.getCompleted());
         step.setStepGoal(inputDto.getStepGoal());
-        step.setSequence(inputDto.getSequence());
         step.setCoachingProgram(coachingProgramId);
         step.setSession(sessions);
         step.setAssignment(assignments);

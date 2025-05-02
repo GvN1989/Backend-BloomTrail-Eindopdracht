@@ -1,9 +1,10 @@
 package nl.novi.bloomtrail.services;
 
 import nl.novi.bloomtrail.dtos.StepInputDto;
-import nl.novi.bloomtrail.dtos.StepReorderDto;
+import nl.novi.bloomtrail.exceptions.BadRequestException;
 import nl.novi.bloomtrail.exceptions.NotFoundException;
 import nl.novi.bloomtrail.helper.DateConverter;
+import nl.novi.bloomtrail.helper.StepSequenceHelper;
 import nl.novi.bloomtrail.mappers.StepMapper;
 import nl.novi.bloomtrail.models.Assignment;
 import nl.novi.bloomtrail.models.Session;
@@ -23,13 +24,15 @@ public class StepService {
 
     private final StepRepository stepRepository;
     private final ValidationHelper validationHelper;
+    private final StepSequenceHelper stepSequenceHelper;
     private final CoachingProgramService coachingProgramService;
     private final DownloadService downloadService;
     private final CoachingProgramRepository coachingProgramRepository;
 
-    public StepService(StepRepository stepRepository, ValidationHelper validationHelper, CoachingProgramService coachingProgramService, DownloadService downloadService, CoachingProgramRepository coachingProgramRepository) {
+    public StepService(StepRepository stepRepository, ValidationHelper validationHelper, StepSequenceHelper stepSequenceHelper, CoachingProgramService coachingProgramService, DownloadService downloadService, CoachingProgramRepository coachingProgramRepository) {
         this.stepRepository = stepRepository;
         this.validationHelper = validationHelper;
+        this.stepSequenceHelper = stepSequenceHelper;
         this.coachingProgramService = coachingProgramService;
         this.downloadService = downloadService;
         this.coachingProgramRepository = coachingProgramRepository;
@@ -56,12 +59,21 @@ public class StepService {
     }
 
     public List<Step> addStepsToProgram(List<StepInputDto> inputDtos) {
+
+        if (inputDtos == null || inputDtos.isEmpty()) {
+            throw new BadRequestException("Step input list must not be empty.");
+        }
+
         List<Step> savedSteps = new ArrayList<>();
 
-        for (StepInputDto inputDto : inputDtos) {
-            Long coachingProgramId = inputDto.getCoachingProgramId();
+        Long coachingProgramId = inputDtos.get(0).getCoachingProgramId();
+        CoachingProgram coachingProgram = validationHelper.validateCoachingProgram(coachingProgramId);
 
-            CoachingProgram coachingProgram = validationHelper.validateCoachingProgram(coachingProgramId);
+        for (StepInputDto inputDto : inputDtos) {
+
+            if (inputDto.getStepName() == null || inputDto.getStepStartDate() == null) {
+                throw new BadRequestException("Step name and start date are required.");
+            }
 
             List<Session> sessions = (inputDto.getSessionIds() != null) ? validationHelper.validateSessions(inputDto.getSessionIds()) : new ArrayList<>();
             List<Assignment> assignments = (inputDto.getAssignmentIds() != null) ? validationHelper.validateAssignments(inputDto.getAssignmentIds()) : new ArrayList<>();
@@ -70,28 +82,17 @@ public class StepService {
 
             Step step = StepMapper.toStepEntity(inputDto, coachingProgram, sessions, assignments);
 
-            if (inputDto.getSequence() == null) {
-                int max = stepRepository.findByCoachingProgram(coachingProgram).stream()
-                        .mapToInt(Step::getSequence)
-                        .max()
-                        .orElse(0);
-                step.setSequence(max + 1);
-            } else {
-                step.setSequence(inputDto.getSequence());
-            }
-
-            validationHelper.validateStepSequence(coachingProgram, step);
-
             step.setCoachingProgram(coachingProgram);
             coachingProgram.getTimeline().add(step);
 
             Step savedStep = stepRepository.save(step);
-            coachingProgramRepository.save(coachingProgram);
-
-            coachingProgramService.updateProgramEndDate(coachingProgramId);
-
             savedSteps.add(savedStep);
         }
+
+            stepSequenceHelper.reorderStepsForProgram(coachingProgram);
+
+            coachingProgramRepository.save(coachingProgram);
+            coachingProgramService.updateProgramEndDate(coachingProgramId);
 
         return savedSteps;
     }
@@ -115,33 +116,17 @@ public class StepService {
         if (inputDto.getStepGoal() != null) {
             existingStep.setStepGoal(inputDto.getStepGoal());
         }
+        if (inputDto.getCompleted() != null) {
+            existingStep.setCompleted(inputDto.getCompleted());
+        }
 
         Step updatedStep = stepRepository.save(existingStep);
+
+        stepSequenceHelper.reorderStepsForProgram(coachingProgram);
 
         coachingProgramService.updateProgramEndDate(existingStep.getCoachingProgram().getCoachingProgramId());
 
         return updatedStep;
-    }
-
-    public List<Step> reorderStepSequence(List<StepReorderDto> reorderDtos) {
-        if (reorderDtos == null || reorderDtos.isEmpty()) {
-            throw new IllegalArgumentException("No steps provided for reordering.");
-        }
-        List<Step> updatedSteps = new ArrayList<>();
-
-        for (StepReorderDto dto : reorderDtos) {
-            Step step = validationHelper.validateStep(dto.getStepId());
-            CoachingProgram coachingProgram = step.getCoachingProgram();
-
-            validationHelper.validateCoachOwnsProgramOrIsAdmin(coachingProgram);
-
-            step.setSequence(dto.getNewSequence());
-            validationHelper.validateStepSequence(coachingProgram, step);
-
-            updatedSteps.add(step);
-        }
-
-        return stepRepository.saveAll(updatedSteps);
     }
 
     public void deleteStep(Long stepId) {
@@ -152,13 +137,6 @@ public class StepService {
             coachingProgramService.updateProgramEndDate(coachingProgram.getCoachingProgramId());
         }
         stepRepository.delete(step);
-    }
-
-    public Step markStepCompletionStatus(Long stepId, boolean isCompleted) {
-        Step step = stepRepository.findById(stepId)
-                .orElseThrow(() -> new NotFoundException("Step with ID " + stepId + " not found"));
-        step.setCompleted(isCompleted);
-        return stepRepository.save(step);
     }
 
     public byte[] downloadFilesForStep(Long stepId) throws IOException {
