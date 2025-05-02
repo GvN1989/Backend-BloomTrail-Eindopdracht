@@ -6,7 +6,6 @@ import jakarta.validation.constraints.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -30,13 +29,12 @@ public class Step {
     @Column(name = "step_end_date")
     private LocalDate stepEndDate;
 
-    @Column(name = "completed")
-    private Boolean completed;
+    @Column(nullable = false,name = "step_status")
+    private Boolean completed = false;
 
     @Column(name = "step_goal")
     private String StepGoal;
 
-    @NotNull
     @Column(name = "sequence")
     private Integer sequence;
 

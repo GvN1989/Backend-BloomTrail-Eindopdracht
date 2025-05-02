@@ -65,8 +65,8 @@ public class SessionMapper {
         session.setSessionName(inputDto.getSessionName());
         session.setCoach(inputDto.getCoach());
         session.setClient(inputDto.getClient());
-        session.setSessionDate(DateConverter.convertToLocalDate(inputDto.getSessionDate()));
-        session.setSessionTime(TimeConverter.convertToLocalTime(inputDto.getSessionTime()));
+        session.setSessionDate(inputDto.getSessionDate());
+        session.setSessionTime(inputDto.getSessionTime());
         session.setLocation(inputDto.getLocation());
         session.setComment(inputDto.getComment());
         session.setStep(step);

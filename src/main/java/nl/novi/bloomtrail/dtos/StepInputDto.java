@@ -19,6 +19,7 @@ public class StepInputDto {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy", timezone = "UTC")
     private Date stepEndDate;
 
+    @NotNull(message = "Field 'completed' must not be null.")
     private Boolean completed;
 
     private String stepGoal;

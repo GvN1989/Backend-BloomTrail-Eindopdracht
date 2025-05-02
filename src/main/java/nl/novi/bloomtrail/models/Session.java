@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.*;
-import nl.novi.bloomtrail.enums.SessionStatus;
 import org.hibernate.annotations.*;
 
 import java.time.LocalDate;

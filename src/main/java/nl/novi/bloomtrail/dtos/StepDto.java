@@ -1,5 +1,8 @@
 package nl.novi.bloomtrail.dtos;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import org.springframework.cglib.core.Local;
+
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
@@ -7,19 +10,14 @@ import java.util.List;
 public class StepDto {
 
     private Long StepId;
-
     private String StepName;
-
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private LocalDate stepStartDate;
-
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private LocalDate stepEndDate;
-
     private Boolean completed;
-
     private String stepGoal;
-
     private Integer sequence;
-
     private Long coachingProgramId;
     private List<Long> sessionIds;
     private List<Long> assignmentIds;

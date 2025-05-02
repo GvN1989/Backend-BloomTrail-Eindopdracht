@@ -15,7 +15,6 @@ public class TimeConverter {
         return date.toInstant().atZone(ZoneId.systemDefault()).toLocalTime();
     }
 
-    // ✅ Convert LocalTime to Date (adds default date component)
     public static Date convertToDate(LocalTime localTime) {
         if (localTime == null) return null;
         return Date.from(localTime.atDate(java.time.LocalDate.of(1970, 1, 1))

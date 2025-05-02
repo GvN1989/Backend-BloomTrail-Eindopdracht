@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS steps (
                                      step_id SERIAL PRIMARY KEY,
                                      step_name VARCHAR(255) NOT NULL,
                                      step_goal TEXT,
-                                     completed BOOLEAN,
+                                     step_status BOOLEAN,
                                      step_start_date DATE NOT NULL,
                                      step_end_date DATE NOT NULL,
                                      sequence INTEGER NOT NULL,
@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS steps (
                                      FOREIGN KEY (coaching_program_id) REFERENCES coaching_programs(coaching_program_id) ON DELETE CASCADE
 );
 
-INSERT INTO steps (step_name, step_start_date, step_end_date, completed, step_goal, sequence, coaching_program_id)
+INSERT INTO steps (step_name, step_start_date, step_end_date, step_status, step_goal, sequence, coaching_program_id)
 VALUES
     ('Discovering Your Strengths', '01-04-2024', '07-04-2024', false, 'Complete StrengthsFinder assessment to identify top strengths', 1, 1),
     ('Understanding Talent Themes', '08-04-2024', '14-04-2024', false, 'Deep dive into individual talent themes and their impact', 2, 1),
@@ -77,7 +77,7 @@ VALUES
     ('Creating a Strengths-Based Development Plan', '29-04-2024', '05-05-2024', false, 'Set up long-term goals and growth strategies', 5, 1);
 
 
-INSERT INTO steps (step_name, step_start_date, step_end_date, completed, step_goal, sequence, coaching_program_id)
+INSERT INTO steps (step_name, step_start_date, step_end_date, step_status, step_goal, sequence, coaching_program_id)
 VALUES
     ('Understanding Strengths-Based Leadership', '15-03-2024', '21-03-2024', false, 'Identify leadership style based on strengths', 1, 2),
     ('Building Effective Communication Skills', '22-03-2024', '28-03-2024', false, 'Develop influence through communication techniques', 2, 2),

@@ -1,5 +1,7 @@
 package nl.novi.bloomtrail.dtos;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -11,13 +13,14 @@ public class SessionDto {
     private String sessionName;
     private String coach;
     private String client;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private LocalDate sessionDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
     private LocalTime sessionTime;
     private String location;
     private String comment;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private String status;
     private List<Long> sessionInsightId;
     private List<Long> assignmentId;
     private Long StepId;
@@ -100,14 +103,6 @@ public class SessionDto {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
     }
 
     public List<Long> getSessionInsightId() {

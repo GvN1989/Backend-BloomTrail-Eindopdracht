@@ -75,10 +75,10 @@ public class SessionService {
                 .orElseThrow(() -> new NotFoundException("Session with ID " + sessionId + " not found"));
 
         if (inputDto.getSessionDate() != null) {
-            session.setSessionDate(DateConverter.convertToLocalDate(inputDto.getSessionDate()));
+            session.setSessionDate(inputDto.getSessionDate());
         }
         if (inputDto.getSessionTime() != null) {
-            session.setSessionTime(TimeConverter.convertToLocalTime(inputDto.getSessionTime()));
+            session.setSessionTime(inputDto.getSessionTime());
         }
         if (inputDto.getLocation() != null) {
             session.setLocation(inputDto.getLocation());

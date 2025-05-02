@@ -70,15 +70,10 @@ public class StepService {
         CoachingProgram coachingProgram = validationHelper.validateCoachingProgram(coachingProgramId);
 
         for (StepInputDto inputDto : inputDtos) {
-
-            if (inputDto.getStepName() == null || inputDto.getStepStartDate() == null) {
-                throw new BadRequestException("Step name and start date are required.");
-            }
+            validationHelper.validateStepCreationInput(inputDto);
 
             List<Session> sessions = (inputDto.getSessionIds() != null) ? validationHelper.validateSessions(inputDto.getSessionIds()) : new ArrayList<>();
             List<Assignment> assignments = (inputDto.getAssignmentIds() != null) ? validationHelper.validateAssignments(inputDto.getAssignmentIds()) : new ArrayList<>();
-
-            validationHelper.validateStepCreationInput(inputDto);
 
             Step step = StepMapper.toStepEntity(inputDto, coachingProgram, sessions, assignments);
 

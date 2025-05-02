@@ -52,7 +52,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<Object> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(
-                ErrorResponseBuilder.build(409, "This user cannot be deleted because they are still assigned to one or more coaching programs.")
+                ErrorResponseBuilder.build(409, "Database constraint violation occurred. Please check the data and try again.")
         );
     }
 

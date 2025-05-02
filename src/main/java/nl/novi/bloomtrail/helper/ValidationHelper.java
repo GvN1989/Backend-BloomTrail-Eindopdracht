@@ -11,7 +11,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -74,6 +77,7 @@ public class ValidationHelper {
         return stepRepository.findById(StepId)
                 .orElseThrow(() -> new NotFoundException("Step with ID" + StepId));
     }
+
 
     public List<Session> validateSessions(List<Long> sessionIds) {
         if (sessionIds == null || sessionIds.isEmpty()) {
@@ -162,17 +166,39 @@ public class ValidationHelper {
     }
 
     public void validateStepCreationInput(StepInputDto inputDto) {
+
         if (inputDto.getStepName() == null || inputDto.getStepName().isBlank()) {
             throw new BadRequestException("Step name is required.");
         }
         if (inputDto.getStepGoal() == null || inputDto.getStepGoal().isBlank()) {
             throw new BadRequestException("Step goal is required.");
         }
+        if (inputDto.getCompleted() == null) {
+            throw new BadRequestException("Field 'completed' must not be null.");
+        }
         if (inputDto.getCoachingProgramId() == null) {
             throw new BadRequestException("Coaching program ID is required.");
         }
         if (inputDto.getStepStartDate() == null || inputDto.getStepEndDate() == null) {
             throw new BadRequestException("Step start date and end date cannot be null.");
+        }
+
+        if (inputDto.getStepEndDate().before(inputDto.getStepStartDate())) {
+            throw new BadRequestException("Step end date cannot be before start date.");
+        }
+
+        validateDateFormat(inputDto.getStepStartDate(), "stepStartDate");
+        validateDateFormat(inputDto.getStepEndDate(), "stepEndDate");
+    }
+
+    public void validateDateFormat(Date date, String label) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+        sdf.setLenient(false);
+
+        try {
+            sdf.parse(sdf.format(date));
+        } catch (ParseException e) {
+            throw new BadRequestException("Field '" + label + "' must be in format dd-MM-yyyy.");
         }
     }
 
