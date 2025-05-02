@@ -2,9 +2,7 @@ package nl.novi.bloomtrail.services;
 
 import nl.novi.bloomtrail.dtos.SessionInputDto;
 import nl.novi.bloomtrail.exceptions.NotFoundException;
-import nl.novi.bloomtrail.helper.DateConverter;
 import nl.novi.bloomtrail.helper.ValidationHelper;
-import nl.novi.bloomtrail.helper.TimeConverter;
 import nl.novi.bloomtrail.mappers.SessionMapper;
 import nl.novi.bloomtrail.models.*;
 import nl.novi.bloomtrail.repositories.CoachingProgramRepository;
@@ -47,22 +45,14 @@ public class SessionService {
         }
 
         return steps.stream()
-                .flatMap(step -> step.getSession().stream())
+                .flatMap(step -> step.getSessions().stream())
                 .collect(Collectors.toList());
     }
 
     public Session createSessionAndAddToStep(SessionInputDto inputDto) {
         Step step = validationHelper.validateStep(inputDto.getStepId());
 
-        List<SessionInsight> sessionInsights = inputDto.getSessionInsightsId() == null || inputDto.getSessionInsightsId().isEmpty()
-                ? List.of()
-                : validationHelper.validateSessionInsights(inputDto.getSessionInsightsId());
-
-        List<Assignment> assignments = inputDto.getAssignmentId() == null || inputDto.getAssignmentId().isEmpty()
-                ? List.of()
-                : validationHelper.validateAssignments(inputDto.getAssignmentId());
-
-        Session session = SessionMapper.toSessionEntity(inputDto, step, sessionInsights, assignments);
+        Session session = SessionMapper.toSessionEntity(inputDto, step);
 
         validationHelper.validateSessionDateAndTime(step, session);
 

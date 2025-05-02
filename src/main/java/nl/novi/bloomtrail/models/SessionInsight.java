@@ -23,17 +23,12 @@ public class SessionInsight {
     @CreationTimestamp
     private LocalDateTime createdAt;
     private String description;
-    @Enumerated(EnumType.STRING)
-    @Column(name = "file_context", nullable = false)
     private FileContext fileContext;
-
-    @ManyToOne
-    @JoinColumn(name = "session_id", insertable = false, updatable = false)
+    @OneToOne
+    @JoinColumn(name = "session_id")
     private Session session;
-
     @OneToMany(mappedBy = "sessionInsight", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<File> files = new ArrayList<>();
-
 
     public Long getSessionInsightId() {
         return sessionInsightId;
@@ -90,5 +85,4 @@ public class SessionInsight {
     public void setFileContext(FileContext fileContext) {
         this.fileContext = fileContext;
     }
-
 }

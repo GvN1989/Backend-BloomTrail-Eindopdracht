@@ -44,11 +44,11 @@ public class Step {
 
     @OneToMany
     @JoinColumn(name = "session_id", insertable = false, updatable = false)
-    private List<Session> session = new ArrayList<>();
+    private List<Session> sessions = new ArrayList<>();
 
     @OneToMany
     @JoinColumn(name = "assignment_id", insertable = false, updatable = false)
-    private List<Assignment> assignment = new ArrayList<>();
+    private List<Assignment> assignments = new ArrayList<>();
 
     public Long getStepId() {
         return stepId;
@@ -106,20 +106,20 @@ public class Step {
         this.coachingProgram = coachingProgram;
     }
 
-    public List<Session> getSession() {
-        return session;
+    public List<Session> getSessions() {
+        return sessions;
     }
 
-    public void setSession(List<Session> session) {
-        this.session = session;
+    public void setSessions(List<Session> sessions) {
+        this.sessions = sessions;
     }
 
-    public List<Assignment> getAssignment() {
-        return assignment;
+    public List<Assignment> getAssignments() {
+        return assignments;
     }
 
-    public void setAssignment(List<Assignment> assignment) {
-        this.assignment = assignment;
+    public void setAssignments(List<Assignment> assignments) {
+        this.assignments = assignments;
     }
 
     public String getStepName() {

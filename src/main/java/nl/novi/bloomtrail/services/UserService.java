@@ -173,6 +173,8 @@ public class UserService {
         }
 
         File savedFile = fileService.saveFile(file, FileContext.PROFILE_PICTURE, user);
+        fileRepository.flush();
+
         user.setProfilePicture(savedFile);
         userRepository.save(user);
     }

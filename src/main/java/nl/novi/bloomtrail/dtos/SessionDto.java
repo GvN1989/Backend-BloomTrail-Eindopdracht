@@ -21,8 +21,8 @@ public class SessionDto {
     private String comment;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private List<Long> sessionInsightId;
-    private List<Long> assignmentId;
+    private SessionInsightDto sessionInsight;
+    private List<Long> assignmentIds;
     private Long StepId;
 
     public Long getSessionId() {
@@ -105,20 +105,12 @@ public class SessionDto {
         this.updatedAt = updatedAt;
     }
 
-    public List<Long> getSessionInsightId() {
-        return sessionInsightId;
+    public List<Long> getAssignmentIds() {
+        return assignmentIds;
     }
 
-    public void setSessionInsightId(List<Long> sessionInsightId) {
-        this.sessionInsightId = sessionInsightId;
-    }
-
-    public List<Long> getAssignmentId() {
-        return assignmentId;
-    }
-
-    public void setAssignmentId(List<Long> assignmentId) {
-        this.assignmentId = assignmentId;
+    public void setAssignmentId(List<Long> assignmentIds) {
+        this.assignmentIds = assignmentIds;
     }
 
     public Long getStepId() {
@@ -127,5 +119,17 @@ public class SessionDto {
 
     public void setStepId(Long stepId) {
         StepId = stepId;
+    }
+
+    public SessionInsightDto getSessionInsight() {
+        return sessionInsight;
+    }
+
+    public void setSessionInsight(SessionInsightDto sessionInsight) {
+        this.sessionInsight = sessionInsight;
+    }
+
+    public void setAssignmentIds(List<Long> assignmentIds) {
+        this.assignmentIds = assignmentIds;
     }
 }

@@ -27,15 +27,15 @@ public class File {
     private FileContext context;
 
     @ManyToOne
-    @JoinColumn(name = "assignment_id", insertable = false, updatable = false)
+    @JoinColumn(name = "assignment_id")
     private Assignment assignment;
 
     @ManyToOne
-    @JoinColumn(name = "strength_results_id", insertable = false, updatable = false)
+    @JoinColumn(name = "strength_results_id")
     private StrengthResults strengthResults;
 
     @ManyToOne
-    @JoinColumn(name = "session_insight_id", insertable = false, updatable = false)
+    @JoinColumn(name = "session_insight_id")
     private SessionInsight sessionInsight;
 
     @OneToOne(mappedBy = "profilePicture")

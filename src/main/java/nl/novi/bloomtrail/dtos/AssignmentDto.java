@@ -9,7 +9,7 @@ public class AssignmentDto {
     private String description;
     private Long sessionId;
     private Long stepId;
-    private List<Long> uploadsIds;;
+    private List<Long> fileIds;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -38,12 +38,12 @@ public class AssignmentDto {
         this.sessionId = sessionId;
     }
 
-    public List<Long> getUploadsIds() {
-        return uploadsIds;
+    public List<Long> getFileId() {
+        return fileIds;
     }
 
-    public void setUploadsIds(List<Long> uploadsIds) {
-        this.uploadsIds = uploadsIds;
+    public void setFileIds(List<Long> fileId) {
+        this.fileIds = fileId;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -51,6 +51,14 @@ public class AssignmentDto {
     }
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     public Long getStepId() {

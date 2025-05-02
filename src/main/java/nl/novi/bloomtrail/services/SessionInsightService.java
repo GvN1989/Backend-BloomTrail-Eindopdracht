@@ -26,16 +26,10 @@ public class SessionInsightService {
         this.downloadService = downloadService;
     }
 
-    public List<SessionInsight> getSessionInsightsByContext(Long sessionId, FileContext context) {
+    public SessionInsight getSessionInsightBySession(Long sessionId) {
         Session session = validationHelper.validateSession(sessionId);
 
-        return session.getSessionInsights().stream().filter(insight -> insight.getFileContext() == context).toList();
-    }
-
-    public List<SessionInsight> getSessionInsightsBySession(Long sessionId) {
-        Session session = validationHelper.validateSession(sessionId);
-
-        return session.getSessionInsights();
+        return session.getSessionInsight();
     }
 
     public SessionInsight createSessionInsight(SessionInsightInputDto inputDto) {
@@ -48,7 +42,6 @@ public class SessionInsightService {
         SessionInsight sessionInsight = new SessionInsight();
         sessionInsight.setAuthor(inputDto.getAuthor());
         sessionInsight.setDescription(inputDto.getDescription());
-        sessionInsight.setFileContext(inputDto.getFileContext());
         sessionInsight.setSession(session);
 
         return sessionInsightRepository.save(sessionInsight);
@@ -73,6 +66,15 @@ public class SessionInsightService {
     public byte[] downloadSessionInsightFiles(Long sessionInsightId, FileContext context) throws IOException {
         SessionInsight sessionInsight = validationHelper.validateSessionInsight(sessionInsightId);
         return downloadService.downloadSessionInsightFiles(sessionInsightId, context);
+    }
+
+    public SessionInsight getOrCreateBySession(Session session) {
+        return sessionInsightRepository.findBySession(session)
+                .orElseGet(() -> {
+                    SessionInsight si = new SessionInsight();
+                    si.setSession(session);
+                    return sessionInsightRepository.save(si);
+                });
     }
 
 

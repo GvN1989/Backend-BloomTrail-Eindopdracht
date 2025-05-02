@@ -1,6 +1,5 @@
 package nl.novi.bloomtrail.controllers;
 
-import jakarta.validation.Valid;
 import nl.novi.bloomtrail.dtos.AssignmentDto;
 import nl.novi.bloomtrail.dtos.AssignmentInputDto;
 import nl.novi.bloomtrail.mappers.AssignmentMapper;
@@ -43,26 +42,23 @@ public class AssignmentController {
         return ResponseEntity.ok(assignmentDtos);
     }
 
-    @PostMapping
-    public ResponseEntity<Assignment> createAssignment(
-            @RequestPart("data") AssignmentInputDto dto,
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<AssignmentDto> createAssignment(
+            @RequestParam("description") String description,
+            @RequestParam("stepId") Long stepId,
+            @RequestParam(value = "sessionId", required = false) Long sessionId,
             @RequestPart(value = "file", required = false) MultipartFile file
     ) {
-        Assignment assignment = assignmentService.createAssignment(dto, file);
-        return ResponseEntity.status(HttpStatus.CREATED).body(assignment);
+        AssignmentInputDto inputDto = new AssignmentInputDto();
+        inputDto.setDescription(description);
+        inputDto.setStepId(stepId);
+        inputDto.setSessionId(sessionId);
+
+        Assignment assignment = assignmentService.createAssignment(inputDto, file);
+        AssignmentDto responseDto = AssignmentMapper.toAssignmentDto(assignment);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<AssignmentDto> updateAssignment(
-            @PathVariable("id") Long assignmentId,
-            @Valid @RequestBody AssignmentInputDto inputDto) {
-
-        Assignment updatedAssignment = assignmentService.updateAssignment(assignmentId, inputDto);
-        AssignmentDto response = AssignmentMapper.toAssignmentDto(updatedAssignment);
-
-        return ResponseEntity.ok(response);
-    }
-
 
     @PostMapping("/{id}/upload")
     public ResponseEntity<String> uploadFileForAssignment(

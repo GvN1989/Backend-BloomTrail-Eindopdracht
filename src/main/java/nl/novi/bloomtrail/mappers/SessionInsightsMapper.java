@@ -18,7 +18,6 @@ public class SessionInsightsMapper {
         dto.setAuthor(sessionInsight.getAuthor());
         dto.setCreatedAt(sessionInsight.getCreatedAt());
         dto.setDescription(sessionInsight.getDescription());
-        dto.setFileContext(sessionInsight.getFileContext() != null ? sessionInsight.getFileContext().toString() : null);
         dto.setSessionId(sessionInsight.getSession().getSessionId());
         dto.setFileUrls(
                 sessionInsight.getFiles().stream()
@@ -36,7 +35,6 @@ public class SessionInsightsMapper {
             SessionInsight entity = new SessionInsight();
             entity.setAuthor(inputDto.getAuthor());
             entity.setDescription(inputDto.getDescription());
-            entity.setFileContext(inputDto.getFileContext());
             entity.setSession(session);
             entity.setFiles(files);
             return entity;

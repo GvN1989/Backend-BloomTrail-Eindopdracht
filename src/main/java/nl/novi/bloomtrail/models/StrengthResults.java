@@ -21,9 +21,6 @@ public class StrengthResults {
     @Column(name = "strength_results_id")
     private Long resultsId;
     private String filename;
-    @Enumerated(EnumType.STRING)
-    @Column(name = "file_context", nullable = false)
-    private FileContext fileContext;
     @CreationTimestamp
     private Date createdAt;
     @UpdateTimestamp
@@ -128,13 +125,5 @@ public class StrengthResults {
 
     public void setManagingStrengths(List<ManagingStrength> managingStrengths) {
         this.managingStrengths = managingStrengths;
-    }
-
-    public FileContext getFileContext() {
-        return fileContext;
-    }
-
-    public void setFileContext(FileContext fileContext) {
-        this.fileContext = fileContext;
     }
 }

@@ -1,5 +1,6 @@
 package nl.novi.bloomtrail.services;
 
+import jakarta.persistence.EntityNotFoundException;
 import nl.novi.bloomtrail.models.*;
 import nl.novi.bloomtrail.repositories.*;
 import org.springframework.stereotype.Service;
@@ -18,8 +19,7 @@ public class FileService {
 
     private final FileRepository fileRepository;
 
-
-    public FileService(FileRepository fileRepository) {
+    public FileService(FileRepository fileRepository, AssignmentRepository assignmentRepository, SessionInsightRepository sessionInsightRepository, StrengthResultsRepository strengthResultsRepository) {
         this.fileRepository = fileRepository;
     }
 
@@ -44,12 +44,16 @@ public class FileService {
         file.setContext(context);
         file.setFileType(fileType);
 
-        switch (parentEntity) {
-            case Assignment assignment -> file.setAssignment(assignment);
-            case StrengthResults strengthResults -> file.setStrengthResults(strengthResults);
-            case SessionInsight sessionInsight -> file.setSessionInsights(sessionInsight);
-            case User user -> file.setUser(user);
-            case null, default -> throw new IllegalArgumentException("Unsupported parent entity type or context");
+        if (parentEntity instanceof Assignment assignment) {
+            file.setAssignment(assignment);
+        } else if (parentEntity instanceof StrengthResults strengthResults) {
+            file.setStrengthResults(strengthResults);
+        } else if (parentEntity instanceof SessionInsight sessionInsight) {
+            file.setSessionInsights(sessionInsight);
+        } else if (parentEntity instanceof User user) {
+            file.setUser(user);
+        } else {
+            throw new IllegalArgumentException("Unsupported parent entity type or context");
         }
 
         return fileRepository.save(file);
@@ -72,7 +76,6 @@ public class FileService {
             default -> throw new IllegalArgumentException("Unsupported file type");
         };
     }
-
     private byte[] readFileFromStorage(String url) {
         try {
             return Files.readAllBytes(Paths.get(url));

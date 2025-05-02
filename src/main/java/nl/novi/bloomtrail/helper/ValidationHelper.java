@@ -1,7 +1,6 @@
 package nl.novi.bloomtrail.helper;
 
 import nl.novi.bloomtrail.dtos.StepInputDto;
-import nl.novi.bloomtrail.dtos.UserInputDto;
 import nl.novi.bloomtrail.exceptions.BadRequestException;
 import nl.novi.bloomtrail.exceptions.NotFoundException;
 import nl.novi.bloomtrail.models.*;
@@ -124,7 +123,7 @@ public class ValidationHelper {
     }
 
     public void validateSessionDateAndTime(Step step, Session session) {
-        boolean hasConflict = step.getSession().stream()
+        boolean hasConflict = step.getSessions().stream()
                 .anyMatch(existingSession ->
                         existingSession.getSessionDate().equals(session.getSessionDate()) &&
                                 existingSession.getSessionTime().equals(session.getSessionTime())

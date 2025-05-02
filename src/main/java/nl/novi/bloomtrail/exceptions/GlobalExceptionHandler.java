@@ -66,7 +66,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<Object> handleMaxSizeException(MaxUploadSizeExceededException ex) {
         return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(
-                ErrorResponseBuilder.build(413, "File is too large. Maximum allowed size is 5MB.")
+                ErrorResponseBuilder.build(413, "File is too large. Maximum allowed size is 10MB.")
         );
     }
     @ExceptionHandler(MultipartException.class)

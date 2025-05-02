@@ -9,7 +9,6 @@ import nl.novi.bloomtrail.models.Assignment;
 import nl.novi.bloomtrail.helper.DateConverter;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 public class StepMapper {
@@ -26,19 +25,19 @@ public class StepMapper {
         dto.setSequence(step.getSequence());
         dto.setCoachingProgramId(step.getCoachingProgram() != null ? step.getCoachingProgram().getCoachingProgramId() : null);
 
-        if (step.getSession() != null) {
+        if (step.getSessions() != null) {
             dto.setSessionIds(
-                    step.getSession().stream()
+                    step.getSessions().stream()
                             .map(Session::getSessionId)
-                            .collect(Collectors.toList())
+                            .toList()
             );
         }
 
-        if (step.getAssignment() != null) {
+        if (step.getAssignments() != null) {
             dto.setAssignmentIds(
-                    step.getAssignment().stream()
+                    step.getAssignments().stream()
                             .map(Assignment::getAssignmentId)
-                            .collect(Collectors.toList())
+                            .toList()
             );
         }
 
@@ -55,8 +54,8 @@ public class StepMapper {
         step.setCompleted(inputDto.getCompleted());
         step.setStepGoal(inputDto.getStepGoal());
         step.setCoachingProgram(coachingProgramId);
-        step.setSession(sessions);
-        step.setAssignment(assignments);
+        step.setSessions(sessions);
+        step.setAssignments(assignments);
 
         return step;
 

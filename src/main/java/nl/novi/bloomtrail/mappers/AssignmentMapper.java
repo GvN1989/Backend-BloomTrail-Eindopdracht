@@ -9,7 +9,7 @@ import nl.novi.bloomtrail.models.Session;
 import nl.novi.bloomtrail.models.Step;
 
 
-import java.util.stream.Collectors;
+import java.util.Collections;
 
 public class AssignmentMapper {
 
@@ -20,14 +20,17 @@ public class AssignmentMapper {
         dto.setDescription(assignment.getDescription());
         dto.setSessionId(assignment.getSession() != null ? assignment.getSession().getSessionId() : null);
         dto.setStepId(assignment.getStep() != null ? assignment.getStep().getStepId() : null);
+        dto.setCreatedAt(assignment.getCreatedAt());
+        dto.setUpdatedAt(assignment.getUpdatedAt());
         if (assignment.getFiles() != null && !assignment.getFiles().isEmpty()) {
-            dto.setUploadsIds(
+            dto.setFileIds(
                     assignment.getFiles().stream()
                             .map(File::getFileId)
-                            .collect(Collectors.toList())
+                            .toList()
             );
+        } else {
+            dto.setFileIds(Collections.emptyList());
         }
-
         return dto;
 
     }
@@ -41,6 +44,7 @@ public class AssignmentMapper {
             Assignment assignment = new Assignment();
 
             assignment.setDescription(inputDto.getDescription());
+
             if (session != null) {
                 assignment.setSession(session);
             }

@@ -3,14 +3,17 @@ package nl.novi.bloomtrail.controllers;
 import jakarta.validation.Valid;
 import nl.novi.bloomtrail.dtos.SessionDto;
 import nl.novi.bloomtrail.dtos.SessionInputDto;
+import nl.novi.bloomtrail.enums.FileContext;
 import nl.novi.bloomtrail.mappers.SessionMapper;
 import nl.novi.bloomtrail.models.Session;
+import nl.novi.bloomtrail.services.SessionInsightService;
 import nl.novi.bloomtrail.services.SessionService;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
@@ -21,8 +24,11 @@ public class SessionController {
 
     private final SessionService sessionService;
 
-    public SessionController(SessionService sessionService) {
+    private final SessionInsightService sessionInsightService;
+
+    public SessionController(SessionService sessionService, SessionInsightService sessionInsightService) {
         this.sessionService = sessionService;
+        this.sessionInsightService = sessionInsightService;
     }
 
     @GetMapping("/user/{username}")
@@ -35,7 +41,6 @@ public class SessionController {
 
         return ResponseEntity.ok(sessionDtos);
     }
-
     @PostMapping
     public ResponseEntity<SessionDto> createSessionAndAddToStep(@RequestBody @Valid SessionInputDto inputDto) {
         Session session = sessionService.createSessionAndAddToStep(inputDto);
@@ -49,6 +54,24 @@ public class SessionController {
         SessionDto updatedSessionDto = SessionMapper.toSessionDto(updatedSession);
         return ResponseEntity.ok().body(updatedSessionDto);
 
+    }
+
+    @PostMapping("/{sessionId}/client-reflection")
+    public ResponseEntity<String> uploadClientReflectionFile(
+            @PathVariable("id") Long sessionInsightId,
+            @RequestParam("file") MultipartFile file) {
+
+        sessionInsightService.uploadClientReflectionFile(file, sessionInsightId);
+        return ResponseEntity.ok("Client reflection file uploaded successfully.");
+    }
+
+    @PostMapping("/{sessionId}/coach-notes")
+    public ResponseEntity<String> uploadCoachNotesFile(
+            @PathVariable("id") Long sessionInsightId,
+            @RequestParam("file") MultipartFile file) {
+
+        sessionInsightService.uploadCoachNotesFile(file, sessionInsightId);
+        return ResponseEntity.ok("Coach notes file uploaded successfully.");
     }
 
     @DeleteMapping("/{id}")

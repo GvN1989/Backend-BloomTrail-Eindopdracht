@@ -34,7 +34,7 @@ public class SessionInputDto {
     private LocalDateTime createdAt;
     @Future
     private LocalDateTime updatedAt;
-    private List<Long> sessionInsightsId;
+    private SessionInsightInputDto sessionInsight;
     private List<Long> assignmentId;
     private Long StepId;
 
@@ -118,14 +118,6 @@ public class SessionInputDto {
         this.updatedAt = updatedAt;
     }
 
-    public List<Long> getSessionInsightsId() {
-        return sessionInsightsId;
-    }
-
-    public void setSessionInsightsId(List<Long> sessionInsightsId) {
-        this.sessionInsightsId = sessionInsightsId;
-    }
-
     public List<Long> getAssignmentId() {
         return assignmentId;
     }
@@ -140,5 +132,13 @@ public class SessionInputDto {
 
     public void setStepId(Long stepId) {
         StepId = stepId;
+    }
+
+    public SessionInsightInputDto getSessionInsight() {
+        return sessionInsight;
+    }
+
+    public void setSessionInsight(SessionInsightInputDto sessionInsight) {
+        this.sessionInsight = sessionInsight;
     }
 }

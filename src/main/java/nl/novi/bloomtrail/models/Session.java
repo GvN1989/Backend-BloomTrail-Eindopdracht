@@ -40,14 +40,14 @@ public class Session {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<SessionInsight> sessionInsights = new ArrayList<>();
+    @OneToOne(mappedBy = "session", cascade = CascadeType.ALL)
+    private SessionInsight sessionInsight;
 
     @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Assignment> assignment = new ArrayList<>();
 
     @ManyToOne
-    @JoinColumn(name = "step_id", insertable = false, updatable = false)
+    @JoinColumn(name = "step_id")
     private Step step;
 
     public Long getSessionId() {
@@ -130,19 +130,19 @@ public class Session {
         this.sessionName = sessionName;
     }
 
-    public List<SessionInsight> getSessionInsights() {
-        return sessionInsights;
+    public SessionInsight getSessionInsight() {
+        return sessionInsight;
     }
 
-    public void setSessionInsights(List<SessionInsight> sessionInsights) {
-        this.sessionInsights = sessionInsights;
+    public void setSessionInsight(SessionInsight sessionInsight) {
+        this.sessionInsight = sessionInsight;
     }
 
     public List<Assignment> getAssignment() {
         return assignment;
     }
 
-    public void setAssignment(List<Assignment> assignments) {
+    public void setAssignment(List<Assignment> assignment) {
         this.assignment = assignment;
     }
 

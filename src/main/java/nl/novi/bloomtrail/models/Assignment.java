@@ -5,6 +5,7 @@ import nl.novi.bloomtrail.enums.FileContext;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
@@ -19,18 +20,15 @@ public class Assignment {
     @Column(name = "assignment_id")
     private Long assignmentId;
     private String description;
-    @Enumerated(EnumType.STRING)
-    @Column(name = "file_context", nullable = false)
-    private FileContext fileContext;
     @CreationTimestamp
-    private Date createdAt;
+    private LocalDateTime createdAt;
     @UpdateTimestamp
-    private Date updatedAt;
+    private LocalDateTime updatedAt;
     @ManyToOne
-    @JoinColumn(name = "session_id", insertable = false, updatable = false)
+    @JoinColumn(name = "session_id")
     private Session session;
     @ManyToOne
-    @JoinColumn(name = "step_id", insertable = false, updatable = false)
+    @JoinColumn(name = "step_id")
     private Step step;
     @OneToMany(mappedBy = "assignment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<File> files = new ArrayList<>();
@@ -75,19 +73,19 @@ public class Assignment {
         this.step = step;
     }
 
-    public Date getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public Date getUpdatedAt() {
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
 
-    public FileContext getFileContext() {
-        return fileContext;
-    }
-
-    public void setFileContext(FileContext fileContext) {
-        this.fileContext = fileContext;
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

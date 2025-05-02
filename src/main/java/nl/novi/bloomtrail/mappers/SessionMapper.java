@@ -7,8 +7,6 @@ import nl.novi.bloomtrail.models.Assignment;
 import nl.novi.bloomtrail.models.Session;
 import nl.novi.bloomtrail.models.SessionInsight;
 import nl.novi.bloomtrail.models.Step;
-import nl.novi.bloomtrail.helper.DateConverter;
-import nl.novi.bloomtrail.helper.TimeConverter;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,16 +26,14 @@ public class SessionMapper {
         dto.setComment(session.getComment());
         dto.setCreatedAt(session.getCreatedAt());
         dto.setUpdatedAt(session.getUpdatedAt());
-        dto.setStepId(session.getStep() != null ? session.getStep().getStepId() : null);
 
-        if (session.getSessionInsights() != null) {
-            dto.setSessionInsightId(
-                    session.getSessionInsights().stream()
-                            .map(SessionInsight::getSessionInsightId)
-                            .collect(Collectors.toList())
-            );
+        if (session.getStep() != null) {
+            dto.setStepId(session.getStep().getStepId());
+        }
 
 
+        if (session.getSessionInsight() != null) {
+            dto.setSessionInsight(SessionInsightMapper.toDto(session.getSessionInsight()));
         }
 
         if (session.getAssignment() != null) {
@@ -47,14 +43,13 @@ public class SessionMapper {
                             .collect(Collectors.toList())
             );
 
-
         }
 
         return dto;
 
     }
 
-    public static Session toSessionEntity(SessionInputDto inputDto, Step step, List<SessionInsight> sessionInsights, List<Assignment> assignments) {
+    public static Session toSessionEntity(SessionInputDto inputDto, Step step) {
         if (inputDto == null) {
             throw new ForbiddenException("SessionInputDto cannot be null");
         }
@@ -70,14 +65,12 @@ public class SessionMapper {
         session.setLocation(inputDto.getLocation());
         session.setComment(inputDto.getComment());
         session.setStep(step);
-        session.setSessionInsights(sessionInsights);
-        session.setAssignment(assignments);
 
         return session;
+
         }catch (Exception e) {
             throw new ForbiddenException("Error mapping SessionInputDto to Session" + e);
         }
-
     }
 
 }

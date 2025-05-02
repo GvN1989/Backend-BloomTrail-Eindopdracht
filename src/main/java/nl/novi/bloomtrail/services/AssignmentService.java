@@ -1,5 +1,6 @@
 package nl.novi.bloomtrail.services;
 
+import jakarta.persistence.EntityNotFoundException;
 import nl.novi.bloomtrail.dtos.AssignmentInputDto;
 import nl.novi.bloomtrail.helper.ValidationHelper;
 import nl.novi.bloomtrail.models.Assignment;
@@ -8,6 +9,7 @@ import nl.novi.bloomtrail.models.File;
 import nl.novi.bloomtrail.enums.FileContext;
 import nl.novi.bloomtrail.models.Step;
 import nl.novi.bloomtrail.repositories.AssignmentRepository;
+import nl.novi.bloomtrail.repositories.FileRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,19 +20,22 @@ import java.util.List;
 public class AssignmentService {
     private final AssignmentRepository assignmentRepository;
     private final FileService fileService;
+
+    private final FileRepository fileRepository;
     private final ValidationHelper validationHelper;
     private final DownloadService downloadService;
 
-    public AssignmentService(AssignmentRepository assignmentRepository, FileService fileService, ValidationHelper validationHelper, DownloadService downloadService) {
+    public AssignmentService(AssignmentRepository assignmentRepository, FileService fileService, FileRepository fileRepository, ValidationHelper validationHelper, DownloadService downloadService) {
         this.assignmentRepository = assignmentRepository;
         this.fileService = fileService;
+        this.fileRepository = fileRepository;
         this.validationHelper = validationHelper;
         this.downloadService = downloadService;
     }
 
     public List<Assignment> getAssignmentsByStep(Long stepId) {
         Step step = validationHelper.validateStep(stepId);
-        return step.getAssignment();
+        return step.getAssignments();
     }
 
     public List<Assignment> getAssignmentsBySession(Long sessionId) {
@@ -46,22 +51,6 @@ public class AssignmentService {
     public List<File> getUploadsForAssignment(Long assignmentId) {
         Assignment assignment = validationHelper.validateAssignment(assignmentId);
         return fileService.getUploadsForParentEntity(assignment);
-    }
-
-    public Assignment updateAssignment(Long assignmentId, AssignmentInputDto inputDto) {
-        Assignment assignment = validationHelper.validateAssignment(assignmentId);
-
-        if (inputDto.getStepId() != null) {
-            Step step = validationHelper.validateStep(inputDto.getStepId());
-            assignment.setStep(step);
-        }
-
-        if (inputDto.getSessionId() != null) {
-            Session session = validationHelper.validateSession(inputDto.getSessionId());
-            assignment.setSession(session);
-        }
-
-        return assignmentRepository.save(assignment);
     }
 
     public Assignment createAssignment(AssignmentInputDto inputDto, MultipartFile file) {
@@ -81,12 +70,14 @@ public class AssignmentService {
         }
 
         Assignment savedAssignment = assignmentRepository.save(assignment);
+        assignmentRepository.flush();
 
         if (file != null && !file.isEmpty()) {
             fileService.saveFile(file, FileContext.ASSIGNMENT, savedAssignment);
         }
 
-        return savedAssignment;
+        return assignmentRepository.findByAssignmentId(savedAssignment.getAssignmentId())
+                .orElseThrow(() -> new EntityNotFoundException("Assignment not found after creation"));
     }
 
     public void deleteAssignment(Long assignmentId) {
