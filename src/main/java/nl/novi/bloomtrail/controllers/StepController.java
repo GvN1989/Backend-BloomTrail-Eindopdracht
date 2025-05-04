@@ -50,30 +50,31 @@ public class StepController {
     @PostMapping("/coaching-programs/{programId}/steps")
     public ResponseEntity<List<StepDto>> addStepsToProgram(
             @PathVariable Long programId,
-            @Valid @RequestBody Object input
+            @Valid @RequestBody StepInputDto inputDto
     ) {
 
-        ObjectMapper objectMapper = new ObjectMapper();
+        inputDto.setCoachingProgramId(programId);
+        List<StepInputDto> inputDtos = List.of(inputDto);
 
-        List<StepInputDto> inputDtos;
-
-        if (input instanceof Map) {
-            StepInputDto single = objectMapper.convertValue(input, StepInputDto.class);
-            single.setCoachingProgramId(programId);
-            inputDtos = List.of(single);
-        }
-        else if (input instanceof List) {
-            inputDtos = objectMapper.convertValue(input, new TypeReference<List<StepInputDto>>() {});
-            inputDtos.forEach(dto -> dto.setCoachingProgramId(programId));
-        }
-        else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid input format.");
-        }
 
         List<StepDto> response = stepService.addStepsToProgram(inputDtos).stream()
                 .map(StepMapper::toStepDto)
                 .toList();
 
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping("/coaching-programs/{programId}/steps/batch")
+    public ResponseEntity<List<StepDto>> addStepsToProgramBatch(
+            @PathVariable Long programId,
+            @Valid @RequestBody List<StepInputDto> inputDtos) {
+
+        inputDtos.forEach(dto -> dto.setCoachingProgramId(programId));
+
+        List<StepDto> response = stepService.addStepsToProgram(inputDtos).stream()
+                .map(StepMapper::toStepDto)
+                .toList();
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

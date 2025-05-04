@@ -23,14 +23,14 @@ public class CoachingProgramInputDto {
     private String goal;
 
     @NotNull
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     @Future
-    private Date startDate;
+    private LocalDate startDate;
 
     @NotNull
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     @Future
-    private Date endDate;
+    private LocalDate endDate;
 
     @NotBlank(message = "Client username is required")
     private String clientUsername;
@@ -62,20 +62,20 @@ public class CoachingProgramInputDto {
     public void setGoal(String goal) {
         this.goal = goal;
     }
-    @NotNull(message = "Start date cannot be null")
-    public Date getStartDate() {
+
+    public LocalDate getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(Date startDate) {
+    public void setStartDate(LocalDate startDate) {
         this.startDate = startDate;
     }
 
-    public Date getEndDate() {
+    public LocalDate getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(Date endDate) {
+    public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
     }
 

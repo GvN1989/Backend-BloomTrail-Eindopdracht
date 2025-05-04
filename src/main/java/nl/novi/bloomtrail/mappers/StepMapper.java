@@ -54,8 +54,8 @@ public class StepMapper {
         Step step = new Step();
 
         step.setStepName(inputDto.getStepName());
-        step.setStepStartDate(DateConverter.convertToLocalDate(inputDto.getStepStartDate()));
-        step.setStepEndDate(DateConverter.convertToLocalDate(inputDto.getStepEndDate()));
+        step.setStepStartDate(inputDto.getStepStartDate());
+        step.setStepEndDate(inputDto.getStepEndDate());
         step.setCompleted(inputDto.getCompleted());
         step.setStepGoal(inputDto.getStepGoal());
         step.setCoachingProgram(coachingProgramId);

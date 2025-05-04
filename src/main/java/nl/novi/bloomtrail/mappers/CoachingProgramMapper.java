@@ -48,8 +48,8 @@ public class CoachingProgramMapper {
 
         coachingProgram.setCoachingProgramName(inputDto.getCoachingProgramName());
         coachingProgram.setGoal(inputDto.getGoal());
-        coachingProgram.setStartDate(DateConverter.convertToLocalDate(inputDto.getStartDate()));
-        coachingProgram.setEndDate(DateConverter.convertToLocalDate(inputDto.getEndDate()));
+        coachingProgram.setStartDate(inputDto.getStartDate());
+        coachingProgram.setEndDate(inputDto.getEndDate());
         coachingProgram.setClient(client);
         coachingProgram.setCoach(coach);
 
@@ -70,11 +70,11 @@ public class CoachingProgramMapper {
         }
 
         if (dto.getStartDate() != null) {
-            program.setStartDate(DateConverter.convertToLocalDate(dto.getStartDate()));
+            program.setStartDate(dto.getStartDate());
         }
 
         if (dto.getEndDate() != null) {
-            program.setEndDate(DateConverter.convertToLocalDate(dto.getEndDate()));
+            program.setEndDate(dto.getEndDate());
         }
 
     }

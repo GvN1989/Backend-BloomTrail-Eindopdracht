@@ -1,5 +1,7 @@
 package nl.novi.bloomtrail.dtos;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
@@ -9,7 +11,10 @@ public class CoachingProgramDto {
     private Long coachingProgramId;
     private String coachingProgramName;
     private String goal;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private LocalDate startDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private LocalDate endDate;
     private List<StepDto> timeline;
     private String clientUsername;

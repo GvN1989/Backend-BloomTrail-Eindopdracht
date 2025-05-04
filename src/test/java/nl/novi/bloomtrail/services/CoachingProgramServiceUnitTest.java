@@ -20,6 +20,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static org.mockito.Mockito.*;
@@ -366,8 +367,11 @@ public class CoachingProgramServiceUnitTest {
         inputDto.setCoachUsername("coachUser");
         inputDto.setCoachingProgramName("Updated Program");
         inputDto.setGoal("Updated Goal");
-        inputDto.setStartDate(DateConverter.convertToDate(LocalDate.parse("2024-03-01")));
-        inputDto.setEndDate(DateConverter.convertToDate(LocalDate.parse("2024-06-01")));
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+        inputDto.setStartDate(LocalDate.parse("01-03-2024", formatter));
+        inputDto.setEndDate(LocalDate.parse("01-06-2024", formatter));
 
         String clientUsername = "clientUser";
         Long programId = 1L;
@@ -391,8 +395,8 @@ public class CoachingProgramServiceUnitTest {
         Assertions.assertNotNull(result);
         Assertions.assertEquals("Updated Program", result.getCoachingProgramName());
         Assertions.assertEquals("Updated Goal", result.getGoal());
-        Assertions.assertEquals(LocalDate.parse("2024-03-01"), result.getStartDate());
-        Assertions.assertEquals(LocalDate.parse("2024-06-01"), result.getEndDate());
+        Assertions.assertEquals(LocalDate.parse("01-03-2024", formatter), result.getStartDate());
+        Assertions.assertEquals(LocalDate.parse("01-06-2024", formatter), result.getEndDate());
         Assertions.assertEquals("clientUser", result.getClient().getUsername());
         Assertions.assertEquals("coachUser", result.getCoach().getUsername());
     }
@@ -604,11 +608,13 @@ public class CoachingProgramServiceUnitTest {
         CoachingProgram mockCoachingProgram = new CoachingProgram();
         mockCoachingProgram.setCoachingProgramId(coachingProgramId);
 
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
         Step step1 = new Step();
-        step1.setStepEndDate(LocalDate.parse("2025-01-10"));
+        step1.setStepEndDate(LocalDate.parse("10-01-2025", formatter));
 
         Step step2 = new Step();
-        step2.setStepEndDate(LocalDate.parse("2025-01-15"));
+        step2.setStepEndDate(LocalDate.parse("15-01-2025", formatter));
 
         mockCoachingProgram.setTimeline(List.of(step1, step2));
         when(validationHelper.validateCoachingProgram(coachingProgramId)).thenReturn(mockCoachingProgram);
@@ -616,7 +622,7 @@ public class CoachingProgramServiceUnitTest {
         coachingProgramService.updateProgramEndDate(coachingProgramId);
 
         Assertions.assertEquals(
-                LocalDate.from(LocalDate.parse("2025-01-15")),
+                (LocalDate.parse("15-01-2025", formatter)),
                 mockCoachingProgram.getEndDate()
         );
 

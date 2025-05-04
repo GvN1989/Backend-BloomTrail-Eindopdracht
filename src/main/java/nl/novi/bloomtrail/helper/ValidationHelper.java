@@ -10,10 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,16 +22,14 @@ public class ValidationHelper {
     private final UserRepository userRepository;
     private final CoachingProgramRepository coachingProgramRepository;
     private final StepRepository stepRepository;
-    private final StrengthResultsRepository strengthResultsRepository;
     private final SessionInsightRepository sessionInsightRepository;
 
-    public ValidationHelper(AssignmentRepository assignmentRepository, SessionRepository sessionRepository, UserRepository userRepository, CoachingProgramRepository coachingProgramRepository, StepRepository stepRepository, StrengthResultsRepository strengthResultsRepository, SessionInsightRepository sessionInsightRepository) {
+    public ValidationHelper(AssignmentRepository assignmentRepository, SessionRepository sessionRepository, UserRepository userRepository, CoachingProgramRepository coachingProgramRepository, StepRepository stepRepository, SessionInsightRepository sessionInsightRepository) {
         this.assignmentRepository = assignmentRepository;
         this.sessionRepository = sessionRepository;
         this.userRepository = userRepository;
         this.coachingProgramRepository = coachingProgramRepository;
         this.stepRepository = stepRepository;
-        this.strengthResultsRepository = strengthResultsRepository;
         this.sessionInsightRepository = sessionInsightRepository;
     }
 
@@ -74,7 +69,7 @@ public class ValidationHelper {
 
     public Step validateStep(Long StepId) {
         return stepRepository.findById(StepId)
-                .orElseThrow(() -> new NotFoundException("Step with ID" + StepId));
+                .orElseThrow(() -> new NotFoundException("Step not found"));
     }
 
 
@@ -100,11 +95,6 @@ public class ValidationHelper {
         }
 
         return assignments;
-    }
-
-    public StrengthResults validateStrengthResult(Long resultId) {
-        return strengthResultsRepository.findById(resultId)
-                .orElseThrow(() -> new NotFoundException("StrengthResults" + resultId));
     }
 
     public SessionInsight validateSessionInsight(Long sessionInsightId) {
@@ -182,23 +172,11 @@ public class ValidationHelper {
             throw new BadRequestException("Step start date and end date cannot be null.");
         }
 
-        if (inputDto.getStepEndDate().before(inputDto.getStepStartDate())) {
+        if (inputDto.getStepEndDate().isBefore(inputDto.getStepStartDate())) {
             throw new BadRequestException("Step end date cannot be before start date.");
         }
-
-        validateDateFormat(inputDto.getStepStartDate(), "stepStartDate");
-        validateDateFormat(inputDto.getStepEndDate(), "stepEndDate");
     }
 
-    public void validateDateFormat(Date date, String label) {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
-        sdf.setLenient(false);
 
-        try {
-            sdf.parse(sdf.format(date));
-        } catch (ParseException e) {
-            throw new BadRequestException("Field '" + label + "' must be in format dd-MM-yyyy.");
-        }
-    }
 
 }

@@ -103,10 +103,10 @@ public class StepService {
             existingStep.setStepName(inputDto.getStepName());
         }
         if (inputDto.getStepStartDate() != null) {
-            existingStep.setStepStartDate(DateConverter.convertToLocalDate(inputDto.getStepStartDate()));
+            existingStep.setStepStartDate(inputDto.getStepStartDate());
         }
         if (inputDto.getStepEndDate() != null) {
-            existingStep.setStepEndDate(DateConverter.convertToLocalDate(inputDto.getStepEndDate()));
+            existingStep.setStepEndDate(inputDto.getStepEndDate());
         }
         if (inputDto.getStepGoal() != null) {
             existingStep.setStepGoal(inputDto.getStepGoal());

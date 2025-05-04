@@ -3,6 +3,7 @@ package nl.novi.bloomtrail.dtos;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.*;
 import lombok.NoArgsConstructor;
+import org.springframework.cglib.core.Local;
 
 import java.time.LocalDate;
 import java.util.Date;
@@ -13,11 +14,11 @@ public class StepInputDto {
     private Long StepId;
 
     private String StepName;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy",timezone = "UTC")
-    private Date stepStartDate;
+    @JsonFormat(pattern = "dd-MM-yyyy")
+    private LocalDate stepStartDate;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy", timezone = "UTC")
-    private Date stepEndDate;
+    @JsonFormat(pattern = "dd-MM-yyyy")
+    private LocalDate stepEndDate;
 
     @NotNull(message = "Field 'completed' must not be null.")
     private Boolean completed;
@@ -46,19 +47,19 @@ public class StepInputDto {
         StepName = stepName;
     }
 
-    public Date getStepStartDate() {
+    public LocalDate getStepStartDate() {
         return stepStartDate;
     }
 
-    public void setStepStartDate(Date stepStartDate) {
+    public void setStepStartDate(LocalDate stepStartDate) {
         this.stepStartDate = stepStartDate;
     }
 
-    public Date getStepEndDate() {
+    public LocalDate getStepEndDate() {
         return stepEndDate;
     }
 
-    public void setStepEndDate(Date stepEndDate) {
+    public void setStepEndDate(LocalDate stepEndDate) {
         this.stepEndDate = stepEndDate;
     }
 
