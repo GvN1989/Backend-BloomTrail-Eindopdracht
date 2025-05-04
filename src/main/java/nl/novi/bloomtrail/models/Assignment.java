@@ -25,9 +25,6 @@ public class Assignment {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
     @ManyToOne
-    @JoinColumn(name = "session_id")
-    private Session session;
-    @ManyToOne
     @JoinColumn(name = "step_id")
     private Step step;
     @OneToMany(mappedBy = "assignment", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -55,14 +52,6 @@ public class Assignment {
 
     public void setFiles(List<File> files) {
         this.files = files;
-    }
-
-    public Session getSession() {
-        return session;
-    }
-
-    public void setSession(Session session) {
-        this.session = session;
     }
 
     public Step getStep() {

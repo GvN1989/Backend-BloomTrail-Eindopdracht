@@ -22,7 +22,6 @@ public class SessionDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private SessionInsightDto sessionInsight;
-    private List<Long> assignmentIds;
     private Long StepId;
 
     public Long getSessionId() {
@@ -105,14 +104,6 @@ public class SessionDto {
         this.updatedAt = updatedAt;
     }
 
-    public List<Long> getAssignmentIds() {
-        return assignmentIds;
-    }
-
-    public void setAssignmentId(List<Long> assignmentIds) {
-        this.assignmentIds = assignmentIds;
-    }
-
     public Long getStepId() {
         return StepId;
     }
@@ -129,7 +120,4 @@ public class SessionDto {
         this.sessionInsight = sessionInsight;
     }
 
-    public void setAssignmentIds(List<Long> assignmentIds) {
-        this.assignmentIds = assignmentIds;
-    }
 }

@@ -11,7 +11,6 @@ public class CoachingProgramDto {
     private String goal;
     private LocalDate startDate;
     private LocalDate endDate;
-    private List<String> strengthResultUrls;
     private List<StepDto> timeline;
     private String clientUsername;
     private String coachUsername;
@@ -54,14 +53,6 @@ public class CoachingProgramDto {
 
     public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
-    }
-
-    public List<String> getStrengthResultUrls() {
-        return strengthResultUrls;
-    }
-
-    public void setStrengthResultUrls(List<String> strengthResultUrls) {
-        this.strengthResultUrls = strengthResultUrls;
     }
 
     public List<StepDto> getTimeline() {

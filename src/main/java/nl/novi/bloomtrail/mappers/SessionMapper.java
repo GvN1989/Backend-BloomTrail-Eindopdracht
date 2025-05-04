@@ -31,18 +31,8 @@ public class SessionMapper {
             dto.setStepId(session.getStep().getStepId());
         }
 
-
         if (session.getSessionInsight() != null) {
             dto.setSessionInsight(SessionInsightMapper.toDto(session.getSessionInsight()));
-        }
-
-        if (session.getAssignment() != null) {
-            dto.setAssignmentId(
-                    session.getAssignment().stream()
-                            .map(Assignment::getAssignmentId)
-                            .collect(Collectors.toList())
-            );
-
         }
 
         return dto;

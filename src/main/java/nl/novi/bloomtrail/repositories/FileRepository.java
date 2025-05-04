@@ -13,7 +13,5 @@ public interface FileRepository extends JpaRepository<File, Long> {
 
     List<File> findByAssignment(Assignment assignment);
 
-    List<File> findByStrengthResults(StrengthResults strengthResults);
-
     List<File> findBySessionInsight(SessionInsight sessionInsight);
 }

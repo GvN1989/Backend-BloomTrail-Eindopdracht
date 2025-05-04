@@ -1,5 +1,6 @@
 package nl.novi.bloomtrail.utils;
 
+import nl.novi.bloomtrail.enums.FileContext;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -18,24 +19,25 @@ public class FileStorageUtil {
             if (filename.isEmpty()) {
                 throw new IllegalArgumentException("Invalid file name");
             }
-            return saveFile(file.getBytes(), filename);
+            return saveFile(file.getBytes(), filename, FileContext.ASSIGNMENT);
         } catch (IOException e) {
             throw new RuntimeException("Failed to save file", e);
         }
     }
 
-    public static String saveFile(byte[] fileData, String fileName) {
+    public static String saveFile(byte[] fileData, String fileName, FileContext context) {
         try {
-            Path uploadDir = Paths.get(UPLOAD_DIR);
+            System.out.println("getSubdirectoryForContext() called with: " + context);
+            String subDir = getSubdirectoryForContext(context);
+            Path uploadDir = Paths.get(UPLOAD_DIR, subDir);
             if (!Files.exists(uploadDir)) {
                 Files.createDirectories(uploadDir);
             }
 
             Path filePath = uploadDir.resolve(fileName);
-            String uniqueFileName = fileName;
             int counter = 1;
             while (Files.exists(filePath)) {
-                uniqueFileName = appendCounterToFilename(fileName, counter++);
+                String uniqueFileName = appendCounterToFilename(fileName, counter++);
                 filePath = uploadDir.resolve(uniqueFileName);
             }
 
@@ -62,4 +64,14 @@ public class FileStorageUtil {
         }
     }
 
+    private static String getSubdirectoryForContext(FileContext context) {
+        return switch (context) {
+            case STRENGTH_RESULTS -> "strength-results";
+            case ASSIGNMENT -> "assignments";
+            case SESSION_INSIGHTS_CLIENT_REFLECTION -> "session-insights-client-reflection";
+            case SESSION_INSIGHTS_COACH_NOTES -> "session-insights-coach-notes";
+            case PROFILE_PICTURE -> "profile-picture";
+            default -> throw new IllegalArgumentException("No static resource " + context.name());
+        };
+    }
 }

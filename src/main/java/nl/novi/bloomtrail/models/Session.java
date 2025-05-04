@@ -14,22 +14,25 @@ import java.util.List;
 
 
 @Entity
-@Table(name = "Sessions")
+@Table(name = "sessions")
 public class Session {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "session_id", unique = true, nullable = false)
     private Long sessionId;
-    @Column(name = "Session_Name")
+    @Column(name = "session_name")
     @NotBlank
     private String sessionName;
     @NotBlank
     private String coach;
     @NotBlank
     private String client;
+    @Column(name = "session_date")
     @NotNull
     private LocalDate sessionDate;
+
+    @Column(name = "session_time")
     @NotNull
     private LocalTime sessionTime;
     @NotBlank
@@ -42,9 +45,6 @@ public class Session {
 
     @OneToOne(mappedBy = "session", cascade = CascadeType.ALL)
     private SessionInsight sessionInsight;
-
-    @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Assignment> assignment = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "step_id")
@@ -136,14 +136,6 @@ public class Session {
 
     public void setSessionInsight(SessionInsight sessionInsight) {
         this.sessionInsight = sessionInsight;
-    }
-
-    public List<Assignment> getAssignment() {
-        return assignment;
-    }
-
-    public void setAssignment(List<Assignment> assignment) {
-        this.assignment = assignment;
     }
 
     public Step getStep() {

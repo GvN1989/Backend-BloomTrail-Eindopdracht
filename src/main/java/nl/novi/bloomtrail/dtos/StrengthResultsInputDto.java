@@ -8,24 +8,18 @@ import nl.novi.bloomtrail.enums.FileContext;
 import java.util.List;
 
 public class StrengthResultsInputDto {
-    private String filename;
+    private String username;
     @Size(max = 500)
     private String summary;
     @ElementCollection
     private List<String> topStrengthNames;
-    @NotNull(message = "CoachingProgram ID is required")
-    private Long coachingProgramId;
 
-    public boolean isValid() {
-        return coachingProgramId != null;
+    public String getUsername() {
+        return username;
     }
 
-    public String getFilename() {
-        return filename;
-    }
-
-    public void setFilename(String filename) {
-        this.filename = filename;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getSummary() {
@@ -44,11 +38,5 @@ public class StrengthResultsInputDto {
         this.topStrengthNames = topStrengthNames;
     }
 
-    public Long getCoachingProgramId() {
-        return coachingProgramId;
-    }
 
-    public void setCoachingProgramId(Long coachingProgramId) {
-        this.coachingProgramId = coachingProgramId;
-    }
 }

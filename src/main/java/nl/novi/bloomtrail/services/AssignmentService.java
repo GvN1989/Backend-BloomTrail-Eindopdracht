@@ -2,6 +2,7 @@ package nl.novi.bloomtrail.services;
 
 import jakarta.persistence.EntityNotFoundException;
 import nl.novi.bloomtrail.dtos.AssignmentInputDto;
+import nl.novi.bloomtrail.exceptions.NotFoundException;
 import nl.novi.bloomtrail.helper.ValidationHelper;
 import nl.novi.bloomtrail.models.Assignment;
 import nl.novi.bloomtrail.models.Session;
@@ -38,11 +39,6 @@ public class AssignmentService {
         return step.getAssignments();
     }
 
-    public List<Assignment> getAssignmentsBySession(Long sessionId) {
-        Session session = validationHelper.validateSession(sessionId);
-        return session.getAssignment();
-    }
-
     public void uploadFileForAssignment(MultipartFile file, Long assignmentId) {
         Assignment assignment = validationHelper.validateAssignment(assignmentId);
         fileService.saveFile(file, FileContext.ASSIGNMENT, assignment);
@@ -64,11 +60,6 @@ public class AssignmentService {
         Step step = validationHelper.validateStep(inputDto.getStepId());
         assignment.setStep(step);
 
-        if (inputDto.getSessionId() != null) {
-            Session session = validationHelper.validateSession(inputDto.getSessionId());
-            assignment.setSession(session);
-        }
-
         Assignment savedAssignment = assignmentRepository.save(assignment);
         assignmentRepository.flush();
 
@@ -88,6 +79,12 @@ public class AssignmentService {
 
     public byte[] downloadAssignmentFiles(Long assignmentId) throws IOException {
         Assignment assignment = validationHelper.validateAssignment(assignmentId);
+        List<File> files = fileService.getUploadsForParentEntity(assignment);
+
+        if (files.isEmpty()) {
+            throw new NotFoundException("No files found for assignment " + assignmentId);
+        }
+
         return downloadService.downloadFilesForEntity(assignment);
     }
 }

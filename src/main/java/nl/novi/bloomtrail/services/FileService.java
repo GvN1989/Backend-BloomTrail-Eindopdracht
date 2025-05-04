@@ -1,6 +1,5 @@
 package nl.novi.bloomtrail.services;
 
-import jakarta.persistence.EntityNotFoundException;
 import nl.novi.bloomtrail.models.*;
 import nl.novi.bloomtrail.repositories.*;
 import org.springframework.stereotype.Service;
@@ -12,6 +11,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -19,16 +19,22 @@ public class FileService {
 
     private final FileRepository fileRepository;
 
-    public FileService(FileRepository fileRepository, AssignmentRepository assignmentRepository, SessionInsightRepository sessionInsightRepository, StrengthResultsRepository strengthResultsRepository) {
+    public FileService(FileRepository fileRepository) {
         this.fileRepository = fileRepository;
     }
 
     public File saveFile(MultipartFile file, FileContext context, Object parentEntity) {
-        return saveFile(FileStorageUtil.saveFile(file), context, parentEntity, file.getContentType());
+        return saveFile(
+                FileStorageUtil.saveFile(file),
+                context,
+                parentEntity,
+                file.getContentType(),
+                file.getOriginalFilename()
+        );
     }
 
     public File saveFile(byte[] fileData, String fileName, FileContext context) {
-        String fileUrl = FileStorageUtil.saveFile(fileData, fileName);
+        String fileUrl = FileStorageUtil.saveFile(fileData, fileName, context);
 
         File file = new File();
         file.setFileType("application/pdf");
@@ -38,16 +44,16 @@ public class FileService {
         return fileRepository.save(file);
     }
 
-    private File saveFile(String url, FileContext context, Object parentEntity, String fileType) {
+    private File saveFile(String url, FileContext context, Object parentEntity, String fileType,String originalFilename) {
         File file = new File();
+        file.setOriginalFilename(originalFilename);
         file.setUrl(url);
+        System.out.println("Saving file with context = " + context);
         file.setContext(context);
         file.setFileType(fileType);
 
         if (parentEntity instanceof Assignment assignment) {
             file.setAssignment(assignment);
-        } else if (parentEntity instanceof StrengthResults strengthResults) {
-            file.setStrengthResults(strengthResults);
         } else if (parentEntity instanceof SessionInsight sessionInsight) {
             file.setSessionInsights(sessionInsight);
         } else if (parentEntity instanceof User user) {
@@ -59,10 +65,6 @@ public class FileService {
         return fileRepository.save(file);
     }
 
-    public List<File> getUploadsByContext(FileContext context) {
-        return fileRepository.findByContext(context);
-    }
-
     public List<File> getUploadsForParentEntity(Object parentEntity) {
 
         if (parentEntity == null) {
@@ -71,12 +73,37 @@ public class FileService {
 
         return switch (parentEntity) {
             case Assignment assignment -> fileRepository.findByAssignment(assignment);
-            case StrengthResults strengthResults -> fileRepository.findByStrengthResults(strengthResults);
             case SessionInsight sessionInsight -> fileRepository.findBySessionInsight(sessionInsight);
-            default -> throw new IllegalArgumentException("Unsupported file type");
+            case Session session -> {
+                List<File> files = new ArrayList<>();
+
+                if (session.getSessionInsight() != null) {
+                    files.addAll(fileRepository.findBySessionInsight(session.getSessionInsight()));
+                }
+
+                yield files;
+            }
+            case Step step -> {
+                List<File> files = new ArrayList<>();
+                if (step.getAssignments() != null) {
+                    for (Assignment assignment : step.getAssignments()) {
+                        files.addAll(fileRepository.findByAssignment(assignment));
+                    }
+                }
+                if (step.getSessions() != null) {
+                    for (Session session : step.getSessions()) {
+                        SessionInsight insight = session.getSessionInsight();
+                        if (insight != null) {
+                            files.addAll(fileRepository.findBySessionInsight(insight));
+                        }
+                    }
+                }
+                yield files;
+            }
+            default -> throw new IllegalArgumentException("Unsupported file type" + parentEntity.getClass().getSimpleName());
         };
     }
-    private byte[] readFileFromStorage(String url) {
+    public byte[] readFileFromStorage(String url) {
         try {
             return Files.readAllBytes(Paths.get(url));
         } catch (IOException e) {

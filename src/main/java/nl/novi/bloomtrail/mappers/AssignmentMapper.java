@@ -18,18 +18,17 @@ public class AssignmentMapper {
 
         dto.setAssignmentId(assignment.getAssignmentId());
         dto.setDescription(assignment.getDescription());
-        dto.setSessionId(assignment.getSession() != null ? assignment.getSession().getSessionId() : null);
         dto.setStepId(assignment.getStep() != null ? assignment.getStep().getStepId() : null);
         dto.setCreatedAt(assignment.getCreatedAt());
         dto.setUpdatedAt(assignment.getUpdatedAt());
         if (assignment.getFiles() != null && !assignment.getFiles().isEmpty()) {
-            dto.setFileIds(
+            dto.setFileUrls(
                     assignment.getFiles().stream()
-                            .map(File::getFileId)
+                            .map(file -> "/files/"+ file.getFileId())
                             .toList()
             );
         } else {
-            dto.setFileIds(Collections.emptyList());
+            dto.setFileUrls(Collections.emptyList());
         }
         return dto;
 
@@ -45,9 +44,6 @@ public class AssignmentMapper {
 
             assignment.setDescription(inputDto.getDescription());
 
-            if (session != null) {
-                assignment.setSession(session);
-            }
             if (step != null) {
                 assignment.setStep(step);
             }

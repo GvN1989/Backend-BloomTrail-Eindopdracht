@@ -10,12 +10,13 @@ import java.util.Date;
 
 
 @Entity
-@Table(name = "uploads")
+@Table(name = "files")
 
 public class File {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long fileId;
+    private String originalFilename;
     private String fileType;
     private String url;
     @CreationTimestamp
@@ -29,10 +30,6 @@ public class File {
     @ManyToOne
     @JoinColumn(name = "assignment_id")
     private Assignment assignment;
-
-    @ManyToOne
-    @JoinColumn(name = "strength_results_id")
-    private StrengthResults strengthResults;
 
     @ManyToOne
     @JoinColumn(name = "session_insight_id")
@@ -49,6 +46,14 @@ public class File {
         this.fileId = uploadId;
     }
 
+    public String getOriginalFilename() {
+        return originalFilename;
+    }
+
+    public void setOriginalFilename(String originalFilename) {
+        this.originalFilename = originalFilename;
+    }
+
     public String getUrl() {
         return url;
     }
@@ -63,14 +68,6 @@ public class File {
 
     public void setAssignment(Assignment assignment) {
         this.assignment = assignment;
-    }
-
-    public StrengthResults getStrengthResults() {
-        return strengthResults;
-    }
-
-    public void setStrengthResults(StrengthResults strengthResults) {
-        this.strengthResults = strengthResults;
     }
 
     public SessionInsight getSessionInsights() {
@@ -110,7 +107,6 @@ public class File {
     private void validateRelationships() {
         int relationCount = 0;
         if (assignment != null) relationCount++;
-        if (strengthResults != null) relationCount++;
         if (sessionInsight != null) relationCount++;
 
         if (relationCount > 1) {

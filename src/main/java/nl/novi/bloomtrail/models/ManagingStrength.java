@@ -3,14 +3,12 @@ package nl.novi.bloomtrail.models;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "managingStrength")
+@Table(name = "managing_strength")
 public class ManagingStrength {
 
     @Id
-    @Column(name = "strength_id")
+    @Column(name = "id")
     private Long strengthId;
-    @Column(name = "strength_rank")
-    private Integer rank;
     private String strengthNl;
     private String strengthEn;
     private String contributionDoing;
@@ -19,12 +17,11 @@ public class ManagingStrength {
     private String needRelationship;
     private String externalTriggers;
     private String internalTriggers;
+    @Column(length = 2000)
     private String operatingBelief;
-    private String misManaged;
 
-    @ManyToOne
-    @JoinColumn(name = "strength_results_id", nullable = false)
-    private StrengthResults strengthResults;
+    @Column(length = 2000)
+    private String misManaged;
 
     public Long getStrengthId() {
         return strengthId;
@@ -112,21 +109,5 @@ public class ManagingStrength {
 
     public void setMisManaged(String misManaged) {
         this.misManaged = misManaged;
-    }
-
-    public StrengthResults getStrengthResults() {
-        return strengthResults;
-    }
-
-    public void setStrengthResults(StrengthResults strengthResults) {
-        this.strengthResults = strengthResults;
-    }
-
-    public Integer getRank() {
-        return rank;
-    }
-
-    public void setRank(Integer rank) {
-        this.rank = rank;
     }
 }

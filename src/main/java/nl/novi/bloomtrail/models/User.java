@@ -37,6 +37,10 @@ public class User {
     @JoinColumn(name = "profile_picture_id")
     private File profilePicture;
 
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
+    @JoinColumn( name = "strength_results_id")
+    private StrengthResults strengthResults;
+
     public User() {}
 
     public User(String username, String password, String fullName, String email, boolean enabled, String authority) {
@@ -111,4 +115,13 @@ public class User {
     public void setProfilePicture(File profilePicture) {
         this.profilePicture = profilePicture;
     }
+
+    public StrengthResults getStrengthResults() {
+        return strengthResults;
+    }
+
+    public void setStrengthResults(StrengthResults strengthResults) {
+        this.strengthResults = strengthResults;
+    }
+
 }

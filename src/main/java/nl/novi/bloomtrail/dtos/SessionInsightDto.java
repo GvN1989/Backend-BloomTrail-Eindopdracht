@@ -12,7 +12,6 @@ public class SessionInsightDto {
     private Long sessionId;
     private List<String> clientReflectionUrls;
     private List<String> coachNotesUrls;
-    private List<String> fileUrls;
 
     public Long getSessionInsightId() {
         return sessionInsightId;
@@ -52,14 +51,6 @@ public class SessionInsightDto {
 
     public void setSessionId(Long sessionId) {
         this.sessionId = sessionId;
-    }
-
-    public List<String> getFileUrls() {
-        return fileUrls;
-    }
-
-    public void setFileUrls(List<String> fileUrls) {
-        this.fileUrls = fileUrls;
     }
 
     public List<String> getClientReflectionUrls() {

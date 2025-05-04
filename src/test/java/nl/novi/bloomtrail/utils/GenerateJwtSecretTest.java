@@ -1,4 +1,4 @@
 package nl.novi.bloomtrail.utils;
 
-public enum PdfFontTypeTest {
+public class GenerateJwtSecretTest {
 }

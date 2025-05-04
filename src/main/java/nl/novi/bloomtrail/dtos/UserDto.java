@@ -11,6 +11,7 @@ public class UserDto {
     private Boolean enabled;
     private String authority;
     public String profilePictureUrl;
+    private String reportUrl;
 
     public UserDto(String username, String email, String fullName,Boolean enabled, String authority, String profilePictureUrl) {
         this.username = username;
@@ -66,5 +67,13 @@ public class UserDto {
 
     public void setAuthority(String authority) {
         this.authority = authority;
+    }
+
+    public String getReportUrl() {
+        return reportUrl;
+    }
+
+    public void setReportUrl(String reportUrl) {
+        this.reportUrl = reportUrl;
     }
 }

@@ -35,7 +35,6 @@ public class SessionInputDto {
     @Future
     private LocalDateTime updatedAt;
     private SessionInsightInputDto sessionInsight;
-    private List<Long> assignmentId;
     private Long StepId;
 
     public Long getSessionId() {
@@ -116,14 +115,6 @@ public class SessionInputDto {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    public List<Long> getAssignmentId() {
-        return assignmentId;
-    }
-
-    public void setAssignmentId(List<Long> assignmentId) {
-        this.assignmentId = assignmentId;
     }
 
     public Long getStepId() {

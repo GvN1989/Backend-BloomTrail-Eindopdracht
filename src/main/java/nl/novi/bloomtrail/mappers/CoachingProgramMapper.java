@@ -25,18 +25,6 @@ public class CoachingProgramMapper {
         dto.setClientUsername(coachingProgram.getClient() != null ? coachingProgram.getClient().getUsername() : null);
         dto.setCoachUsername(coachingProgram.getCoach() != null ? coachingProgram.getCoach().getUsername() : null);
 
-        if (coachingProgram.getStrengthResults() != null) {
-            dto.setStrengthResultUrls(
-                    coachingProgram.getStrengthResults().stream()
-                            .filter(strengthResult -> strengthResult.getFiles() != null)
-                            .flatMap(strengthResult -> strengthResult.getFiles().stream())
-                            .map(File::getUrl)
-                            .collect(Collectors.toList())
-            );
-        } else {
-            dto.setStrengthResultUrls(Collections.emptyList());
-        }
-
         if (coachingProgram.getTimeline() != null) {
             dto.setTimeline(
                     coachingProgram.getTimeline().stream()

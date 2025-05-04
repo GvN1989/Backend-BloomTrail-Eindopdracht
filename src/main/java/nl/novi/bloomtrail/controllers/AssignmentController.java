@@ -33,26 +33,15 @@ public class AssignmentController {
         return ResponseEntity.ok(assignmentDtos);
     }
 
-    @GetMapping("/session/{sessionId}")
-    public ResponseEntity<List<AssignmentDto>> getAssignmentsBySession(@PathVariable Long sessionId) {
-        List<Assignment> assignments = assignmentService.getAssignmentsBySession(sessionId);
-        List<AssignmentDto> assignmentDtos = assignments.stream()
-                .map(AssignmentMapper::toAssignmentDto)
-                .toList();
-        return ResponseEntity.ok(assignmentDtos);
-    }
-
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<AssignmentDto> createAssignment(
             @RequestParam("description") String description,
             @RequestParam("stepId") Long stepId,
-            @RequestParam(value = "sessionId", required = false) Long sessionId,
             @RequestPart(value = "file", required = false) MultipartFile file
     ) {
         AssignmentInputDto inputDto = new AssignmentInputDto();
         inputDto.setDescription(description);
         inputDto.setStepId(stepId);
-        inputDto.setSessionId(sessionId);
 
         Assignment assignment = assignmentService.createAssignment(inputDto, file);
         AssignmentDto responseDto = AssignmentMapper.toAssignmentDto(assignment);
@@ -77,27 +66,17 @@ public class AssignmentController {
 
     @GetMapping("/{assignmentId}/download")
     public ResponseEntity<byte[]> downloadSingleAssignmentFiles(@PathVariable Long assignmentId) throws IOException {
-        byte[] fileData = assignmentService.downloadAssignmentFiles(assignmentId);
-
-        List<File> files = assignmentService.getUploadsForAssignment(assignmentId);
+        byte[] zipData = assignmentService.downloadAssignmentFiles(assignmentId);
 
         HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        headers.setContentDisposition(ContentDisposition.attachment()
+               .filename("assignment_files_" + assignmentId + ".zip")
+               .build());
 
-        if (files.size() == 1) {
-            File singleFile = files.get(0);
-            headers.setContentType(MediaType.APPLICATION_PDF);
-            headers.setContentDisposition(ContentDisposition.attachment()
-                    .filename(Paths.get(singleFile.getUrl()).getFileName().toString())
-                    .build());
-        } else {
-            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-            headers.setContentDisposition(ContentDisposition.attachment()
-                    .filename("assignment_files_" + assignmentId + ".zip")
-                    .build());
-        }
 
         return ResponseEntity.ok()
                 .headers(headers)
-                .body(fileData);
+                .body(zipData);
     }
 }

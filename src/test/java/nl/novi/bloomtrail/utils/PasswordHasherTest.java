@@ -1,4 +1,4 @@
 package nl.novi.bloomtrail.utils;
 
-public class PdfUtilsTest {
+public class PasswordHasherTest {
 }

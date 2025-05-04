@@ -2,6 +2,7 @@ package nl.novi.bloomtrail.dtos;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.cglib.core.Local;
+import org.springframework.expression.spel.ast.Assign;
 
 import java.time.LocalDate;
 import java.util.Date;
@@ -20,7 +21,7 @@ public class StepDto {
     private Integer sequence;
     private Long coachingProgramId;
     private List<Long> sessionIds;
-    private List<Long> assignmentIds;
+    private List<AssignmentDto> assignments;
 
     public Long getStepId() {
         return StepId;
@@ -94,11 +95,11 @@ public class StepDto {
         this.sessionIds = sessionIds;
     }
 
-    public List<Long> getAssignmentIds() {
-        return assignmentIds;
+    public List<AssignmentDto> getAssignments() {
+        return assignments;
     }
 
-    public void setAssignmentIds(List<Long> assignmentIds) {
-        this.assignmentIds = assignmentIds;
+    public void setAssignments(List<AssignmentDto> assignments) {
+        this.assignments = assignments;
     }
 }

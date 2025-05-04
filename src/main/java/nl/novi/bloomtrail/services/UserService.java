@@ -14,7 +14,6 @@ import nl.novi.bloomtrail.repositories.AuthorityRepository;
 import nl.novi.bloomtrail.repositories.FileRepository;
 import nl.novi.bloomtrail.repositories.UserRepository;
 import nl.novi.bloomtrail.utils.RandomStringGenerator;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
