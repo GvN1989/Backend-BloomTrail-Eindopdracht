@@ -68,4 +68,12 @@ public class StepMapper {
         }
 
     }
+
+    public static void updateStepFromDto(Step step, StepInputDto dto) {
+        if (dto.getStepName() != null) step.setStepName(dto.getStepName());
+        if (dto.getStepGoal() != null) step.setStepGoal(dto.getStepGoal());
+        if (dto.getStepStartDate() != null) step.setStepStartDate(dto.getStepStartDate());
+        if (dto.getStepEndDate() != null) step.setStepEndDate(dto.getStepEndDate());
+        if (dto.getCompleted() != null) step.setCompleted(dto.getCompleted());
+    }
 }

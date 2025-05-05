@@ -14,7 +14,4 @@ public interface StepRepository extends JpaRepository<Step, Long> {
 
     List<Step> findByCoachingProgram(CoachingProgram coachingProgram);
 
-    @EntityGraph(attributePaths = {"assignments"})
-    Optional<Step> findByStepId(Long stepId);
-
 }

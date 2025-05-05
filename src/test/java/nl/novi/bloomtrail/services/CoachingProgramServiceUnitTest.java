@@ -1,11 +1,10 @@
 package nl.novi.bloomtrail.services;
 
-import jakarta.validation.*;
 import nl.novi.bloomtrail.dtos.CoachingProgramInputDto;
-import nl.novi.bloomtrail.dtos.CoachingProgramPatchDto;
+import nl.novi.bloomtrail.dtos.CoachingProgramUpdateDto;
 import nl.novi.bloomtrail.dtos.SimpleCoachingProgramDto;
 import nl.novi.bloomtrail.exceptions.NotFoundException;
-import nl.novi.bloomtrail.helper.DateConverter;
+import nl.novi.bloomtrail.helper.AccessValidator;
 import nl.novi.bloomtrail.helper.ValidationHelper;
 import nl.novi.bloomtrail.models.*;
 import nl.novi.bloomtrail.repositories.*;
@@ -36,10 +35,7 @@ public class CoachingProgramServiceUnitTest {
     private ValidationHelper validationHelper;
 
     @Mock
-    private StepRepository stepRepository;
-
-    @Mock
-    private StrengthResultsRepository strengthResultsRepository;
+    private AccessValidator accessValidator;
 
     @InjectMocks
     private CoachingProgramService coachingProgramService;
@@ -190,6 +186,9 @@ public class CoachingProgramServiceUnitTest {
 
         when(coachingProgramRepository.findByUserUsername(username)).thenReturn(mockPrograms);
 
+        when(accessValidator.isAffiliatedUserOrAdmin(program1)).thenReturn(true);
+        when(accessValidator.isAffiliatedUserOrAdmin(program2)).thenReturn(true);
+
         List<CoachingProgram> result = coachingProgramService.getCoachingProgramsByUser(username);
 
         Assertions.assertNotNull(result);
@@ -230,8 +229,8 @@ public class CoachingProgramServiceUnitTest {
 
         List<CoachingProgram> programs = List.of(cp1);
 
-        when(validationHelper.validateUser(username)).thenReturn(mockUser);
         when(coachingProgramRepository.findByUserUsername(username)).thenReturn(programs);
+        when(accessValidator.isAffiliatedUserOrAdmin(cp1)).thenReturn(true);
 
         List<CoachingProgram> result = coachingProgramService.getCoachingProgramsByUser(username);
 
@@ -363,7 +362,7 @@ public class CoachingProgramServiceUnitTest {
     @Test
     void updateCoachingProgram_Success() {
 
-        CoachingProgramPatchDto inputDto = new CoachingProgramPatchDto();
+        CoachingProgramUpdateDto inputDto = new CoachingProgramUpdateDto();
         inputDto.setCoachUsername("coachUser");
         inputDto.setCoachingProgramName("Updated Program");
         inputDto.setGoal("Updated Goal");
@@ -385,10 +384,10 @@ public class CoachingProgramServiceUnitTest {
         CoachingProgram program = new CoachingProgram();
         program.setClient(client);
 
-        Mockito.when(validationHelper.validateUser("clientUser")).thenReturn(client);
         Mockito.when(validationHelper.validateUser("coachUser")).thenReturn(coach);
         Mockito.when(validationHelper.validateCoachingProgram(programId)).thenReturn(program);
         Mockito.when(coachingProgramRepository.save(Mockito.any())).thenAnswer(invocation -> invocation.getArgument(0));
+        doNothing().when(accessValidator).validateCoachOwnsProgramOrIsAdmin(program);
 
         CoachingProgram result = coachingProgramService.updateCoachingProgram("clientUser",1L, inputDto);
 
@@ -407,9 +406,8 @@ public class CoachingProgramServiceUnitTest {
         Long invalidCoachingProgramId = 99L;
         String username = "clientUser";
 
-        CoachingProgramPatchDto inputDto = new CoachingProgramPatchDto();
+        CoachingProgramUpdateDto inputDto = new CoachingProgramUpdateDto();
 
-        when(validationHelper.validateUser(username)).thenReturn(new User());
         when(validationHelper.validateCoachingProgram(invalidCoachingProgramId))
                 .thenThrow(new NotFoundException("Coaching program not found"));
 
@@ -424,7 +422,8 @@ public class CoachingProgramServiceUnitTest {
         Long coachingProgramId = 1L;
         String invalidClientUsername = "invalidClient";
 
-        CoachingProgramPatchDto inputDto = new CoachingProgramPatchDto();
+        CoachingProgramUpdateDto inputDto = new CoachingProgramUpdateDto();
+        inputDto.setCoachUsername(invalidClientUsername);
 
         when(validationHelper.validateUser(invalidClientUsername))
                 .thenThrow(new IllegalArgumentException("Client user not found"));
@@ -440,7 +439,7 @@ public class CoachingProgramServiceUnitTest {
         Long coachingProgramId = 1L;
         String username = "clientUser";
 
-        CoachingProgramPatchDto inputDto = new CoachingProgramPatchDto();
+        CoachingProgramUpdateDto inputDto = new CoachingProgramUpdateDto();
         inputDto.setGoal("Test goal");
 
         User client = new User();
@@ -449,7 +448,6 @@ public class CoachingProgramServiceUnitTest {
         CoachingProgram program = new CoachingProgram();
         program.setClient(client);
 
-        when(validationHelper.validateUser(username)).thenReturn(client);
         when(validationHelper.validateCoachingProgram(coachingProgramId)).thenReturn(program);
         when(coachingProgramRepository.save(any(CoachingProgram.class)))
                 .thenThrow(new RuntimeException("Database error"));

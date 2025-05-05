@@ -25,7 +25,7 @@ public class Assignment {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
     @ManyToOne
-    @JoinColumn(name = "step_id")
+    @JoinColumn(name = "step_id", nullable = false)
     private Step step;
     @OneToMany(mappedBy = "assignment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<File> files = new ArrayList<>();

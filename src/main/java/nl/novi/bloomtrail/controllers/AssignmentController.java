@@ -1,17 +1,16 @@
 package nl.novi.bloomtrail.controllers;
 
+import jakarta.validation.Valid;
 import nl.novi.bloomtrail.dtos.AssignmentDto;
 import nl.novi.bloomtrail.dtos.AssignmentInputDto;
 import nl.novi.bloomtrail.mappers.AssignmentMapper;
 import nl.novi.bloomtrail.models.Assignment;
-import nl.novi.bloomtrail.models.File;
 import nl.novi.bloomtrail.services.AssignmentService;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.List;
 
 @RestController
@@ -39,9 +38,7 @@ public class AssignmentController {
             @RequestParam("stepId") Long stepId,
             @RequestPart(value = "file", required = false) MultipartFile file
     ) {
-        AssignmentInputDto inputDto = new AssignmentInputDto();
-        inputDto.setDescription(description);
-        inputDto.setStepId(stepId);
+        AssignmentInputDto inputDto = buildAssignmentInputDto(description, stepId);
 
         Assignment assignment = assignmentService.createAssignment(inputDto, file);
         AssignmentDto responseDto = AssignmentMapper.toAssignmentDto(assignment);
@@ -49,13 +46,18 @@ public class AssignmentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
-    @PostMapping("/{id}/upload")
-    public ResponseEntity<String> uploadFileForAssignment(
-            @PathVariable("id") Long assignmentId,
-            @RequestPart("file") MultipartFile file
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<AssignmentDto> updateAssignment(
+            @PathVariable ("id") Long assignmentId,
+            @RequestParam("description") String description,
+            @RequestParam("stepId") Long stepId,
+            @RequestPart(value = "file", required = false) MultipartFile file
     ) {
-        assignmentService.uploadFileForAssignment(file, assignmentId);
-        return ResponseEntity.ok("File uploaded successfully for assignment with ID: " + assignmentId);
+        AssignmentInputDto inputDto = buildAssignmentInputDto(description, stepId);
+
+        Assignment assignment = assignmentService.updateAssignment(assignmentId,inputDto, file);
+        AssignmentDto responseDto = AssignmentMapper.toAssignmentDto(assignment);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
     @DeleteMapping("/{id}")
@@ -64,8 +66,8 @@ public class AssignmentController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{assignmentId}/download")
-    public ResponseEntity<byte[]> downloadSingleAssignmentFiles(@PathVariable Long assignmentId) throws IOException {
+    @GetMapping("/{id}/download-zip")
+    public ResponseEntity<byte[]> downloadSingleAssignmentFiles(@PathVariable ("id") Long assignmentId) throws IOException {
         byte[] zipData = assignmentService.downloadAssignmentFiles(assignmentId);
 
         HttpHeaders headers = new HttpHeaders();
@@ -78,5 +80,12 @@ public class AssignmentController {
         return ResponseEntity.ok()
                 .headers(headers)
                 .body(zipData);
+    }
+
+    private AssignmentInputDto buildAssignmentInputDto(String description, Long stepId) {
+        AssignmentInputDto dto = new AssignmentInputDto();
+        dto.setDescription(description);
+        dto.setStepId(stepId);
+        return dto;
     }
 }

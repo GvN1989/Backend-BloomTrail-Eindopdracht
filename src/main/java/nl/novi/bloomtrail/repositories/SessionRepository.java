@@ -9,7 +9,5 @@ import java.util.List;
 
 public interface SessionRepository extends JpaRepository <Session, Long> {
 
-    @Query("SELECT s.sessionInsightId FROM SessionInsight s WHERE s.session = :session")
-    List<Long> findInsightIdsBySession(@Param("session") Session session);
 
 }

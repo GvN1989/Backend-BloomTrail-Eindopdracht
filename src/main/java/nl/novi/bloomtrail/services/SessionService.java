@@ -2,6 +2,7 @@ package nl.novi.bloomtrail.services;
 
 import nl.novi.bloomtrail.dtos.SessionInputDto;
 import nl.novi.bloomtrail.exceptions.NotFoundException;
+import nl.novi.bloomtrail.helper.AccessValidator;
 import nl.novi.bloomtrail.helper.ValidationHelper;
 import nl.novi.bloomtrail.mappers.SessionMapper;
 import nl.novi.bloomtrail.models.*;
@@ -19,22 +20,27 @@ public class SessionService {
     private final SessionRepository sessionRepository;
     private final CoachingProgramRepository coachingProgramRepository;
     private final ValidationHelper validationHelper;
+    private final AccessValidator accessValidator;
     private final DownloadService downloadService;
 
-    public SessionService(SessionRepository sessionRepository, CoachingProgramRepository coachingProgramRepository, ValidationHelper validationHelper, DownloadService downloadService) {
+    public SessionService(SessionRepository sessionRepository, CoachingProgramRepository coachingProgramRepository, ValidationHelper validationHelper, AccessValidator accessValidator, DownloadService downloadService) {
         this.sessionRepository = sessionRepository;
         this.coachingProgramRepository = coachingProgramRepository;
         this.validationHelper = validationHelper;
+        this.accessValidator = accessValidator;
         this.downloadService = downloadService;
     }
 
     public List<Session> getSessionsForUser(String username) {
         User user = validationHelper.validateUser(username);
 
+
         List<CoachingProgram> programs = coachingProgramRepository.findByUserUsername(username);
         if (programs.isEmpty()) {
             throw new NotFoundException("The user with username " + username + " does not have any coaching programs");
         }
+
+        accessValidator.validateSelfCoachOrAdminAccess(username, programs);
 
         List<Step> steps = programs.stream()
                 .flatMap(program -> program.getTimeline().stream())
@@ -54,6 +60,7 @@ public class SessionService {
 
         Session session = SessionMapper.toSessionEntity(inputDto, step);
 
+        accessValidator.validateCoachOrAdminAccess(session);
         validationHelper.validateSessionDateAndTime(step, session);
 
         session.setStep(step);
@@ -64,31 +71,23 @@ public class SessionService {
         Session session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new NotFoundException("Session with ID " + sessionId + " not found"));
 
-        if (inputDto.getSessionDate() != null) {
-            session.setSessionDate(inputDto.getSessionDate());
-        }
-        if (inputDto.getSessionTime() != null) {
-            session.setSessionTime(inputDto.getSessionTime());
-        }
-        if (inputDto.getLocation() != null) {
-            session.setLocation(inputDto.getLocation());
-        }
-        if (inputDto.getComment() != null) {
-            session.setComment(inputDto.getComment());
-        }
+        SessionMapper.updateSessionFromDto(session, inputDto);
 
         return sessionRepository.save(session);
     }
 
     public void deleteSession(Long sessionId) {
-        if (!sessionRepository.existsById(sessionId)) {
-            throw new NotFoundException("No session found with ID " + sessionId);
-        }
+        Session session = validationHelper.validateSession(sessionId);
+        accessValidator.validateCoachOrAdminAccess(session);
+
         sessionRepository.deleteById(sessionId);
     }
 
     public byte[] downloadFilesForSession(Long sessionId) throws IOException {
         Session session = validationHelper.validateSession(sessionId);
+
+        accessValidator.validateCoachOrClientOrAdminAccess(session);
+
         return downloadService.downloadFilesForEntity(session);
     }
 

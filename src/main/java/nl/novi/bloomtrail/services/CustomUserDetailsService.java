@@ -1,6 +1,5 @@
 package nl.novi.bloomtrail.services;
 
-import nl.novi.bloomtrail.exceptions.NotFoundException;
 import nl.novi.bloomtrail.models.User;
 import nl.novi.bloomtrail.repositories.UserRepository;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

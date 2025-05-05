@@ -1,15 +1,8 @@
 package nl.novi.bloomtrail.dtos;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.validation.constraints.Future;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-
 import java.time.LocalDate;
-import java.util.Date;
 
-public class CoachingProgramPatchDto {
+public class CoachingProgramUpdateDto {
     private String coachingProgramName;
     private String goal;
     private LocalDate startDate;

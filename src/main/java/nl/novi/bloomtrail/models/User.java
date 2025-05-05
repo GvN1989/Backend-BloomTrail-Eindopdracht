@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -38,10 +39,11 @@ public class User {
     private File profilePicture;
 
     @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
-    @JoinColumn( name = "strength_results_id")
+    @JoinColumn(name = "strength_results_id")
     private StrengthResults strengthResults;
 
-    public User() {}
+    public User() {
+    }
 
     public User(String username, String password, String fullName, String email, boolean enabled, String authority) {
         this.username = username;

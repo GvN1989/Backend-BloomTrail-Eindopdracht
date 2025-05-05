@@ -22,6 +22,7 @@ public class Authority implements Serializable {
     @OneToOne
     @MapsId("username")
     @JoinColumn(name = "username",referencedColumnName = "username")
+    @JsonIgnore
     private User user;
 
     public Authority() {}

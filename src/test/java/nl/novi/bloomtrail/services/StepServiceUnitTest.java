@@ -2,6 +2,7 @@ package nl.novi.bloomtrail.services;
 
 import nl.novi.bloomtrail.dtos.StepInputDto;
 import nl.novi.bloomtrail.exceptions.BadRequestException;
+import nl.novi.bloomtrail.helper.AccessValidator;
 import nl.novi.bloomtrail.helper.StepSequenceHelper;
 import nl.novi.bloomtrail.exceptions.NotFoundException;
 import nl.novi.bloomtrail.helper.ValidationHelper;
@@ -40,9 +41,9 @@ public class StepServiceUnitTest {
     @Mock
     private ValidationHelper validationHelper;
     @Mock
-    private StepRepository stepRepository;
+    private AccessValidator accessValidator;
     @Mock
-    private UserRepository userRepository;
+    private StepRepository stepRepository;
     @Mock
     private CoachingProgramService coachingProgramService;
     @Mock
@@ -86,7 +87,6 @@ public class StepServiceUnitTest {
         mockAssignment = new Assignment();
         mockAssignment .setAssignmentId(1L);
 
-
         lenient().doNothing().when(stepSequenceHelper).reorderStepsForProgram(mockCoachingProgram);
     }
 
@@ -94,6 +94,7 @@ public class StepServiceUnitTest {
     @Test
     void testFindStepById_Success() {
         when(validationHelper.validateStep(1L)).thenReturn(mockStep);
+        doNothing().when(accessValidator).validateAffiliatedUserOrAdmin(any(CoachingProgram.class));
 
         Step result = stepService.findById(1L);
 
@@ -117,19 +118,29 @@ public class StepServiceUnitTest {
     @Tag("unit")
     @Test
     void testReturnsStepsLinkedToUserAndProgram() {
+
         String username = "testuser";
         Long programId = 1L;
 
+        User coach = new User();
+        coach.setUsername("coach1");
+
+        User client = new User();
+        client.setUsername(username);
+
+
         CoachingProgram mockProgram = new CoachingProgram();
         mockProgram.setCoachingProgramId(programId);
+        mockProgram.setCoach(coach);
+        mockProgram.setClient(client);
 
         Step mockStep = new Step();
         mockStep.setStepId(1L);
         mockStep.setStepName("Step 1");
+        mockStep.setCoachingProgram(mockProgram);
 
-        when(validationHelper.validateUser(username)).thenReturn(new User());
-        when(coachingProgramRepository.findByCoachingProgramIdAndClientUsername(programId, username))
-                .thenReturn(Optional.of(mockProgram));
+        when(validationHelper.validateCoachingProgram(programId)).thenReturn(mockProgram);
+        doNothing().when(accessValidator).validateAffiliatedUserOrAdmin(mockProgram);
         when(stepRepository.findByCoachingProgram(mockProgram)).thenReturn(List.of(mockStep));
 
         List<Step> result = stepService.getStepsForUserAndProgram(username, programId);
@@ -144,9 +155,8 @@ public class StepServiceUnitTest {
         String username = "ghost";
         Long programId = 99L;
 
-        when(validationHelper.validateUser(username)).thenReturn(new User());
-        when(coachingProgramRepository.findByCoachingProgramIdAndClientUsername(programId, username))
-                .thenReturn(Optional.empty());
+        when(validationHelper.validateCoachingProgram(programId))
+                .thenThrow(new NotFoundException("Program not found"));
 
         Assertions.assertThrows(NotFoundException.class, () ->
                 stepService.getStepsForUserAndProgram(username, programId));
@@ -161,9 +171,8 @@ public class StepServiceUnitTest {
         CoachingProgram mockProgram = new CoachingProgram();
         mockProgram.setCoachingProgramId(programId);
 
-        when(validationHelper.validateUser(username)).thenReturn(new User());
-        when(coachingProgramRepository.findByCoachingProgramIdAndClientUsername(programId, username))
-                .thenReturn(Optional.of(mockProgram));
+        when(validationHelper.validateCoachingProgram(programId)).thenReturn(mockProgram);
+        doNothing().when(accessValidator).validateAffiliatedUserOrAdmin(mockProgram);
         when(stepRepository.findByCoachingProgram(mockProgram)).thenReturn(List.of());
 
         Assertions.assertThrows(NotFoundException.class, () ->
@@ -243,6 +252,8 @@ public class StepServiceUnitTest {
     void testUpdateStep_Success() {
         mockStepInputDto.setStepName("Updated Step");
 
+        doNothing().when(accessValidator).validateCoachOwnsProgramOrIsAdmin(mockCoachingProgram);
+
         when(validationHelper.validateStep(1L)).thenReturn(mockStep);
         when(stepRepository.save(any(Step.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -259,6 +270,8 @@ public class StepServiceUnitTest {
     @Test
     void testUpdateStep_CoversAllFields() {
         mockStepInputDto.setStepName("Updated Step");
+
+        doNothing().when(accessValidator).validateCoachOwnsProgramOrIsAdmin(mockCoachingProgram);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 

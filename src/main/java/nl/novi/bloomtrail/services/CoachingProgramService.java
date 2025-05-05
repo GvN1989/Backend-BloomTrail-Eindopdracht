@@ -1,10 +1,10 @@
 package nl.novi.bloomtrail.services;
 
 import nl.novi.bloomtrail.dtos.CoachingProgramInputDto;
-import nl.novi.bloomtrail.dtos.CoachingProgramPatchDto;
+import nl.novi.bloomtrail.dtos.CoachingProgramUpdateDto;
 import nl.novi.bloomtrail.dtos.SimpleCoachingProgramDto;
 import nl.novi.bloomtrail.exceptions.NotFoundException;
-import nl.novi.bloomtrail.helper.DateConverter;
+import nl.novi.bloomtrail.helper.AccessValidator;
 import nl.novi.bloomtrail.mappers.CoachingProgramMapper;
 import nl.novi.bloomtrail.helper.ValidationHelper;
 import nl.novi.bloomtrail.models.*;
@@ -24,12 +24,13 @@ public class CoachingProgramService {
 
     private final CoachingProgramRepository coachingProgramRepository;
     private final ValidationHelper validationHelper;
-    private final StepRepository stepRepository;
 
-    public CoachingProgramService(CoachingProgramRepository coachingProgramRepository, ValidationHelper validationHelper, StepRepository stepRepository) {
+    private final AccessValidator accessValidator;
+
+    public CoachingProgramService(CoachingProgramRepository coachingProgramRepository, ValidationHelper validationHelper, AccessValidator accessValidator) {
         this.coachingProgramRepository = coachingProgramRepository;
         this.validationHelper = validationHelper;
-        this.stepRepository = stepRepository;
+        this.accessValidator = accessValidator;
     }
 
     public List<CoachingProgram> findByCoachingProgramNameIgnoreCase(String coachingProgramName) {
@@ -49,8 +50,11 @@ public class CoachingProgramService {
         if (username == null) {
             throw new IllegalArgumentException("Username cannot be null");
         }
-        validationHelper.validateUser(username);
-        return coachingProgramRepository.findByUserUsername(username);
+        List<CoachingProgram> programs = coachingProgramRepository.findByUserUsername(username);
+
+        return programs.stream()
+                .filter(accessValidator::isAffiliatedUserOrAdmin)
+                .toList();
     }
 
     @Transactional
@@ -68,16 +72,16 @@ public class CoachingProgramService {
         return coachingProgramRepository.save(coachingProgram);
     }
 
-    public CoachingProgram updateCoachingProgram(String username, Long coachingProgramId, @Valid CoachingProgramPatchDto patchInputDto) {
-        User user = validationHelper.validateUser(username);
+    public CoachingProgram updateCoachingProgram(String username, Long coachingProgramId, @Valid CoachingProgramUpdateDto updateInputDto) {
         CoachingProgram coachingProgram = validationHelper.validateCoachingProgram(coachingProgramId);
+        accessValidator.validateCoachOwnsProgramOrIsAdmin(coachingProgram);
 
-        if (patchInputDto.getCoachUsername() != null) {
-            User coach = validationHelper.validateUser(patchInputDto.getCoachUsername());
+        if (updateInputDto.getCoachUsername() != null) {
+            User coach = validationHelper.validateUser(updateInputDto.getCoachUsername());
             coachingProgram.setCoach(coach);
         }
 
-        CoachingProgramMapper.updateCoachingProgramFromPatchDto(coachingProgram, patchInputDto);
+        CoachingProgramMapper.updateCoachingProgramDto(coachingProgram, updateInputDto);
 
         return coachingProgramRepository.save(coachingProgram);
     }
@@ -110,6 +114,7 @@ public class CoachingProgramService {
 
     public double calculateProgressPercentage(Long coachingProgramId) {
         CoachingProgram coachingProgram = validationHelper.validateCoachingProgram(coachingProgramId);
+        accessValidator.validateCoachOwnsProgramOrIsAdmin(coachingProgram);
 
         List<Step> timeline = coachingProgram.getTimeline();
 
@@ -127,5 +132,9 @@ public class CoachingProgramService {
 
         return progress;
     }
+
+
+
+
 
 }

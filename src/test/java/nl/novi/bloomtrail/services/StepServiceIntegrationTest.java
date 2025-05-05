@@ -1,21 +1,28 @@
 package nl.novi.bloomtrail.services;
 
 import nl.novi.bloomtrail.dtos.StepInputDto;
+import nl.novi.bloomtrail.models.Authority;
 import nl.novi.bloomtrail.models.CoachingProgram;
 import nl.novi.bloomtrail.models.Step;
 import nl.novi.bloomtrail.models.User;
 import nl.novi.bloomtrail.repositories.CoachingProgramRepository;
 import nl.novi.bloomtrail.repositories.StepRepository;
 import nl.novi.bloomtrail.repositories.UserRepository;
+import nl.novi.bloomtrail.utils.SecurityTestHelper;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
-import nl.novi.bloomtrail.helper.DateConverter;
+import org.mockito.Mockito;
+import org.junit.jupiter.api.AfterEach;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -43,6 +50,15 @@ public class StepServiceIntegrationTest {
     private CoachingProgramRepository coachingProgramRepository;
     private CoachingProgram coachingProgram;
     private Step step;
+
+    @BeforeEach
+    void setup() {
+        SecurityTestHelper.authenticateAs("henk", "ADMIN");
+    }
+    @AfterEach
+    void clearSecurityContext() {
+        SecurityContextHolder.clearContext();
+    }
 
     @Test
     void testAddStepsToProgram_Success() {
@@ -94,7 +110,7 @@ public class StepServiceIntegrationTest {
     void testFindById_Success() {
 
         User client = new User();
-        client.setUsername("testUser");
+        client.setUsername("henk");
         client.setEmail("testuser@example.com");
         client.setPassword("password123");
         client.setApikey("FakeApiKey1234567890");

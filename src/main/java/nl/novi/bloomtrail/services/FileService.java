@@ -33,17 +33,6 @@ public class FileService {
         );
     }
 
-    public File saveFile(byte[] fileData, String fileName, FileContext context) {
-        String fileUrl = FileStorageUtil.saveFile(fileData, fileName, context);
-
-        File file = new File();
-        file.setFileType("application/pdf");
-        file.setUrl(fileUrl);
-        file.setContext(context);
-
-        return fileRepository.save(file);
-    }
-
     private File saveFile(String url, FileContext context, Object parentEntity, String fileType,String originalFilename) {
         File file = new File();
         file.setOriginalFilename(originalFilename);

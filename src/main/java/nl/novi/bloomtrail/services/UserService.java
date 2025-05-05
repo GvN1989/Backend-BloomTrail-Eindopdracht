@@ -6,6 +6,7 @@ import nl.novi.bloomtrail.enums.FileContext;
 import nl.novi.bloomtrail.exceptions.ConflictException;
 import nl.novi.bloomtrail.exceptions.NotFoundException;
 import nl.novi.bloomtrail.exceptions.BadRequestException;
+import nl.novi.bloomtrail.helper.AccessValidator;
 import nl.novi.bloomtrail.helper.ValidationHelper;
 import nl.novi.bloomtrail.mappers.UserMapper;
 import nl.novi.bloomtrail.models.Authority;
@@ -32,15 +33,17 @@ public class UserService {
     private final UserRepository userRepository;
     private final FileRepository fileRepository;
     private final ValidationHelper validationHelper;
+    private final AccessValidator accessValidator;
     private final AuthorityRepository authorityRepository;
     private final FileService fileService;
     private final DownloadService downloadService;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, FileRepository fileRepository, ValidationHelper validationHelper, AuthorityRepository authorityRepository, FileService fileService, DownloadService downloadService, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, FileRepository fileRepository, ValidationHelper validationHelper, AccessValidator accessValidator, AuthorityRepository authorityRepository, FileService fileService, DownloadService downloadService, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.fileRepository = fileRepository;
         this.validationHelper = validationHelper;
+        this.accessValidator = accessValidator;
         this.authorityRepository = authorityRepository;
         this.fileService = fileService;
         this.downloadService = downloadService;
@@ -118,7 +121,7 @@ public class UserService {
 
     public UserDto updateAuthority(String username, String newAuthority) {
         User user = validationHelper.validateUser(username);
-        validationHelper.validateAuthority(newAuthority);
+        accessValidator.validateAuthority(newAuthority);
 
         if (user.getAuthority() != null) {
             authorityRepository.delete(user.getAuthority());

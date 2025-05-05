@@ -40,15 +40,5 @@ public class SessionInsightMapper {
         return dto;
     }
 
-    public static SessionInsight toSessionInsightEntity(SessionInsightInputDto inputDto, Session session) {
-        SessionInsight sessionInsight = new SessionInsight();
-
-        sessionInsight.setAuthor(inputDto.getAuthor());
-        sessionInsight.setDescription(inputDto.getDescription());
-        sessionInsight.setSession(session);
-
-        return sessionInsight;
-    }
-
 
 }

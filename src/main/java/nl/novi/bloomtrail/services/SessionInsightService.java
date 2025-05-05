@@ -21,12 +21,6 @@ public class SessionInsightService {
         this.validationHelper = validationHelper;
     }
 
-    public SessionInsight getSessionInsightBySession(Long sessionId) {
-        Session session = validationHelper.validateSession(sessionId);
-
-        return session.getSessionInsight();
-    }
-
     public void uploadClientReflectionFile(Long sessionId,MultipartFile file) {
         Session session = validationHelper.validateSession(sessionId);
         String username = SecurityContextHolder.getContext().getAuthentication().getName();

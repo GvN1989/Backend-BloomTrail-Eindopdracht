@@ -3,9 +3,6 @@ package nl.novi.bloomtrail.dtos;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
-import nl.novi.bloomtrail.models.Authority;
-
-import java.util.Set;
 
 public class UserInputDto {
 
@@ -24,6 +21,9 @@ public class UserInputDto {
 
     @NotEmpty(message = "At least one authority must be assigned")
     public String authority;
+
+    public UserInputDto() { }
+
 
     public UserInputDto(String username, String password, Boolean enabled, String apikey, String email, String authority, String fullName) {
         this.username = username;

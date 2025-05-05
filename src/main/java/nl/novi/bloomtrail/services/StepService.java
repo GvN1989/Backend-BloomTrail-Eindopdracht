@@ -3,7 +3,7 @@ package nl.novi.bloomtrail.services;
 import nl.novi.bloomtrail.dtos.StepInputDto;
 import nl.novi.bloomtrail.exceptions.BadRequestException;
 import nl.novi.bloomtrail.exceptions.NotFoundException;
-import nl.novi.bloomtrail.helper.DateConverter;
+import nl.novi.bloomtrail.helper.AccessValidator;
 import nl.novi.bloomtrail.helper.StepSequenceHelper;
 import nl.novi.bloomtrail.mappers.StepMapper;
 import nl.novi.bloomtrail.models.Assignment;
@@ -24,14 +24,16 @@ public class StepService {
 
     private final StepRepository stepRepository;
     private final ValidationHelper validationHelper;
+    private final AccessValidator accessValidator;
     private final StepSequenceHelper stepSequenceHelper;
     private final CoachingProgramService coachingProgramService;
     private final DownloadService downloadService;
     private final CoachingProgramRepository coachingProgramRepository;
 
-    public StepService(StepRepository stepRepository, ValidationHelper validationHelper, StepSequenceHelper stepSequenceHelper, CoachingProgramService coachingProgramService, DownloadService downloadService, CoachingProgramRepository coachingProgramRepository) {
+    public StepService(StepRepository stepRepository, ValidationHelper validationHelper, AccessValidator accessValidator, StepSequenceHelper stepSequenceHelper, CoachingProgramService coachingProgramService, DownloadService downloadService, CoachingProgramRepository coachingProgramRepository) {
         this.stepRepository = stepRepository;
         this.validationHelper = validationHelper;
+        this.accessValidator = accessValidator;
         this.stepSequenceHelper = stepSequenceHelper;
         this.coachingProgramService = coachingProgramService;
         this.downloadService = downloadService;
@@ -39,22 +41,20 @@ public class StepService {
     }
 
     public Step findById(Long stepId) {
-        return validationHelper.validateStep(stepId);
+        Step step = validationHelper.validateStep(stepId);
+        CoachingProgram program = step.getCoachingProgram();
+        accessValidator.validateAffiliatedUserOrAdmin(program);
+        return step;
     }
 
     public List<Step> getStepsForUserAndProgram(String username, Long programId) {
-        validationHelper.validateUser(username);
-
-        CoachingProgram program = coachingProgramRepository
-                .findByCoachingProgramIdAndClientUsername(programId, username)
-                .orElseThrow(() -> new NotFoundException("Program not found for user"));
+        CoachingProgram program = validationHelper.validateCoachingProgram(programId);
+        accessValidator.validateAffiliatedUserOrAdmin(program);
 
         List<Step> steps = stepRepository.findByCoachingProgram(program);
-
         if (steps.isEmpty()) {
             throw new NotFoundException("No steps found for CoachingProgram with ID: " + programId);
         }
-
         return steps;
     }
 
@@ -97,28 +97,13 @@ public class StepService {
         Step existingStep = validationHelper.validateStep(stepId);
         CoachingProgram coachingProgram = existingStep.getCoachingProgram();
 
-        validationHelper.validateCoachOwnsProgramOrIsAdmin(coachingProgram);
+        accessValidator.validateCoachOwnsProgramOrIsAdmin(coachingProgram);
 
-        if (inputDto.getStepName() != null) {
-            existingStep.setStepName(inputDto.getStepName());
-        }
-        if (inputDto.getStepStartDate() != null) {
-            existingStep.setStepStartDate(inputDto.getStepStartDate());
-        }
-        if (inputDto.getStepEndDate() != null) {
-            existingStep.setStepEndDate(inputDto.getStepEndDate());
-        }
-        if (inputDto.getStepGoal() != null) {
-            existingStep.setStepGoal(inputDto.getStepGoal());
-        }
-        if (inputDto.getCompleted() != null) {
-            existingStep.setCompleted(inputDto.getCompleted());
-        }
+        StepMapper.updateStepFromDto(existingStep, inputDto);
 
         Step updatedStep = stepRepository.save(existingStep);
 
         stepSequenceHelper.reorderStepsForProgram(coachingProgram);
-
         coachingProgramService.updateProgramEndDate(existingStep.getCoachingProgram().getCoachingProgramId());
 
         return updatedStep;

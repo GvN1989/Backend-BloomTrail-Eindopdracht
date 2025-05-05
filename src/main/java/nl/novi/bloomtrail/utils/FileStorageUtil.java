@@ -66,7 +66,6 @@ public class FileStorageUtil {
 
     private static String getSubdirectoryForContext(FileContext context) {
         return switch (context) {
-            case STRENGTH_RESULTS -> "strength-results";
             case ASSIGNMENT -> "assignments";
             case SESSION_INSIGHTS_CLIENT_REFLECTION -> "session-insights-client-reflection";
             case SESSION_INSIGHTS_COACH_NOTES -> "session-insights-coach-notes";

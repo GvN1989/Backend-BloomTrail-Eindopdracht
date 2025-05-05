@@ -2,6 +2,7 @@ package nl.novi.bloomtrail.mappers;
 
 import nl.novi.bloomtrail.dtos.SessionDto;
 import nl.novi.bloomtrail.dtos.SessionInputDto;
+import nl.novi.bloomtrail.dtos.StepInputDto;
 import nl.novi.bloomtrail.exceptions.ForbiddenException;
 import nl.novi.bloomtrail.models.Assignment;
 import nl.novi.bloomtrail.models.Session;
@@ -60,6 +61,21 @@ public class SessionMapper {
 
         }catch (Exception e) {
             throw new ForbiddenException("Error mapping SessionInputDto to Session" + e);
+        }
+    }
+
+    public static void updateSessionFromDto(Session session, SessionInputDto inputDto) {
+        if (inputDto.getSessionDate() != null) {
+            session.setSessionDate(inputDto.getSessionDate());
+        }
+        if (inputDto.getSessionTime() != null) {
+            session.setSessionTime(inputDto.getSessionTime());
+        }
+        if (inputDto.getLocation() != null) {
+            session.setLocation(inputDto.getLocation());
+        }
+        if (inputDto.getComment() != null) {
+            session.setComment(inputDto.getComment());
         }
     }
 

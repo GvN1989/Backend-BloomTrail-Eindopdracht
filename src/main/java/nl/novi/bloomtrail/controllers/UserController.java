@@ -3,15 +3,16 @@ package nl.novi.bloomtrail.controllers;
 import jakarta.validation.Valid;
 import nl.novi.bloomtrail.dtos.UserInputDto;
 import nl.novi.bloomtrail.dtos.UserDto;
-import nl.novi.bloomtrail.exceptions.ConflictException;
 import nl.novi.bloomtrail.exceptions.NotFoundException;
+import nl.novi.bloomtrail.helper.AccessValidator;
 import nl.novi.bloomtrail.helper.ValidationHelper;
 import nl.novi.bloomtrail.models.Authority;
 import nl.novi.bloomtrail.services.UserService;
 import nl.novi.bloomtrail.exceptions.BadRequestException;
 import org.springframework.http.*;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,32 +30,23 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
+    private final AccessValidator accessValidator;
 
-    private final ValidationHelper validationHelper;
-
-    public UserController(UserService userService, ValidationHelper validationHelper) {
+    public UserController(UserService userService, AccessValidator accessValidator) {
         this.userService = userService;
-        this.validationHelper = validationHelper;
+        this.accessValidator = accessValidator;
     }
 
-    @GetMapping(value = "")
+    @GetMapping
     public ResponseEntity<List<UserDto>> getUsers() {
         List<UserDto> userProfiles = userService.getUsers();
         return ResponseEntity.ok().body(userProfiles);
     }
-
     @GetMapping(value = "/{username}")
     public ResponseEntity<UserDto> getUser(@PathVariable("username") String username) {
         UserDto userDto = userService.getUser(username);
         return ResponseEntity.ok(userDto);
     }
-
-    @GetMapping("/profile")
-    public ResponseEntity<UserDto> getProfile(@AuthenticationPrincipal UserDetails userDetails) {
-        UserDto userDto = userService.getUser(userDetails.getUsername());
-        return ResponseEntity.ok(userDto);
-    }
-
     @PostMapping(value = "/")
     public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserInputDto dto) throws BadRequestException {
 
@@ -69,20 +61,11 @@ public class UserController {
 
         return ResponseEntity.created(location).body(createdUser);
     }
-
-    @PutMapping(value = "/{username}")
-    public ResponseEntity<UserDto> updateUserProfile(@PathVariable("username") String username, @RequestBody UserInputDto dto) {
-        UserDto updatedUser = userService.updateUserProfile(username, dto);
-        return ResponseEntity.ok(updatedUser);
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{username}")
     public ResponseEntity<Void> deleteUser(@PathVariable String username) {
         userService.deleteUser(username);
         return ResponseEntity.noContent().build();
     }
-
     @GetMapping(value = "/{username}/authority")
     public ResponseEntity<Object> getUserAuthorities(@PathVariable("username") String username) {
         Authority authority = userService.getAuthority(username);
@@ -93,14 +76,13 @@ public class UserController {
 
         return ResponseEntity.ok(authority);
     }
-
     @PutMapping(value = "/{username}/authority")
     public ResponseEntity<Object> updateUserAuthority(@PathVariable("username") String username, @RequestBody Map<String, Object> fields) {
         if (!(fields.get("authority") instanceof String authorityName) || authorityName.trim().isEmpty()) {
             throw new BadRequestException("Authority cannot be empty or missing.");
         }
 
-        validationHelper.validateAuthority(authorityName);
+        accessValidator.validateAuthority(authorityName);
         UserDto updatedUser = userService.updateAuthority(username, authorityName);
         return ResponseEntity.ok(updatedUser);
     }
@@ -111,10 +93,32 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/profile")
+    public ResponseEntity<UserDto> getProfile(@AuthenticationPrincipal UserDetails userDetails) {
+        UserDto userDto = userService.getUser(userDetails.getUsername());
+        return ResponseEntity.ok(userDto);
+    }
+    @PutMapping(value = "/{username}")
+    public ResponseEntity<UserDto> updateUserProfile(@PathVariable("username") String username, @RequestBody UserInputDto dto, @AuthenticationPrincipal UserDetails userDetails) {
+        if (!userDetails.getUsername().equals(username) &&
+                !userDetails.getAuthorities().stream()
+                        .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"))) {
+            throw new AccessDeniedException("You can only update your own profile.");
+        }
+
+        UserDto updatedUser = userService.updateUserProfile(username, dto);
+
+        return ResponseEntity.ok(updatedUser);
+    }
     @PostMapping("/{username}/profile-picture")
     public ResponseEntity<String> uploadProfilePicture(
             @PathVariable String username,
             @RequestPart("file") List<MultipartFile> files) {
+
+        String loggedInUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (!loggedInUsername.equals(username)) {
+            throw new AccessDeniedException("You can only upload your own profile picture.");
+        }
 
         if (files == null || files.size() != 1) {
             throw new BadRequestException("Exactly one file must be uploaded as a profile picture.");
@@ -144,9 +148,13 @@ public class UserController {
                 .headers(headers)
                 .body(profilePicture);
     }
-
     @DeleteMapping("/{username}/profile-picture")
     public ResponseEntity<String> deleteProfilePicture(@PathVariable String username) {
+        String loggedInUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (!loggedInUsername.equals(username)) {
+            throw new AccessDeniedException("You can only delete your own profile picture.");
+        }
+
         userService.deleteProfilePicture(username);
         return ResponseEntity.ok("Profile picture deleted successfully for user: " + username);
     }

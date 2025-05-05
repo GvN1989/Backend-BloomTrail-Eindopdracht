@@ -3,7 +3,6 @@ package nl.novi.bloomtrail.controllers;
 import jakarta.validation.Valid;
 import nl.novi.bloomtrail.dtos.SessionDto;
 import nl.novi.bloomtrail.dtos.SessionInputDto;
-import nl.novi.bloomtrail.enums.FileContext;
 import nl.novi.bloomtrail.mappers.SessionMapper;
 import nl.novi.bloomtrail.models.Session;
 import nl.novi.bloomtrail.services.SessionInsightService;
@@ -56,18 +55,18 @@ public class SessionController {
 
     }
 
-    @PostMapping("/{sessionId}/client-reflection")
+    @PostMapping("/{id}/client-reflection")
     public ResponseEntity<String> uploadClientReflectionFile(
-            @PathVariable Long sessionId,
+            @PathVariable ("id") Long sessionId,
             @RequestParam("file") MultipartFile file) {
 
         sessionInsightService.uploadClientReflectionFile(sessionId,file);
         return ResponseEntity.ok("Client reflection file uploaded successfully.");
     }
 
-    @PostMapping("/{sessionId}/coach-notes")
+    @PostMapping("/{id}/coach-notes")
     public ResponseEntity<String> uploadCoachNotesFile(
-            @PathVariable Long sessionId,
+            @PathVariable ("id") Long sessionId,
             @RequestParam("file") MultipartFile file) {
 
         sessionInsightService.uploadCoachNotesFile(sessionId,file);
@@ -80,8 +79,8 @@ public class SessionController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{sessionId}/download-zip")
-    public ResponseEntity<byte[]> downloadFilesForSession(@PathVariable Long sessionId) throws IOException {
+    @GetMapping("/{id}/download-zip")
+    public ResponseEntity<byte[]> downloadFilesForSession(@PathVariable ("id") Long sessionId) throws IOException {
         byte[] zipData = sessionService.downloadFilesForSession(sessionId);
 
         HttpHeaders headers = new HttpHeaders();

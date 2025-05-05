@@ -110,7 +110,7 @@ public class File {
         if (sessionInsight != null) relationCount++;
 
         if (relationCount > 1) {
-            throw new IllegalStateException("Upload can only belong to one context: Assignment, StrengthResults, or SessionInsights");
+            throw new IllegalStateException("Upload can only belong to one context: Assignment or SessionInsights");
         }
     }
 

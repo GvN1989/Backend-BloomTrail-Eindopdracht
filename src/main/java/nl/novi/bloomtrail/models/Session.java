@@ -31,7 +31,6 @@ public class Session {
     @Column(name = "session_date")
     @NotNull
     private LocalDate sessionDate;
-
     @Column(name = "session_time")
     @NotNull
     private LocalTime sessionTime;

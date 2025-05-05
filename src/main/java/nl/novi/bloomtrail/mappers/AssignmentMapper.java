@@ -2,11 +2,13 @@ package nl.novi.bloomtrail.mappers;
 
 import nl.novi.bloomtrail.dtos.AssignmentDto;
 import nl.novi.bloomtrail.dtos.AssignmentInputDto;
+import nl.novi.bloomtrail.dtos.SessionInputDto;
 import nl.novi.bloomtrail.exceptions.ForbiddenException;
 import nl.novi.bloomtrail.models.Assignment;
 import nl.novi.bloomtrail.models.File;
 import nl.novi.bloomtrail.models.Session;
 import nl.novi.bloomtrail.models.Step;
+import org.springframework.web.multipart.MultipartFile;
 
 
 import java.util.Collections;
@@ -54,4 +56,15 @@ public class AssignmentMapper {
             throw new ForbiddenException("Error mapping AssignmentInputDto to Assignment" + e);
         }
     }
+
+    public static void updateAssignmentFromDto(Assignment assignment, AssignmentInputDto inputDto, Step newStep) {
+        if (inputDto.getDescription() != null) {
+            assignment.setDescription(inputDto.getDescription());
+        }
+
+        if (newStep != null && !newStep.getStepId().equals(assignment.getStep().getStepId())) {
+            assignment.setStep(newStep);
+        }
+    }
+
 }

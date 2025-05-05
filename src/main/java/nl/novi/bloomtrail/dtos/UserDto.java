@@ -1,8 +1,8 @@
 package nl.novi.bloomtrail.dtos;
 
-import nl.novi.bloomtrail.models.Authority;
 
-import java.util.Set;
+import java.util.List;
+
 
 public class UserDto {
     private String username;
@@ -11,15 +11,14 @@ public class UserDto {
     private Boolean enabled;
     private String authority;
     public String profilePictureUrl;
-    private String reportUrl;
 
-    public UserDto(String username, String email, String fullName,Boolean enabled, String authority, String profilePictureUrl) {
+    public UserDto(String username, String email, String fullName, Boolean enabled, String authority, String profilePictureUrl) {
         this.username = username;
         this.email = email;
-        this.fullName= fullName;
+        this.fullName = fullName;
         this.enabled = enabled;
         this.authority = authority;
-        this.profilePictureUrl= profilePictureUrl;
+        this.profilePictureUrl = profilePictureUrl;
     }
 
     public String getUsername() {
@@ -37,6 +36,7 @@ public class UserDto {
     public void setFullName(String fullName) {
         this.fullName = fullName;
     }
+
     public String getEmail() {
         return email;
     }
@@ -69,11 +69,4 @@ public class UserDto {
         this.authority = authority;
     }
 
-    public String getReportUrl() {
-        return reportUrl;
-    }
-
-    public void setReportUrl(String reportUrl) {
-        this.reportUrl = reportUrl;
-    }
 }

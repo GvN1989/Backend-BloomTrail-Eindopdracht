@@ -42,12 +42,10 @@ public class Step {
     @JoinColumn(name = "coaching_program_id")
     private CoachingProgram coachingProgram;
 
-    @OneToMany
-    @JoinColumn(name = "session_id")
+    @OneToMany(mappedBy = "step", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Session> sessions = new ArrayList<>();
 
-    @OneToMany
-    @JoinColumn(name = "assignment_id")
+    @OneToMany(mappedBy = "step", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Assignment> assignments = new ArrayList<>();
 
     public Long getStepId() {

@@ -125,35 +125,6 @@ public class ValidationHelper {
         }
     }
 
-    public void validateAuthority(String authorityName) throws BadRequestException {
-        List<String> validRoles = Arrays.asList("ROLE_USER", "ROLE_COACH", "ROLE_ADMIN");
-        if (!validRoles.contains(authorityName)) {
-            throw new BadRequestException("Invalid role: " + authorityName);
-        }
-    }
-
-    public User getAuthenticatedUser() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        if (principal instanceof UserDetails userDetails) {
-            return userRepository.findByUsername(userDetails.getUsername())
-                    .orElseThrow(() -> new NotFoundException("User not found: " + userDetails.getUsername()));
-        }
-
-        throw new AccessDeniedException("Unable to determine authenticated user.");
-    }
-
-    public void validateCoachOwnsProgramOrIsAdmin(CoachingProgram program) {
-        User currentUser = getAuthenticatedUser();
-
-        boolean isAdmin = currentUser.getAuthority().getAuthority().equals("ADMIN");
-        boolean isCoach = program.getCoach().getUsername().equals(currentUser.getUsername());
-
-        if (!isAdmin && !isCoach) {
-            throw new AccessDeniedException("You do not have permission to modify this coaching program.");
-        }
-    }
-
     public void validateStepCreationInput(StepInputDto inputDto) {
 
         if (inputDto.getStepName() == null || inputDto.getStepName().isBlank()) {

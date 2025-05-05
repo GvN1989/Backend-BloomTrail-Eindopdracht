@@ -4,15 +4,12 @@ import jakarta.validation.Valid;
 import nl.novi.bloomtrail.dtos.*;
 import nl.novi.bloomtrail.exceptions.NotFoundException;
 import nl.novi.bloomtrail.mappers.CoachingProgramMapper;
-import nl.novi.bloomtrail.mappers.StepMapper;
 import nl.novi.bloomtrail.models.CoachingProgram;
-import nl.novi.bloomtrail.models.Step;
 import nl.novi.bloomtrail.services.CoachingProgramService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.Comparator;
 import java.util.List;
 
 @RestController
@@ -53,10 +50,12 @@ public class CoachingProgramController {
 
         return ResponseEntity.ok(dtos);
     }
+
     @GetMapping("/user/{username}")
     public List<CoachingProgramDto> getCoachingProgramsByUser(@PathVariable String username) {
-        return coachingProgramService.getCoachingProgramsByUser(username)
-                .stream()
+        List<CoachingProgram> programs = coachingProgramService.getCoachingProgramsByUser(username);
+
+        return programs.stream()
                 .map(CoachingProgramMapper::toCoachingProgramDto)
                 .toList();
     }
@@ -80,18 +79,17 @@ public class CoachingProgramController {
     public ResponseEntity <Void> deleteCoachingProgram(@PathVariable("id") Long coachingProgramId) {
         coachingProgramService.deleteCoachingProgram(coachingProgramId);
         return ResponseEntity.noContent().build();
-
     }
 
     @PutMapping("/{username}/{id}")
-    public ResponseEntity <CoachingProgramDto> updateCoachingProgram (
+    public ResponseEntity<CoachingProgramDto> updateCoachingProgram(
             @PathVariable Long id,
             @PathVariable String username,
-            @Valid @RequestBody CoachingProgramPatchDto inputDto
+            @Valid @RequestBody CoachingProgramUpdateDto inputDto
     ) {
-        CoachingProgram updatedCoachingProgram = coachingProgramService.updateCoachingProgram(username,id,inputDto);
-        CoachingProgramDto updatedCoachingProgramDto = CoachingProgramMapper.toCoachingProgramDto(updatedCoachingProgram);
-        return ResponseEntity.ok().body(updatedCoachingProgramDto);
+        CoachingProgram updated = coachingProgramService.updateCoachingProgram(username, id, inputDto);
+        CoachingProgramDto dto = CoachingProgramMapper.toCoachingProgramDto(updated);
+        return ResponseEntity.ok(dto);
     }
 
 }

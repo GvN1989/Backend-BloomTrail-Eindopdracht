@@ -1,7 +1,5 @@
 package nl.novi.bloomtrail.controllers;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import nl.novi.bloomtrail.dtos.StepDto;
 import nl.novi.bloomtrail.dtos.StepInputDto;
@@ -10,12 +8,12 @@ import nl.novi.bloomtrail.models.Step;
 import nl.novi.bloomtrail.services.StepService;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
+
 
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
+
 
 @RestController
 @RequestMapping("/step")
@@ -30,8 +28,7 @@ public class StepController {
     @GetMapping("/{id}")
     public ResponseEntity <StepDto> getStepById (@PathVariable("id") Long stepId) {
         Step step = stepService.findById(stepId);
-        StepDto dto = StepMapper.toStepDto(step);
-        return ResponseEntity.ok(dto);
+        return ResponseEntity.ok(StepMapper.toStepDto(step));
     }
 
     @GetMapping("/steps/{username}/{programId}")
@@ -47,7 +44,7 @@ public class StepController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/coaching-programs/{programId}/steps")
+    @PostMapping("/{programId}/step")
     public ResponseEntity<List<StepDto>> addStepsToProgram(
             @PathVariable Long programId,
             @Valid @RequestBody StepInputDto inputDto
@@ -65,7 +62,7 @@ public class StepController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PostMapping("/coaching-programs/{programId}/steps/batch")
+    @PostMapping("/{programId}/steps-batch")
     public ResponseEntity<List<StepDto>> addStepsToProgramBatch(
             @PathVariable Long programId,
             @Valid @RequestBody List<StepInputDto> inputDtos) {
@@ -80,7 +77,7 @@ public class StepController {
     }
 
 
-    @PatchMapping("/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity <StepDto> updateStepDetails (@PathVariable("id") Long stepId, @RequestBody StepInputDto inputDto) {
         Step updatedStep = stepService.updateStepDetails(stepId, inputDto);
         StepDto updatedStepDto = StepMapper.toStepDto(updatedStep);
@@ -93,8 +90,8 @@ public class StepController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{stepId}/download-zip")
-    public ResponseEntity<byte[]> downloadFilesForStep(@PathVariable Long stepId) throws IOException {
+    @GetMapping("/{id}/download-zip")
+    public ResponseEntity<byte[]> downloadFilesForStep(@PathVariable("id") Long stepId) throws IOException {
         byte[] zipData = stepService.downloadFilesForStep(stepId);
 
         HttpHeaders headers = new HttpHeaders();

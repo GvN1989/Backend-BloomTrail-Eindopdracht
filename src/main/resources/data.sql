@@ -16,9 +16,9 @@ CREATE TABLE IF NOT EXISTS authorities (
 );
 
 INSERT INTO users (username, password, full_name, email, enabled, api_key) VALUES
-                                                                                             ('henk','$2a$10$Pq2fS8wJ/s5morEL6YZW6.MHQD3jTU4G62HdD4F4cryO7UXV3cIuW','Henk Jansen','test@testy.tst',true,'7847493'),
-                                                                                             ('alice','$2a$10$a66zyevDCm5FGEFO630R.u6n0t39vnSu0PAOboGwD1y1tkSO3pK9G', 'Alice Johnson', 'alice@example.com', true, '1234567'),
-                                                                                             ('charlie','$2a$10$rPfp.ae24draeskMGyOS2ujrE6LibDwmtpiPlP2pVsUa6oWsSGr7a', 'Charlie Brown', 'charlie@example.com', true, '3456789'),
+                                                                                             ('henk','$2a$10$8KhGMxoMIUtKsfwzv/xPaesps2gNWP28mEKHqO9qKNuNulmEDXMQi','Henk Jansen','test@testy.tst',true,'7847493'),
+                                                                                             ('alice','$2a$10$rlkxAjkKiApYgOGnQbXSQ.W3tR8QmsKk520mCFIFXvXbkeeEgTBDC', 'Alice Johnson', 'alice@example.com', true, '1234567'),
+                                                                                             ('charlie','$2a$10$0NUzILKVMk3OEGE/FxYGJuG2IN8JQkXES47jHBMBNJV.WieAk1HAy', 'Charlie Brown', 'charlie@example.com', true, '3456789'),
                                                                                              ('diana','$2a$10$iB5J6qmeMsDHm02msCu2R.CPHIHTAudAwq868KEqclJ0uAYnNmdPW', 'Diana Prince', 'diana@example.com', true, '4567890');
 
 INSERT INTO authorities (username, authority) VALUES (
@@ -82,6 +82,19 @@ VALUES
     ('Leading with Emotional Intelligence', '01-04-2024', '07-04-2024', false, 'Apply emotional intelligence to lead teams effectively', 3, 2),
     ('Strengths-Based Decision Making', '08-04-2024', '14-04-2024', false, 'Use strengths to make confident and impactful decisions', 4, 2),
     ('Sustaining Leadership Growth', '15-04-2024', '21-04-2024', false, 'Create a plan for continuous leadership development', 5, 2);
+
+CREATE TABLE IF NOT EXISTS sessions (
+                                     session_id SERIAL PRIMARY KEY,
+                                     session_name VARCHAR(255) NOT NULL,
+                                     coach TEXT NOT NULL,
+                                     client TEXT NOT NULL,
+                                     session_date DATE NOT NULL,
+                                     session_time TIME NOT NULL,
+                                     location TEXT,
+                                     comment TEXT,
+                                     step_id BIGINT NOT NULL,
+                                     FOREIGN KEY (step_id) REFERENCES steps(step_id) ON DELETE CASCADE
+);
 
 INSERT INTO sessions (session_Name, coach, client, session_date, session_time, location, comment,created_at, updated_at, step_id)
 VALUES
