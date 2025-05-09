@@ -5,8 +5,10 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import nl.novi.bloomtrail.helper.TokenBlackList;
 import nl.novi.bloomtrail.services.CustomUserDetailsService;
 import nl.novi.bloomtrail.utils.JwtUtils;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,10 +24,12 @@ import java.util.List;
 public class JwtRequestFilter extends OncePerRequestFilter {
     private final CustomUserDetailsService userDetailsService;
     private final JwtUtils jwtUtils;
+    private final TokenBlackList tokenBlackList;
 
-    public JwtRequestFilter(CustomUserDetailsService userDetailsService, JwtUtils jwtUtils) {
+    public JwtRequestFilter(CustomUserDetailsService userDetailsService, JwtUtils jwtUtils, TokenBlackList tokenBlackList) {
         this.userDetailsService = userDetailsService;
         this.jwtUtils = jwtUtils;
+        this.tokenBlackList = tokenBlackList;
     }
 
     @Override
@@ -38,6 +42,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
                 jwt = authorizationHeader.substring(7);
+
+            if (tokenBlackList.isBlacklisted(jwt)) {
+                throw new AccessDeniedException("Token has been invalidated (logged out).");
+            }
+
             try {
                 username = jwtUtils.extractUsername(jwt);
             } catch (Exception e) {

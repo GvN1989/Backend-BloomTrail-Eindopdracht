@@ -91,6 +91,8 @@ public class UserService {
     }
     @Transactional
     public UserDto updateUserProfile(String username, UserInputDto dto) {
+        accessValidator.validateSelfOrAdminAccess(username);
+
         User user = validationHelper.validateUser(username);
 
         if (dto.getFullName() != null && !dto.getFullName().isEmpty()) {
@@ -153,6 +155,8 @@ public class UserService {
     }
 
     public void uploadProfilePicture(String username, MultipartFile file) {
+        accessValidator.validateSelfOrAdminAccess(username);
+
         if (file == null || file.isEmpty()) {
             throw new BadRequestException("No file uploaded.");
         }
@@ -192,6 +196,8 @@ public class UserService {
     }
 
     public void deleteProfilePicture(String username) {
+        accessValidator.validateSelfOrAdminAccess(username);
+
         User user = validationHelper.validateUser(username);
 
         if (user.getProfilePicture() == null) {

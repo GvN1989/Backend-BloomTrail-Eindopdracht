@@ -100,11 +100,6 @@ public class UserController {
     }
     @PutMapping(value = "/{username}")
     public ResponseEntity<UserDto> updateUserProfile(@PathVariable("username") String username, @RequestBody UserInputDto dto, @AuthenticationPrincipal UserDetails userDetails) {
-        if (!userDetails.getUsername().equals(username) &&
-                !userDetails.getAuthorities().stream()
-                        .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"))) {
-            throw new AccessDeniedException("You can only update your own profile.");
-        }
 
         UserDto updatedUser = userService.updateUserProfile(username, dto);
 
@@ -114,11 +109,6 @@ public class UserController {
     public ResponseEntity<String> uploadProfilePicture(
             @PathVariable String username,
             @RequestPart("file") List<MultipartFile> files) {
-
-        String loggedInUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-        if (!loggedInUsername.equals(username)) {
-            throw new AccessDeniedException("You can only upload your own profile picture.");
-        }
 
         if (files == null || files.size() != 1) {
             throw new BadRequestException("Exactly one file must be uploaded as a profile picture.");
@@ -150,11 +140,6 @@ public class UserController {
     }
     @DeleteMapping("/{username}/profile-picture")
     public ResponseEntity<String> deleteProfilePicture(@PathVariable String username) {
-        String loggedInUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-        if (!loggedInUsername.equals(username)) {
-            throw new AccessDeniedException("You can only delete your own profile picture.");
-        }
-
         userService.deleteProfilePicture(username);
         return ResponseEntity.ok("Profile picture deleted successfully for user: " + username);
     }

@@ -3,8 +3,8 @@ package nl.novi.bloomtrail.controllers;
 import nl.novi.bloomtrail.dtos.AuthenticatedUserDto;
 import nl.novi.bloomtrail.dtos.AuthenticationRequest;
 import nl.novi.bloomtrail.dtos.AuthenticationResponse;
-import nl.novi.bloomtrail.exceptions.ConflictException;
 import nl.novi.bloomtrail.helper.ErrorResponseBuilder;
+import nl.novi.bloomtrail.helper.TokenBlackList;
 import nl.novi.bloomtrail.utils.JwtUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,10 +16,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
-
-import java.util.Map;
-
 @RestController
 public class AuthenticationController {
 
@@ -27,9 +23,12 @@ public class AuthenticationController {
 
     private final JwtUtils jwtUtils;
 
-    public AuthenticationController(AuthenticationManager authenticationManager, JwtUtils jwtUtils) {
+    private final TokenBlackList tokenBlackList;
+
+    public AuthenticationController(AuthenticationManager authenticationManager, JwtUtils jwtUtils, TokenBlackList tokenBlackList) {
         this.authenticationManager = authenticationManager;
         this.jwtUtils = jwtUtils;
+        this.tokenBlackList = tokenBlackList;
     }
 
     @GetMapping(value = "/authenticated")
@@ -85,6 +84,15 @@ public class AuthenticationController {
     }
     @PostMapping("/logout/{username}")
     public ResponseEntity<?> logout(@RequestHeader(value= "Authorization", required = false) String authHeader, Authentication authentication){
+
+        String token = authHeader !=null && authHeader.startsWith("Bearer ")
+                ? authHeader.substring(7)
+                : null;
+
+        if (token != null ) {
+            tokenBlackList.blacklist(token);
+        }
+
         String username = (authentication != null) ? authentication.getName() : null;
 
         String message = (username != null)

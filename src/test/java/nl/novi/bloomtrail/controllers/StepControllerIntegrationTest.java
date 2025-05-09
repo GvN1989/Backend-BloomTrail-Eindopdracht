@@ -63,7 +63,7 @@ public class StepControllerIntegrationTest {
     @BeforeEach
     void setUp() {
         UserDetails userDetails = new org.springframework.security.core.userdetails.User(
-                "henk", "zegikniet", List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))
+                "henk", "isDeBaas", List.of(new SimpleGrantedAuthority("ADMIN"))
         );
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(auth);
@@ -108,7 +108,7 @@ public class StepControllerIntegrationTest {
         System.out.println("Serialized JSON:\n" + json);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .post("/step/coaching-programs/" + coachingProgram.getCoachingProgramId() + "/steps")
+                        .post("/step/" + coachingProgram.getCoachingProgramId() + "/step")
                         .contentType(APPLICATION_JSON)
                         .content(json))
                 .andDo(print())

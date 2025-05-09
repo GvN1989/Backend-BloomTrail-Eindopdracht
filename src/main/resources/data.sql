@@ -19,14 +19,16 @@ INSERT INTO users (username, password, full_name, email, enabled, api_key) VALUE
                                                                                              ('henk','$2a$10$8KhGMxoMIUtKsfwzv/xPaesps2gNWP28mEKHqO9qKNuNulmEDXMQi','Henk Jansen','test@testy.tst',true,'7847493'),
                                                                                              ('alice','$2a$10$rlkxAjkKiApYgOGnQbXSQ.W3tR8QmsKk520mCFIFXvXbkeeEgTBDC', 'Alice Johnson', 'alice@example.com', true, '1234567'),
                                                                                              ('charlie','$2a$10$0NUzILKVMk3OEGE/FxYGJuG2IN8JQkXES47jHBMBNJV.WieAk1HAy', 'Charlie Brown', 'charlie@example.com', true, '3456789'),
-                                                                                             ('diana','$2a$10$iB5J6qmeMsDHm02msCu2R.CPHIHTAudAwq868KEqclJ0uAYnNmdPW', 'Diana Prince', 'diana@example.com', true, '4567890');
+                                                                                             ('diana','$2a$10$iB5J6qmeMsDHm02msCu2R.CPHIHTAudAwq868KEqclJ0uAYnNmdPW', 'Diana Prince', 'diana@example.com', true, '4567890'),
+                                                                                             ('edward', '$2a$10$WgkNLijcWURpBDwyfbqOeepbbMRARyaAtRdPiOi41S5Rl5NdoJXWq', 'Edward de Jong','edward@example.com', true, '6958320');
 
 INSERT INTO authorities (username, authority) VALUES (
                                                          'henk',
                                                          'ADMIN'),
                                                      ('alice', 'COACH'),
                                                      ('charlie', 'USER'),
-                                                     ('diana', 'USER');
+                                                     ('diana', 'USER'),
+                                                     ('edward','USER');
 
 
 
