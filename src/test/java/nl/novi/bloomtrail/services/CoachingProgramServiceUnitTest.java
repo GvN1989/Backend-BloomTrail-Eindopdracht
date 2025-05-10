@@ -233,7 +233,7 @@ public class CoachingProgramServiceUnitTest {
         List<CoachingProgram> mockPrograms= List.of(program1, program2);
 
         when(coachingProgramRepository.findByUserUsername(username)).thenReturn(mockPrograms);
-        doNothing().when(accessValidator).validateAffiliatedUserOrAdmin(any(CoachingProgram.class));
+        doNothing().when(accessValidator).validateClientOrCoachOrAdminAccess(any(CoachingProgram.class));
         when(stepRepository.countByCoachingProgram_CoachingProgramId(anyLong())).thenReturn(0);
 
         List<CoachingProgramDto> result = coachingProgramService.getCoachingProgramsByUser(username);
@@ -282,7 +282,7 @@ public class CoachingProgramServiceUnitTest {
         List<CoachingProgram> programs = List.of(mockProgram);
 
         when(validationHelper.validateUser(username)).thenReturn(mockUser);
-        doNothing().when(accessValidator).validateAffiliatedUserOrAdmin(any(CoachingProgram.class));
+        doNothing().when(accessValidator).validateClientOrCoachOrAdminAccess(any(CoachingProgram.class));
         when(coachingProgramRepository.findByUserUsername(username)).thenReturn(programs);
         when(stepRepository.countByCoachingProgram_CoachingProgramId(1L)).thenReturn(1);
 

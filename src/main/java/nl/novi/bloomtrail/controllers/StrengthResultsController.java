@@ -1,5 +1,6 @@
 package nl.novi.bloomtrail.controllers;
 
+import jakarta.validation.Valid;
 import nl.novi.bloomtrail.dtos.StrengthResultsDto;
 import nl.novi.bloomtrail.dtos.StrengthResultsInputDto;
 import nl.novi.bloomtrail.helper.AccessValidator;
@@ -7,7 +8,6 @@ import nl.novi.bloomtrail.mappers.StrengthResultsMapper;
 import nl.novi.bloomtrail.models.StrengthResults;
 import nl.novi.bloomtrail.services.StrengthResultsService;
 import org.springframework.http.*;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -38,11 +38,10 @@ public class StrengthResultsController {
     }
 
     @PostMapping
-    public ResponseEntity<StrengthResultsDto> createStrengthResults(@RequestBody StrengthResultsInputDto inputDto) {
-        String username = accessValidator.getAuthenticatedUser();
-        StrengthResults strengthResults = strengthResultsService.createStrengthResults(inputDto, username);
-        StrengthResultsDto dto = StrengthResultsMapper.toStrengthResultDto(strengthResults);
-        return ResponseEntity.ok(dto);
+    public ResponseEntity<StrengthResultsDto> createStrengthResults(@Valid @RequestBody StrengthResultsInputDto inputDto) {
+        String currentUsername = accessValidator.getAuthenticatedUser();
+        StrengthResults created = strengthResultsService.createStrengthResults(inputDto, currentUsername);
+        return ResponseEntity.ok(StrengthResultsMapper.toStrengthResultDto(created));
     }
 
     @PutMapping

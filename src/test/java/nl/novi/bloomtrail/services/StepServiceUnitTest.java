@@ -90,7 +90,7 @@ public class StepServiceUnitTest {
     @Test
     void testFindStepById_Success() {
         when(validationHelper.validateStep(1L)).thenReturn(mockStep);
-        doNothing().when(accessValidator).validateAffiliatedUserOrAdmin(any(CoachingProgram.class));
+        doNothing().when(accessValidator).validateClientOrCoachOrAdminAccess(any(CoachingProgram.class));
 
         Step result = stepService.findById(1L);
 
@@ -126,7 +126,7 @@ public class StepServiceUnitTest {
         mockStep.setCoachingProgram(mockProgram);
 
         when(validationHelper.validateCoachingProgram(programId)).thenReturn(mockProgram);
-        doNothing().when(accessValidator).validateAffiliatedUserOrAdmin(mockProgram);
+        doNothing().when(accessValidator).validateClientOrCoachOrAdminAccess(mockProgram);
         when(stepRepository.findByCoachingProgram(mockProgram)).thenReturn(List.of(mockStep));
 
         List<Step> result = stepService.getStepsForProgram(programId);
@@ -145,7 +145,7 @@ public class StepServiceUnitTest {
         mockProgram.setCoachingProgramId(programId);
 
         when(validationHelper.validateCoachingProgram(programId)).thenReturn(mockProgram);
-        doNothing().when(accessValidator).validateAffiliatedUserOrAdmin(mockProgram);
+        doNothing().when(accessValidator).validateClientOrCoachOrAdminAccess(mockProgram);
         when(stepRepository.findByCoachingProgram(mockProgram)).thenReturn(List.of());
 
         Assertions.assertThrows(NotFoundException.class, () ->

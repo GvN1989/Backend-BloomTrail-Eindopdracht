@@ -3,7 +3,6 @@ package nl.novi.bloomtrail.dtos;
 import jakarta.persistence.ElementCollection;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import nl.novi.bloomtrail.enums.FileContext;
 
 import java.util.List;
 
@@ -12,6 +11,8 @@ public class StrengthResultsInputDto {
     @Size(max = 500)
     private String summary;
     @ElementCollection
+    @NotNull(message = "Top strengths must be provided")
+    @Size(min = 5, max = 15, message = "You must provide between 5 and 15 strengths")
     private List<String> topStrengthNames;
 
     public String getUsername() {

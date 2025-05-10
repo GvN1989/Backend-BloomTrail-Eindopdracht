@@ -61,7 +61,7 @@ public class SpringSecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/users/{username}").hasAuthority("ADMIN")
 
                         .requestMatchers(HttpMethod.GET, "/users/profile").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/users/{username}").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/users/{username}").hasAnyAuthority("ADMIN","COACH")
                         .requestMatchers(HttpMethod.PUT, "/users/{username}").authenticated()
                         .requestMatchers(HttpMethod.GET, "/users/{username}/profile-picture").authenticated()
                         .requestMatchers(HttpMethod.POST, "/users/{username}/profile-picture").authenticated()
@@ -69,7 +69,6 @@ public class SpringSecurityConfig {
 
                         .requestMatchers(HttpMethod.GET, "/users/clients").hasAuthority("COACH")
 
-                        .requestMatchers(HttpMethod.DELETE, "/users/{username}").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/users").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/users").hasAuthority("ADMIN")
 
@@ -77,9 +76,9 @@ public class SpringSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/coaching-programs").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/coaching-programs/{id}").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/coaching-programs/user/{username}").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/coaching-programs").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/coaching-programs").hasAnyAuthority("ADMIN","COACH")
                         .requestMatchers(HttpMethod.DELETE, "/coaching-programs/{id}").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/coaching-programs/{username}/{id}").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/coaching-programs/{username}/{id}").hasAnyAuthority("ADMIN","COACH")
 
                         .requestMatchers(HttpMethod.GET, "/step/{username}/{programId}").authenticated()
                         .requestMatchers(HttpMethod.POST, "/step/{programId}/step").hasAnyAuthority("ADMIN","COACH")

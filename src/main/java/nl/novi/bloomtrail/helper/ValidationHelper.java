@@ -142,7 +142,6 @@ public class ValidationHelper {
         if (inputDto.getStepStartDate() == null || inputDto.getStepEndDate() == null) {
             throw new BadRequestException("Step start date and end date cannot be null.");
         }
-
         if (inputDto.getStepEndDate().isBefore(inputDto.getStepStartDate())) {
             throw new BadRequestException("Step end date cannot be before start date.");
         }

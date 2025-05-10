@@ -1,10 +1,7 @@
 package nl.novi.bloomtrail.dtos;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.validation.constraints.Future;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.NoArgsConstructor;
 
 
@@ -24,7 +21,7 @@ public class CoachingProgramInputDto {
 
     @NotNull
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
-    @Future
+    @FutureOrPresent(message = "Start date must be today or in the future.")
     private LocalDate startDate;
 
     @NotNull

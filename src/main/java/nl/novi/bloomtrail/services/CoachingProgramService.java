@@ -69,6 +69,8 @@ public class CoachingProgramService {
 
         List<CoachingProgram> programs = coachingProgramRepository.findByUserUsername(username);
 
+        accessValidator.validateSelfOrAffiliatedCoachOrAdminAccess(username, programs);
+
         return programs.stream()
                 .map(this::toDtoWithMetrics)
                 .toList();
@@ -124,7 +126,7 @@ public class CoachingProgramService {
 
 
     public double calculateProgressPercentage(CoachingProgram coachingProgram) {
-        accessValidator.validateAffiliatedUserOrAdmin(coachingProgram);
+        accessValidator.validateClientOrCoachOrAdminAccess(coachingProgram);
 
         List<Step> timeline = coachingProgram.getTimeline();
 

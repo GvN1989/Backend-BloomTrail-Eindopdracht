@@ -1,9 +1,12 @@
 package nl.novi.bloomtrail.helper;
 
 import nl.novi.bloomtrail.exceptions.BadRequestException;
+import nl.novi.bloomtrail.exceptions.ForbiddenException;
 import nl.novi.bloomtrail.models.CoachingProgram;
 import nl.novi.bloomtrail.models.Session;
 import nl.novi.bloomtrail.models.Step;
+import nl.novi.bloomtrail.repositories.CoachingProgramRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,6 +17,9 @@ import java.util.List;
 
 @Service
 public class AccessValidator {
+
+    @Autowired
+    private CoachingProgramRepository coachingProgramRepository;
 
 
     public void validateAuthority(String authorityName) throws BadRequestException {
@@ -31,8 +37,7 @@ public class AccessValidator {
         return auth.getName();
     }
 
-
-    public void validateSelfCoachOrAdminAccess(String username, List<CoachingProgram> programs) {
+    public void validateSelfOrAffiliatedCoachOrAdminAccess(String username, List<CoachingProgram> programs) {
         String currentUsername = getAuthenticatedUsername();
         boolean isAdmin = isAdmin();
         boolean isSelf = currentUsername.equals(username);
@@ -40,10 +45,9 @@ public class AccessValidator {
                 .anyMatch(program -> program.getCoach().getUsername().equals(currentUsername));
 
         if (!isAdmin && !isSelf && !isCoach) {
-            throw new AccessDeniedException("You are not allowed to access this user's sessions.");
+            throw new AccessDeniedException("You are not allowed to access this user's coaching program.");
         }
     }
-
 
     public void validateCoachOrAdminAccess(Session session) {
         String username = getAuthenticatedUsername();
@@ -67,14 +71,6 @@ public class AccessValidator {
         }
     }
 
-    public boolean isAffiliatedUserOrAdmin(CoachingProgram program) {
-        String username = getAuthenticatedUsername();
-        boolean isAdmin = isAdmin();
-
-        return isAdmin ||
-                program.getCoach().getUsername().equals(username) ||
-                program.getClient().getUsername().equals(username);
-    }
     public void validateCoachOwnsProgramOrIsAdmin(CoachingProgram program) {
         String username = getAuthenticatedUsername();
         boolean isAdmin = isAdmin();
@@ -85,21 +81,7 @@ public class AccessValidator {
         }
     }
 
-    public void validateCoachOwnsClientOrSelfOrAdmin(String targetUsername, List<CoachingProgram> coachPrograms) {
-        String currentUsername = getAuthenticatedUsername();
-        boolean isAdmin = isAdmin();
-        boolean isSelf = currentUsername.equals(targetUsername);
-
-        boolean isClientOfCoach = coachPrograms.stream()
-                .anyMatch(program -> program.getClient().getUsername().equals(targetUsername));
-
-        if (!isAdmin && !isSelf && !isClientOfCoach) {
-            throw new AccessDeniedException("Access denied: You are not allowed to view this user's data.");
-        }
-    }
-
-
-    public void validateAffiliatedUserOrAdmin(CoachingProgram program) {
+    public void validateClientOrCoachOrAdminAccess(CoachingProgram program) {
         String username = getAuthenticatedUsername();
         boolean isAdmin = isAdmin();
 
@@ -112,15 +94,13 @@ public class AccessValidator {
         }
     }
 
-
-
     public void validateSelfOrAdminAccess(String targetUsername) {
         String username = getAuthenticatedUsername();
         boolean isAdmin = isAdmin();
         boolean isSelf = username.equals(targetUsername);
 
         if (!isAdmin && !isSelf) {
-            throw new AccessDeniedException("Access denied: You can only access your own data unless you're an admin.");
+            throw new ForbiddenException("Access denied: You can only access your own data unless you're an admin.");
         }
     }
 
@@ -157,6 +137,4 @@ public class AccessValidator {
         return getAuthOrThrow().getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("COACH"));
     }
-
-
 }

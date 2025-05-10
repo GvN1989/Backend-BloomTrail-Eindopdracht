@@ -1,6 +1,7 @@
 package nl.novi.bloomtrail.services;
 
 import nl.novi.bloomtrail.dtos.StrengthResultsInputDto;
+import nl.novi.bloomtrail.exceptions.BadRequestException;
 import nl.novi.bloomtrail.exceptions.NotFoundException;
 import nl.novi.bloomtrail.helper.AccessValidator;
 import nl.novi.bloomtrail.mappers.StrengthResultsMapper;
@@ -8,6 +9,8 @@ import nl.novi.bloomtrail.models.*;
 import nl.novi.bloomtrail.repositories.StrengthResultsRepository;
 import org.springframework.stereotype.Service;
 import nl.novi.bloomtrail.helper.ValidationHelper;
+
+import java.util.List;
 
 @Service
 public class StrengthResultsService {
@@ -34,7 +37,7 @@ public class StrengthResultsService {
 
 
         if (strengthResultsRepository.findByUser(user).isPresent()) {
-            throw new IllegalStateException("Strength results already exist for user: " + username);
+            throw new BadRequestException("Strength results already exist for user: " + username);
         }
 
         StrengthResults strengthResults = StrengthResultsMapper.toStrengthResultsEntity(inputDto, user);
@@ -57,9 +60,11 @@ public class StrengthResultsService {
 
     public void deleteStrengthResultsByUsername(String username) {
         User user = validationHelper.validateUser(username);
-        StrengthResults strengthResults = strengthResultsRepository.findByUser(user)
-                .orElseThrow(() -> new NotFoundException("No strength results found for user: " + username));
 
+        StrengthResults strengthResults = strengthResultsRepository.findByUser(user)
+                .orElseThrow(() -> {
+                    return new NotFoundException("No strength results found for user: " + username);
+                });
         strengthResultsRepository.delete(strengthResults);
     }
 

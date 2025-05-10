@@ -40,7 +40,7 @@ public class SessionService {
             throw new NotFoundException("The user with username " + username + " does not have any coaching programs");
         }
 
-        accessValidator.validateSelfCoachOrAdminAccess(username, programs);
+        accessValidator.validateSelfOrAffiliatedCoachOrAdminAccess(username, programs);
 
         List<Step> steps = programs.stream()
                 .flatMap(program -> program.getTimeline().stream())

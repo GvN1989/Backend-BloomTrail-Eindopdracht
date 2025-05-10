@@ -44,13 +44,13 @@ public class StepService {
     public Step findById(Long stepId) {
         Step step = validationHelper.validateStep(stepId);
         CoachingProgram program = step.getCoachingProgram();
-        accessValidator.validateAffiliatedUserOrAdmin(program);
+        accessValidator.validateClientOrCoachOrAdminAccess(program);
         return step;
     }
 
     public List<Step> getStepsForProgram(Long programId) {
         CoachingProgram program = validationHelper.validateCoachingProgram(programId);
-        accessValidator.validateAffiliatedUserOrAdmin(program);
+        accessValidator.validateClientOrCoachOrAdminAccess(program);
 
         List<Step> steps = stepRepository.findByCoachingProgram(program);
         if (steps.isEmpty()) {
@@ -126,7 +126,7 @@ public class StepService {
     public byte[] downloadFilesForStep(Long stepId) throws IOException {
         Step step = validationHelper.validateStep(stepId);
         CoachingProgram coachingProgram = step.getCoachingProgram();
-        accessValidator.validateAffiliatedUserOrAdmin(coachingProgram);
+        accessValidator.validateClientOrCoachOrAdminAccess(coachingProgram);
 
         return downloadService.downloadFilesForEntity(step);
     }

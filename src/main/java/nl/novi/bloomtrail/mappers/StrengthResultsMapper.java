@@ -14,6 +14,7 @@ public class StrengthResultsMapper {
         StrengthResultsDto dto = new StrengthResultsDto();
 
         dto.setResultsId(strengthResults.getResultsId());
+        dto.setUsername(strengthResults.getUser().getUsername());
         dto.setCreatedAt(strengthResults.getCreatedAt());
         dto.setUpdatedAt(strengthResults.getUpdatedAt());
         dto.setSummary(strengthResults.getSummary());

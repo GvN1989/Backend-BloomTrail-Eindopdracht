@@ -35,7 +35,7 @@ public class AssignmentService {
 
     public List<Assignment> getAssignmentsByStep(Long stepId) {
         Step step = validationHelper.validateStep(stepId);
-        accessValidator.validateAffiliatedUserOrAdmin(step.getCoachingProgram());
+        accessValidator.validateClientOrCoachOrAdminAccess(step.getCoachingProgram());
 
         return step.getAssignments();
     }
@@ -89,7 +89,7 @@ public class AssignmentService {
 
     public byte[] downloadAssignmentFiles(Long assignmentId) throws IOException {
         Assignment assignment = validationHelper.validateAssignment(assignmentId);
-        accessValidator.validateAffiliatedUserOrAdmin(assignment.getStep().getCoachingProgram());
+        accessValidator.validateClientOrCoachOrAdminAccess(assignment.getStep().getCoachingProgram());
 
         List<File> files = fileService.getUploadsForParentEntity(assignment);
 
