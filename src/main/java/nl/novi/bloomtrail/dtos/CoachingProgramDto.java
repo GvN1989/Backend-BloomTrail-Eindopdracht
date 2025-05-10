@@ -18,6 +18,8 @@ public class CoachingProgramDto {
     private List<StepDto> timeline;
     private String clientUsername;
     private String coachUsername;
+    private int stepCount;
+    private double progress;
 
     public Long getCoachingProgramId() {
         return coachingProgramId;
@@ -81,5 +83,21 @@ public class CoachingProgramDto {
 
     public void setCoachUsername(String coachUsername) {
         this.coachUsername = coachUsername;
+    }
+
+    public int getStepCount() {
+        return stepCount;
+    }
+
+    public void setStepCount(int stepCount) {
+        this.stepCount = stepCount;
+    }
+
+    public double getProgress() {
+        return progress;
+    }
+
+    public void setProgress(double progress) {
+        this.progress = progress;
     }
 }

@@ -34,9 +34,6 @@ public class CoachingProgram {
     @Temporal(TemporalType.DATE)
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
-
-    @Column(name = "progress", nullable = false)
-    private double progress = 0.0;
     @ManyToOne
     @JoinColumn(name = "client_id", nullable = false)
     private User client;
@@ -110,13 +107,5 @@ public class CoachingProgram {
 
     public void setCoach(User coach) {
         this.coach = coach;
-    }
-
-    public double getProgress() {
-        return progress;
-    }
-
-    public void setProgress(double progress) {
-        this.progress = progress;
     }
 }

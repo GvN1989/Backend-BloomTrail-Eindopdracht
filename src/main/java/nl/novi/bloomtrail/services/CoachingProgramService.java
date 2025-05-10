@@ -1,9 +1,9 @@
 package nl.novi.bloomtrail.services;
 
+import nl.novi.bloomtrail.dtos.CoachingProgramDto;
 import nl.novi.bloomtrail.dtos.CoachingProgramInputDto;
 import nl.novi.bloomtrail.dtos.CoachingProgramUpdateDto;
 import nl.novi.bloomtrail.dtos.SimpleCoachingProgramDto;
-import nl.novi.bloomtrail.exceptions.NotFoundException;
 import nl.novi.bloomtrail.helper.AccessValidator;
 import nl.novi.bloomtrail.mappers.CoachingProgramMapper;
 import nl.novi.bloomtrail.helper.ValidationHelper;
@@ -11,7 +11,6 @@ import nl.novi.bloomtrail.models.*;
 import nl.novi.bloomtrail.repositories.*;
 import org.springframework.stereotype.Service;
 import jakarta.validation.Valid;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDate;
@@ -23,44 +22,56 @@ import java.util.Objects;
 public class CoachingProgramService {
 
     private final CoachingProgramRepository coachingProgramRepository;
+
+    private final StepRepository stepRepository;
+
     private final ValidationHelper validationHelper;
 
     private final AccessValidator accessValidator;
 
-    public CoachingProgramService(CoachingProgramRepository coachingProgramRepository, ValidationHelper validationHelper, AccessValidator accessValidator) {
+    public CoachingProgramService(CoachingProgramRepository coachingProgramRepository, StepRepository stepRepository, ValidationHelper validationHelper, AccessValidator accessValidator) {
         this.coachingProgramRepository = coachingProgramRepository;
+        this.stepRepository = stepRepository;
         this.validationHelper = validationHelper;
         this.accessValidator = accessValidator;
     }
 
-    public List<CoachingProgram> findByCoachingProgramNameIgnoreCase(String coachingProgramName) {
-        return validationHelper.validateCoachingProgramName(coachingProgramName);
-    }
+    public CoachingProgramDto findById(Long coachingProgramId) {
+        CoachingProgram coachingProgram = validationHelper.validateCoachingProgram(coachingProgramId);
 
-    public CoachingProgram findById(Long coachingProgramId) {
-        return validationHelper.validateCoachingProgram(coachingProgramId);
+        return toDtoWithMetrics(coachingProgram);
     }
 
 
     public List<SimpleCoachingProgramDto> getCoachingProgramDetails() {
-        return coachingProgramRepository.findAllCoachingProgramDetails();
-    }
-
-    public List<CoachingProgram> getCoachingProgramsByUser(String username) {
-        if (username == null) {
-            throw new IllegalArgumentException("Username cannot be null");
-        }
-        List<CoachingProgram> programs = coachingProgramRepository.findByUserUsername(username);
+        List<CoachingProgram> programs = coachingProgramRepository.findAll();
 
         return programs.stream()
-                .filter(accessValidator::isAffiliatedUserOrAdmin)
+                .map(this::toSimpleDtoWithMetrics)
                 .toList();
     }
 
-    @Transactional
-    public CoachingProgram getCoachingProgramWithSteps(Long programId) {
-        return coachingProgramRepository.findByIdWithSteps(programId)
-                .orElseThrow(() -> new NotFoundException("Coaching program not found"));
+    public List<SimpleCoachingProgramDto> getCoachingProgramSummariesForCoach(String coachUsername) {
+        List<CoachingProgram> programs = coachingProgramRepository.findAllByCoach_Username(coachUsername);
+
+        return programs.stream()
+                .map(this::toSimpleDtoWithMetrics)
+                .toList();
+    }
+
+
+    public List<CoachingProgramDto> getCoachingProgramsByUser(String username) {
+        if (username == null) {
+            throw new IllegalArgumentException("Username cannot be null");
+        }
+
+        validationHelper.validateUser(username);
+
+        List<CoachingProgram> programs = coachingProgramRepository.findByUserUsername(username);
+
+        return programs.stream()
+                .map(this::toDtoWithMetrics)
+                .toList();
     }
 
     public CoachingProgram saveCoachingProgram(CoachingProgramInputDto inputDto) {
@@ -112,9 +123,8 @@ public class CoachingProgramService {
     }
 
 
-    public double calculateProgressPercentage(Long coachingProgramId) {
-        CoachingProgram coachingProgram = validationHelper.validateCoachingProgram(coachingProgramId);
-        accessValidator.validateCoachOwnsProgramOrIsAdmin(coachingProgram);
+    public double calculateProgressPercentage(CoachingProgram coachingProgram) {
+        accessValidator.validateAffiliatedUserOrAdmin(coachingProgram);
 
         List<Step> timeline = coachingProgram.getTimeline();
 
@@ -126,15 +136,20 @@ public class CoachingProgramService {
                 .filter(Step::getCompleted)
                 .count();
 
-        double progress = (double) completedSteps / timeline.size() * 100;
-        coachingProgram.setProgress(progress);
-        coachingProgramRepository.save(coachingProgram);
-
-        return progress;
+        return (double) completedSteps / timeline.size() * 100;
     }
 
+    public CoachingProgramDto toDtoWithMetrics(CoachingProgram program) {
+        int stepCount = stepRepository.countByCoachingProgram_CoachingProgramId(program.getCoachingProgramId());
+        double progress = calculateProgressPercentage(program);
+        return CoachingProgramMapper.toCoachingProgramDto(program, stepCount, progress);
+    }
 
-
+    public SimpleCoachingProgramDto toSimpleDtoWithMetrics(CoachingProgram program) {
+        int stepCount = stepRepository.countByCoachingProgram_CoachingProgramId(program.getCoachingProgramId());
+        double progress = calculateProgressPercentage(program);
+        return CoachingProgramMapper.toSimpleDto(program, stepCount, progress);
+    }
 
 
 }

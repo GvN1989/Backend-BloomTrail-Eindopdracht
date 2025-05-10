@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartException;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @RestControllerAdvice
@@ -42,11 +43,20 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Object> handleValidation(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(error ->
-                errors.put(error.getField(), error.getDefaultMessage())
+        String message = ex.getBindingResult().getFieldErrors().stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .collect(Collectors.joining("; "));
+
+        return ResponseEntity.badRequest().body(
+                ErrorResponseBuilder.build(400, message)
         );
-        return ResponseEntity.badRequest().body(errors);
+    }
+
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<Object> handleAccessDenied(org.springframework.security.access.AccessDeniedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                ErrorResponseBuilder.build(403, ex.getMessage())
+        );
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
@@ -59,7 +69,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<Object> handleUnreadableJson(HttpMessageNotReadableException ex) {
         return ResponseEntity.badRequest().body(
-                ErrorResponseBuilder.build(400, "Invalid request format: " + ex.getMostSpecificCause().getMessage())
+                ErrorResponseBuilder.build(400, "Invalid request format: Required fields may be missing or malformed.")
         );
     }
 
@@ -86,14 +96,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Object> handleIllegalArgument(IllegalArgumentException ex) {
         return ResponseEntity.badRequest().body(
-                ErrorResponseBuilder.build(400, ex.getMessage())
+                ErrorResponseBuilder.build(400, "Invalid argument provided.")
         );
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleGenericException(Exception ex) {
         return ResponseEntity.status(500).body(
-                ErrorResponseBuilder.build(500, "An unexpected error occurred: " + ex.getMessage())
+                ErrorResponseBuilder.build(500, "An unexpected error occurred.")
         );
     }
 }

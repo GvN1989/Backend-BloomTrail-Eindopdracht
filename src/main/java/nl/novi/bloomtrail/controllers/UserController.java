@@ -42,12 +42,18 @@ public class UserController {
         List<UserDto> userProfiles = userService.getUsers();
         return ResponseEntity.ok().body(userProfiles);
     }
+
+    @GetMapping("/clients")
+    public ResponseEntity<List<UserDto>> getMyClients() {
+        return ResponseEntity.ok(userService.getUsers());
+    }
+
     @GetMapping(value = "/{username}")
     public ResponseEntity<UserDto> getUser(@PathVariable("username") String username) {
         UserDto userDto = userService.getUser(username);
         return ResponseEntity.ok(userDto);
     }
-    @PostMapping(value = "/")
+    @PostMapping
     public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserInputDto dto) throws BadRequestException {
 
         String newUsername = userService.createUser(dto);
@@ -95,7 +101,9 @@ public class UserController {
 
     @GetMapping("/profile")
     public ResponseEntity<UserDto> getProfile(@AuthenticationPrincipal UserDetails userDetails) {
-        UserDto userDto = userService.getUser(userDetails.getUsername());
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserDto userDto = userService.getUser(username);
+
         return ResponseEntity.ok(userDto);
     }
     @PutMapping(value = "/{username}")

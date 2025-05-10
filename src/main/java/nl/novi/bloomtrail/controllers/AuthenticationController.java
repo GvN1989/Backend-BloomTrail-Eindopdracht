@@ -4,7 +4,6 @@ import nl.novi.bloomtrail.dtos.AuthenticatedUserDto;
 import nl.novi.bloomtrail.dtos.AuthenticationRequest;
 import nl.novi.bloomtrail.dtos.AuthenticationResponse;
 import nl.novi.bloomtrail.helper.ErrorResponseBuilder;
-import nl.novi.bloomtrail.helper.TokenBlackList;
 import nl.novi.bloomtrail.utils.JwtUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,12 +22,9 @@ public class AuthenticationController {
 
     private final JwtUtils jwtUtils;
 
-    private final TokenBlackList tokenBlackList;
-
-    public AuthenticationController(AuthenticationManager authenticationManager, JwtUtils jwtUtils, TokenBlackList tokenBlackList) {
+    public AuthenticationController(AuthenticationManager authenticationManager, JwtUtils jwtUtils) {
         this.authenticationManager = authenticationManager;
         this.jwtUtils = jwtUtils;
-        this.tokenBlackList = tokenBlackList;
     }
 
     @GetMapping(value = "/authenticated")
@@ -88,10 +84,6 @@ public class AuthenticationController {
         String token = authHeader !=null && authHeader.startsWith("Bearer ")
                 ? authHeader.substring(7)
                 : null;
-
-        if (token != null ) {
-            tokenBlackList.blacklist(token);
-        }
 
         String username = (authentication != null) ? authentication.getName() : null;
 

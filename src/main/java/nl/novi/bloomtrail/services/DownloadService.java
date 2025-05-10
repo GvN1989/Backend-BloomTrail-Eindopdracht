@@ -33,7 +33,7 @@ public class DownloadService {
         List<File> files = fileService.getUploadsForParentEntity(parentEntity);
 
         if (files.isEmpty()) {
-            throw new IllegalArgumentException("No files available for download for the given entity.");
+            return null;
         }
 
         return createZipFromFiles(files);
@@ -46,7 +46,7 @@ public class DownloadService {
 
             for (File file : files) {
                 byte[] fileData = fileService.readFileFromStorage(file.getUrl());
-                String fileName= "session_" + file.getFileId() + "_" +
+                String fileName= "assignment_" + file.getFileId() + "_" +
                         (file.getOriginalFilename() != null ? file.getOriginalFilename() : "file_" + file.getFileId());
 
                 ZipEntry zipEntry = new ZipEntry(fileName);

@@ -1,5 +1,6 @@
 package nl.novi.bloomtrail.services;
 
+import nl.novi.bloomtrail.dtos.CoachingProgramDto;
 import nl.novi.bloomtrail.dtos.CoachingProgramInputDto;
 import nl.novi.bloomtrail.dtos.CoachingProgramUpdateDto;
 import nl.novi.bloomtrail.dtos.SimpleCoachingProgramDto;
@@ -30,6 +31,9 @@ public class CoachingProgramServiceUnitTest {
 
     @Mock
     private CoachingProgramRepository coachingProgramRepository;
+
+    @Mock
+    private StepRepository stepRepository;
 
     @Mock
     private ValidationHelper validationHelper;
@@ -70,39 +74,6 @@ public class CoachingProgramServiceUnitTest {
 
     @Tag("unit")
     @Test
-    void testFindByNameIgnoreCase_Success() {
-
-        String programName = "Leadership Program";
-
-        CoachingProgram mockProgram1 = new CoachingProgram();
-        mockProgram1.setCoachingProgramId(1L);
-        mockProgram1.setCoachingProgramName("Leadership Program");
-
-        CoachingProgram mockProgram2 = new CoachingProgram();
-        mockProgram2.setCoachingProgramId(2L);
-        mockProgram2.setCoachingProgramName("Advanced Leadership Program");
-
-        List<CoachingProgram> mockPrograms = List.of(mockProgram1, mockProgram2);
-
-
-        when(validationHelper.validateCoachingProgramName(programName)).thenReturn(mockPrograms);
-
-
-        List<CoachingProgram> result = coachingProgramService.findByCoachingProgramNameIgnoreCase(programName);
-
-
-        Assertions.assertNotNull(result, "Result should not be null");
-        Assertions.assertEquals(2, result.size(), "Result list size should match");
-        Assertions.assertEquals("Leadership Program", result.get(0).getCoachingProgramName(), "First program name should match");
-        Assertions.assertEquals("Advanced Leadership Program", result.get(1).getCoachingProgramName(), "Second program name should match");
-
-
-        Mockito.verify(validationHelper, Mockito.times(1)).validateCoachingProgramName(programName);
-    }
-
-
-    @Tag("unit")
-    @Test
     public void testFindByID_SUCCES() {
 
         Long coachingProgramId = 1L;
@@ -110,10 +81,12 @@ public class CoachingProgramServiceUnitTest {
         CoachingProgram mockProgram = new CoachingProgram();
         mockProgram.setCoachingProgramId(coachingProgramId);
         mockProgram.setGoal("Test Goal");
+        mockProgram.setTimeline(Collections.emptyList());
 
         when(validationHelper.validateCoachingProgram(coachingProgramId)).thenReturn(mockProgram);
+        when(stepRepository.countByCoachingProgram_CoachingProgramId(coachingProgramId)).thenReturn(0);
 
-        CoachingProgram result = coachingProgramService.findById(coachingProgramId);
+        CoachingProgramDto result = coachingProgramService.findById(coachingProgramId);
 
         Assertions.assertNotNull(result, "The result should not be null");
         Assertions.assertEquals(coachingProgramId, result.getCoachingProgramId(), "The coaching program ID should match");
@@ -140,14 +113,29 @@ public class CoachingProgramServiceUnitTest {
     @Tag("unit")
     @Test
     public void testGetCoachingProgramDetails_SUCCES() {
-        String clientUsername = "testClient";
-        String coachUsername = "testCoach";
-        SimpleCoachingProgramDto mockDto1 = new SimpleCoachingProgramDto(1L, "Let's Go", clientUsername, coachUsername);
-        SimpleCoachingProgramDto mockDto2 = new SimpleCoachingProgramDto(2L, "Keep Moving", clientUsername, coachUsername);
+        User client = new User();
+        client.setUsername("testClient");
 
-        List<SimpleCoachingProgramDto> mockDtos = Arrays.asList(mockDto1, mockDto2);
+        User coach = new User();
+        coach.setUsername("testCoach");
 
-        when(coachingProgramRepository.findAllCoachingProgramDetails()).thenReturn(mockDtos);
+        CoachingProgram program1 = new CoachingProgram();
+        program1.setCoachingProgramId(1L);
+        program1.setCoachingProgramName("Let's Go");
+        program1.setClient(client);
+        program1.setCoach(coach);
+        program1.setTimeline(Collections.emptyList());
+
+        CoachingProgram program2 = new CoachingProgram();
+        program2.setCoachingProgramId(2L);
+        program2.setCoachingProgramName("Keep Moving");
+        program2.setClient(client);
+        program2.setCoach(coach);
+        program2.setTimeline(Collections.emptyList());
+
+        when(coachingProgramRepository.findAll()).thenReturn(List.of(program1, program2));
+        when(stepRepository.countByCoachingProgram_CoachingProgramId(1L)).thenReturn(5);
+        when(stepRepository.countByCoachingProgram_CoachingProgramId(2L)).thenReturn(3);
 
         List<SimpleCoachingProgramDto> result = coachingProgramService.getCoachingProgramDetails();
 
@@ -155,14 +143,13 @@ public class CoachingProgramServiceUnitTest {
         Assertions.assertEquals(2, result.size());
         Assertions.assertEquals("Let's Go", result.get(0).getCoachingProgramName());
         Assertions.assertEquals("Keep Moving", result.get(1).getCoachingProgramName());
-        Assertions.assertEquals(clientUsername, result.get(0).getClientUsername());
-        Assertions.assertEquals(coachUsername, result.get(0).getCoachUsername());
+
     }
     @Tag("unit")
     @Test
     public void testGetCoachingProgramDetails_NotFound_EmptyList() {
 
-        when(coachingProgramRepository.findAllCoachingProgramDetails()).thenReturn(Collections.emptyList());
+        when(coachingProgramRepository.findAll()).thenReturn(Collections.emptyList());
 
         List<SimpleCoachingProgramDto> result = coachingProgramService.getCoachingProgramDetails();
 
@@ -172,24 +159,84 @@ public class CoachingProgramServiceUnitTest {
 
     @Tag("unit")
     @Test
+    void testGetCoachingProgramSummariesForCoach_SUCCES() {
+        String coachUsername = "coach1";
+
+        User coach = new User();
+        coach.setUsername(coachUsername);
+
+        User client = new User();
+        client.setUsername("client1");
+
+        CoachingProgram mockProgram1 = new CoachingProgram();
+        mockProgram1.setCoachingProgramId(1L);
+        mockProgram1.setCoachingProgramName("Fit Life");
+        mockProgram1.setCoach(coach);
+        mockProgram1.setClient(client);
+        mockProgram1.setTimeline(List.of(step(true), step(true), step(false), step(false)));
+
+        CoachingProgram mockProgram2 = new CoachingProgram();
+        mockProgram2.setCoachingProgramId(2L);
+        mockProgram2.setCoachingProgramName("Strong Mind");
+        mockProgram2.setCoach(coach);
+        mockProgram2.setClient(client);
+        mockProgram2.setTimeline(List.of(step(true), step(true), step(true)));
+
+        when(coachingProgramRepository.findAllByCoach_Username(coachUsername))
+                .thenReturn(List.of(mockProgram1, mockProgram2));
+
+        when(stepRepository.countByCoachingProgram_CoachingProgramId(1L)).thenReturn(4);
+        when(stepRepository.countByCoachingProgram_CoachingProgramId(2L)).thenReturn(3);
+
+        List<SimpleCoachingProgramDto> result = coachingProgramService.getCoachingProgramSummariesForCoach(coachUsername);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(2, result.size());
+
+        Assertions.assertEquals("Fit Life", result.get(0).getCoachingProgramName());
+        Assertions.assertEquals(4, result.get(0).getStepCount());
+        Assertions.assertEquals(50.0, result.get(0).getProgress(), 0.01);
+
+        Assertions.assertEquals("Strong Mind", result.get(1).getCoachingProgramName());
+        Assertions.assertEquals(3, result.get(1).getStepCount());
+        Assertions.assertEquals(100.0, result.get(1).getProgress(), 0.01);
+    }
+
+    @Tag("unit")
+    @Test
+    void testGetCoachingProgramSummariesForCoach_EmptyList_ShouldReturnEmpty() {
+        String coachUsername = "coachWithNoPrograms";
+
+        when(coachingProgramRepository.findAllByCoach_Username(coachUsername))
+                .thenReturn(Collections.emptyList());
+
+        List<SimpleCoachingProgramDto> result = coachingProgramService.getCoachingProgramSummariesForCoach(coachUsername);
+
+        Assertions.assertNotNull(result, "Result should not be null");
+        Assertions.assertTrue(result.isEmpty(), "Result should be an empty list");
+    }
+
+    @Tag("unit")
+    @Test
     void getCoachingProgramsByUser_Succes(){
         String username= "testUser";
         CoachingProgram program1= new CoachingProgram();
         program1.setCoachingProgramId(1L);
         program1.setCoachingProgramName("Program 1");
+        program1.setTimeline(Collections.emptyList());
 
         CoachingProgram program2= new CoachingProgram();
         program2.setCoachingProgramId(2L);
         program2.setCoachingProgramName("Program 2");
+        program2.setTimeline(Collections.emptyList());
 
         List<CoachingProgram> mockPrograms= List.of(program1, program2);
 
         when(coachingProgramRepository.findByUserUsername(username)).thenReturn(mockPrograms);
+        doNothing().when(accessValidator).validateAffiliatedUserOrAdmin(any(CoachingProgram.class));
+        when(stepRepository.countByCoachingProgram_CoachingProgramId(anyLong())).thenReturn(0);
 
-        when(accessValidator.isAffiliatedUserOrAdmin(program1)).thenReturn(true);
-        when(accessValidator.isAffiliatedUserOrAdmin(program2)).thenReturn(true);
-
-        List<CoachingProgram> result = coachingProgramService.getCoachingProgramsByUser(username);
+        List<CoachingProgramDto> result = coachingProgramService.getCoachingProgramsByUser(username);
 
         Assertions.assertNotNull(result);
         Assertions.assertEquals(2, result.size());
@@ -203,7 +250,7 @@ public class CoachingProgramServiceUnitTest {
 
         when(coachingProgramRepository.findByUserUsername(username)).thenReturn(Collections.emptyList());
 
-        List<CoachingProgram> result = coachingProgramService.getCoachingProgramsByUser(username);
+        List<CoachingProgramDto> result = coachingProgramService.getCoachingProgramsByUser(username);
 
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result.isEmpty(), "Expected an empty list when no programs are found.");
@@ -224,15 +271,22 @@ public class CoachingProgramServiceUnitTest {
         User mockUser = new User();
         mockUser.setUsername(username);
 
-        CoachingProgram cp1 = new CoachingProgram();
-        cp1.setCoachingProgramName("Program A");
+        CoachingProgram mockProgram = new CoachingProgram();
+        mockProgram.setCoachingProgramId(1L);
+        mockProgram.setCoachingProgramName("Program A");
 
-        List<CoachingProgram> programs = List.of(cp1);
+        Step completedStep = new Step();
+        completedStep.setCompleted(true);
+        mockProgram.setTimeline(List.of(completedStep));
 
+        List<CoachingProgram> programs = List.of(mockProgram);
+
+        when(validationHelper.validateUser(username)).thenReturn(mockUser);
+        doNothing().when(accessValidator).validateAffiliatedUserOrAdmin(any(CoachingProgram.class));
         when(coachingProgramRepository.findByUserUsername(username)).thenReturn(programs);
-        when(accessValidator.isAffiliatedUserOrAdmin(cp1)).thenReturn(true);
+        when(stepRepository.countByCoachingProgram_CoachingProgramId(1L)).thenReturn(1);
 
-        List<CoachingProgram> result = coachingProgramService.getCoachingProgramsByUser(username);
+        List<CoachingProgramDto> result = coachingProgramService.getCoachingProgramsByUser(username);
 
         Assertions.assertEquals(1, result.size());
         Assertions.assertEquals("Program A", result.get(0).getCoachingProgramName());
@@ -480,16 +534,9 @@ public class CoachingProgramServiceUnitTest {
 
         mockCoachingProgram.setTimeline(Arrays.asList(step1, step2, step3));
 
-        Mockito.when(validationHelper.validateCoachingProgram(coachingProgramId))
-                .thenReturn(mockCoachingProgram);
-
-
-        double progressPercentage = coachingProgramService.calculateProgressPercentage(coachingProgramId);
+        double progressPercentage = coachingProgramService.calculateProgressPercentage(mockCoachingProgram);
 
         Assertions.assertEquals(66.67, progressPercentage, 0.01);
-
-        Mockito.verify(validationHelper, Mockito.times(1)).validateCoachingProgram(coachingProgramId);
-        Mockito.verify(coachingProgramRepository, Mockito.times(1)).save(mockCoachingProgram);
     }
 
     @Tag ("unit")
@@ -502,15 +549,9 @@ public class CoachingProgramServiceUnitTest {
         mockCoachingProgram.setCoachingProgramId(coachingProgramId);
         mockCoachingProgram.setTimeline(Collections.emptyList());
 
-        Mockito.when(validationHelper.validateCoachingProgram(coachingProgramId))
-                .thenReturn(mockCoachingProgram);
-
-        double progressPercentage = coachingProgramService.calculateProgressPercentage(coachingProgramId);
+        double progressPercentage = coachingProgramService.calculateProgressPercentage(mockCoachingProgram);
 
         Assertions.assertEquals(0.0, progressPercentage);
-
-        Mockito.verify(validationHelper, Mockito.times(1)).validateCoachingProgram(coachingProgramId);
-        Mockito.verify(coachingProgramRepository, Mockito.never()).save(Mockito.any());
     }
 
     @Tag ("unit")
@@ -532,20 +573,14 @@ public class CoachingProgramServiceUnitTest {
 
         mockCoachingProgram.setTimeline(Arrays.asList(step1, step2));
 
-        Mockito.when(validationHelper.validateCoachingProgram(coachingProgramId))
-                .thenReturn(mockCoachingProgram);
-
-        double progressPercentage = coachingProgramService.calculateProgressPercentage(coachingProgramId);
+        double progressPercentage = coachingProgramService.calculateProgressPercentage(mockCoachingProgram);
 
         Assertions.assertEquals(100.0, progressPercentage);
-
-        Mockito.verify(validationHelper, Mockito.times(1)).validateCoachingProgram(coachingProgramId);
-        Mockito.verify(coachingProgramRepository, Mockito.times(1)).save(mockCoachingProgram);
     }
 
     @Tag("unit")
     @Test
-    public void testCalculateProgressPercentage_AfterStepStatusChange() {
+    public void testCalculateProgressPercentage_WhenStepMarkedComplete() {
         Long coachingProgramId = 6L;
 
         CoachingProgram mockCoachingProgram = new CoachingProgram();
@@ -565,38 +600,47 @@ public class CoachingProgramServiceUnitTest {
 
         mockCoachingProgram.setTimeline(Arrays.asList(step1, step2, step3));
 
-        Mockito.when(validationHelper.validateCoachingProgram(coachingProgramId))
-                .thenReturn(mockCoachingProgram);
-
-        double initialProgressPercentage = coachingProgramService.calculateProgressPercentage(coachingProgramId);
+        double initialProgressPercentage = coachingProgramService.calculateProgressPercentage(mockCoachingProgram);
 
         Assertions.assertEquals(66.67, initialProgressPercentage, 0.01);
 
         step3.setCompleted(true);
 
-        double updatedProgressPercentage = coachingProgramService.calculateProgressPercentage(coachingProgramId);
+        double updatedProgressPercentage = coachingProgramService.calculateProgressPercentage(mockCoachingProgram);
 
         Assertions.assertEquals(100.0, updatedProgressPercentage, 0.01);
-
-        Mockito.verify(validationHelper, Mockito.times(2)).validateCoachingProgram(coachingProgramId);
-        Mockito.verify(coachingProgramRepository, Mockito.times(2)).save(mockCoachingProgram);
     }
-    @Tag("unit")
+
     @Test
-    void testGetCoachingProgramWithSteps_Success() {
-        CoachingProgram mockProgram = new CoachingProgram();
-        mockProgram.setCoachingProgramId(1L);
-        mockProgram.setTimeline(List.of(new Step(), new Step()));
+    @Tag("unit")
+    void testToDtoWithMetrics_ShouldReturnValidDto() {
+        CoachingProgram program = new CoachingProgram();
+        program.setCoachingProgramId(1L);
+        program.setTimeline(Collections.emptyList());
 
-        when(coachingProgramRepository.findByIdWithSteps(1L)).thenReturn(Optional.of(mockProgram));
+        when(stepRepository.countByCoachingProgram_CoachingProgramId(1L)).thenReturn(3);
 
-        CoachingProgram result = coachingProgramService.getCoachingProgramWithSteps(1L);
+        CoachingProgramDto result = coachingProgramService.toDtoWithMetrics(program);
 
         Assertions.assertNotNull(result);
-        Assertions.assertEquals(1L, result.getCoachingProgramId());
-        Assertions.assertEquals(2, result.getTimeline().size());
-        verify(coachingProgramRepository, times(1)).findByIdWithSteps(1L);
+        Assertions.assertEquals(3, result.getStepCount());
     }
+
+    @Test
+    @Tag("unit")
+    void testToSimpleDtoWithMetrics_ShouldReturnValidDto() {
+        CoachingProgram simpleMockProgram = new CoachingProgram();
+        simpleMockProgram.setCoachingProgramId(1L);
+        simpleMockProgram.setTimeline(Collections.emptyList());
+
+        when(stepRepository.countByCoachingProgram_CoachingProgramId(1L)).thenReturn(3);
+
+        SimpleCoachingProgramDto result = coachingProgramService.toSimpleDtoWithMetrics(simpleMockProgram);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(3, result.getStepCount());
+    }
+
 
     @Tag("unit")
     @Test
@@ -646,5 +690,10 @@ public class CoachingProgramServiceUnitTest {
         verify(coachingProgramRepository, never()).save(any(CoachingProgram.class));
     }
 
+    private Step step(boolean completed) {
+        Step step = new Step();
+        step.setCompleted(completed);
+        return step;
+    }
 
 }

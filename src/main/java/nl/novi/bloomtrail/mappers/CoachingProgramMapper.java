@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 public class CoachingProgramMapper {
 
-    public static CoachingProgramDto toCoachingProgramDto(CoachingProgram coachingProgram) {
+    public static CoachingProgramDto toCoachingProgramDto(CoachingProgram coachingProgram, int stepCount, double progress) {
         CoachingProgramDto dto = new CoachingProgramDto();
 
         dto.setCoachingProgramId(coachingProgram.getCoachingProgramId());
@@ -23,6 +23,9 @@ public class CoachingProgramMapper {
         dto.setEndDate(coachingProgram.getEndDate());
         dto.setClientUsername(coachingProgram.getClient() != null ? coachingProgram.getClient().getUsername() : null);
         dto.setCoachUsername(coachingProgram.getCoach() != null ? coachingProgram.getCoach().getUsername() : null);
+
+        dto.setStepCount(stepCount);
+        dto.setProgress(progress);
 
         if (coachingProgram.getTimeline() != null) {
             dto.setTimeline(
@@ -37,12 +40,15 @@ public class CoachingProgramMapper {
         return dto;
     }
 
-    public static SimpleCoachingProgramDto toSimpleDto(CoachingProgram program) {
+    public static SimpleCoachingProgramDto toSimpleDto(CoachingProgram program, int stepCount, double progress) {
         return new SimpleCoachingProgramDto(
                 program.getCoachingProgramId(),
                 program.getCoachingProgramName(),
                 program.getClient() != null ? program.getClient().getUsername() : null,
-                program.getCoach() != null ? program.getCoach().getUsername() : null
+                program.getCoach() != null ? program.getCoach().getUsername() : null,
+                stepCount,
+                progress
+
         );
     }
 

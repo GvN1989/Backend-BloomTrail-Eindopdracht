@@ -82,6 +82,9 @@ public class SessionController {
     @GetMapping("/{id}/download-zip")
     public ResponseEntity<byte[]> downloadFilesForSession(@PathVariable ("id") Long sessionId) throws IOException {
         byte[] zipData = sessionService.downloadFilesForSession(sessionId);
+        if (zipData == null || zipData.length == 0) {
+            return ResponseEntity.noContent().build();
+        }
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);

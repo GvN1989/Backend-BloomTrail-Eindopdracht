@@ -44,6 +44,7 @@ public class AccessValidator {
         }
     }
 
+
     public void validateCoachOrAdminAccess(Session session) {
         String username = getAuthenticatedUsername();
         boolean isAdmin = isAdmin();
@@ -84,9 +85,24 @@ public class AccessValidator {
         }
     }
 
+    public void validateCoachOwnsClientOrSelfOrAdmin(String targetUsername, List<CoachingProgram> coachPrograms) {
+        String currentUsername = getAuthenticatedUsername();
+        boolean isAdmin = isAdmin();
+        boolean isSelf = currentUsername.equals(targetUsername);
+
+        boolean isClientOfCoach = coachPrograms.stream()
+                .anyMatch(program -> program.getClient().getUsername().equals(targetUsername));
+
+        if (!isAdmin && !isSelf && !isClientOfCoach) {
+            throw new AccessDeniedException("Access denied: You are not allowed to view this user's data.");
+        }
+    }
+
+
     public void validateAffiliatedUserOrAdmin(CoachingProgram program) {
         String username = getAuthenticatedUsername();
         boolean isAdmin = isAdmin();
+
 
         boolean isCoach = program.getCoach().getUsername().equals(username);
         boolean isClient = program.getClient().getUsername().equals(username);
@@ -95,6 +111,8 @@ public class AccessValidator {
             throw new AccessDeniedException("Access denied: You are not affiliated with this coaching program.");
         }
     }
+
+
 
     public void validateSelfOrAdminAccess(String targetUsername) {
         String username = getAuthenticatedUsername();
@@ -130,9 +148,14 @@ public class AccessValidator {
         return getAuthOrThrow().getName();
     }
 
-    private boolean isAdmin() {
+    public boolean isAdmin() {
         return getAuthOrThrow().getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+                .anyMatch(a -> a.getAuthority().equals("ADMIN"));
+    }
+
+    public boolean isCoach() {
+        return getAuthOrThrow().getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("COACH"));
     }
 
 

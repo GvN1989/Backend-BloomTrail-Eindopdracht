@@ -14,6 +14,7 @@ import nl.novi.bloomtrail.repositories.CoachingProgramRepository;
 import nl.novi.bloomtrail.repositories.StepRepository;
 import nl.novi.bloomtrail.helper.ValidationHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -47,7 +48,7 @@ public class StepService {
         return step;
     }
 
-    public List<Step> getStepsForUserAndProgram(String username, Long programId) {
+    public List<Step> getStepsForProgram(Long programId) {
         CoachingProgram program = validationHelper.validateCoachingProgram(programId);
         accessValidator.validateAffiliatedUserOrAdmin(program);
 
@@ -57,19 +58,23 @@ public class StepService {
         }
         return steps;
     }
-
+    @Transactional
     public List<Step> addStepsToProgram(List<StepInputDto> inputDtos) {
 
         if (inputDtos == null || inputDtos.isEmpty()) {
             throw new BadRequestException("Step input list must not be empty.");
         }
 
-        List<Step> savedSteps = new ArrayList<>();
 
+        List<Step> savedSteps = new ArrayList<>();
         Long coachingProgramId = inputDtos.get(0).getCoachingProgramId();
+
         CoachingProgram coachingProgram = validationHelper.validateCoachingProgram(coachingProgramId);
 
+        accessValidator.validateCoachOwnsProgramOrIsAdmin(coachingProgram);
+
         for (StepInputDto inputDto : inputDtos) {
+
             validationHelper.validateStepCreationInput(inputDto);
 
             List<Session> sessions = (inputDto.getSessionIds() != null) ? validationHelper.validateSessions(inputDto.getSessionIds()) : new ArrayList<>();
@@ -111,16 +116,18 @@ public class StepService {
 
     public void deleteStep(Long stepId) {
         Step step = validationHelper.validateStep(stepId);
-
         CoachingProgram coachingProgram = step.getCoachingProgram();
-        if (coachingProgram != null) {
-            coachingProgramService.updateProgramEndDate(coachingProgram.getCoachingProgramId());
-        }
+        accessValidator.validateCoachOwnsProgramOrIsAdmin(coachingProgram);
+
+        coachingProgramService.updateProgramEndDate(coachingProgram.getCoachingProgramId());
         stepRepository.delete(step);
     }
 
     public byte[] downloadFilesForStep(Long stepId) throws IOException {
         Step step = validationHelper.validateStep(stepId);
+        CoachingProgram coachingProgram = step.getCoachingProgram();
+        accessValidator.validateAffiliatedUserOrAdmin(coachingProgram);
+
         return downloadService.downloadFilesForEntity(step);
     }
 

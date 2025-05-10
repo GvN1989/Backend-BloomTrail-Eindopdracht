@@ -9,7 +9,6 @@ import nl.novi.bloomtrail.helper.ValidationHelper;
 import nl.novi.bloomtrail.models.*;
 import nl.novi.bloomtrail.repositories.CoachingProgramRepository;
 import nl.novi.bloomtrail.repositories.StepRepository;
-import nl.novi.bloomtrail.repositories.UserRepository;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,15 +18,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -117,22 +113,12 @@ public class StepServiceUnitTest {
     }
     @Tag("unit")
     @Test
-    void testReturnsStepsLinkedToUserAndProgram() {
+    void testReturnsStepsLinkedToProgram() {
 
-        String username = "testuser";
         Long programId = 1L;
-
-        User coach = new User();
-        coach.setUsername("coach1");
-
-        User client = new User();
-        client.setUsername(username);
-
 
         CoachingProgram mockProgram = new CoachingProgram();
         mockProgram.setCoachingProgramId(programId);
-        mockProgram.setCoach(coach);
-        mockProgram.setClient(client);
 
         Step mockStep = new Step();
         mockStep.setStepId(1L);
@@ -143,29 +129,16 @@ public class StepServiceUnitTest {
         doNothing().when(accessValidator).validateAffiliatedUserOrAdmin(mockProgram);
         when(stepRepository.findByCoachingProgram(mockProgram)).thenReturn(List.of(mockStep));
 
-        List<Step> result = stepService.getStepsForUserAndProgram(username, programId);
+        List<Step> result = stepService.getStepsForProgram(programId);
 
         assertEquals(1, result.size());
         assertEquals("Step 1", result.get(0).getStepName());
     }
 
-    @Tag("unit")
-    @Test
-    void throwsNotFound_whenProgramNotFoundForUser() {
-        String username = "ghost";
-        Long programId = 99L;
-
-        when(validationHelper.validateCoachingProgram(programId))
-                .thenThrow(new NotFoundException("Program not found"));
-
-        Assertions.assertThrows(NotFoundException.class, () ->
-                stepService.getStepsForUserAndProgram(username, programId));
-    }
 
     @Tag("unit")
     @Test
     void throwsNotFound_whenNoStepsExistForProgram() {
-        String username = "testuser";
         Long programId = 1L;
 
         CoachingProgram mockProgram = new CoachingProgram();
@@ -176,7 +149,7 @@ public class StepServiceUnitTest {
         when(stepRepository.findByCoachingProgram(mockProgram)).thenReturn(List.of());
 
         Assertions.assertThrows(NotFoundException.class, () ->
-                stepService.getStepsForUserAndProgram(username, programId));
+                stepService.getStepsForProgram(programId));
     }
 
 

@@ -43,7 +43,6 @@ CREATE TABLE IF NOT EXISTS coaching_programs (
                                                  goal TEXT,
                                                  start_date DATE NOT NULL,
                                                  end_date DATE NOT NULL,
-                                                 progress DOUBLE PRECISION DEFAULT 0.0,
                                                  client_id VARCHAR(50) NOT NULL,
                                                  coach_id VARCHAR(50) NOT NULL,
                                                  FOREIGN KEY (client_id) REFERENCES users(username),
@@ -51,10 +50,10 @@ CREATE TABLE IF NOT EXISTS coaching_programs (
 );
 
 
-INSERT INTO coaching_programs (coaching_program_name, goal, start_date, end_date, progress, client_id, coach_id)
+INSERT INTO coaching_programs (coaching_program_name, goal, start_date, end_date, client_id, coach_id)
 VALUES
-    ('Strengths-Based Personal Growth', 'Develop self-awareness and leverage natural talents', '01-04-2024', '01-10-2024', 0.0, 'diana', 'henk'),
-    ('Leadership & Influence Mastery', 'Build leadership skills and effectively influence others', '15-03-2024', '15-09-2024', 0.0, 'charlie', 'alice');
+    ('Strengths-Based Personal Growth', 'Develop self-awareness and leverage natural talents', '01-04-2024', '01-10-2024', 'diana', 'henk'),
+    ('Leadership & Influence Mastery', 'Build leadership skills and effectively influence others', '15-03-2024', '15-09-2024', 'charlie', 'alice');
 
 CREATE TABLE IF NOT EXISTS steps (
                                      step_id SERIAL PRIMARY KEY,
@@ -70,7 +69,7 @@ CREATE TABLE IF NOT EXISTS steps (
 
 INSERT INTO steps (step_name, step_start_date, step_end_date, step_status, step_goal, sequence, coaching_program_id)
 VALUES
-    ('Discovering Your Strengths', '01-04-2024', '07-04-2024', false, 'Complete StrengthsFinder assessment to identify top strengths', 1, 1),
+    ('Discovering Your Strengths', '01-04-2024', '07-04-2024', true, 'Complete StrengthsFinder assessment to identify top strengths', 1, 1),
     ('Understanding Talent Themes', '08-04-2024', '14-04-2024', false, 'Deep dive into individual talent themes and their impact', 2, 1),
     ('Applying Strengths to Daily Life', '15-04-2024', '21-04-2024', false, 'Use strengths to solve problems and make decisions', 3, 1),
     ('Overcoming Weaknesses Through Strengths', '22-04-2024', '28-04-2024', false, 'Learn how to manage weaknesses by leaning into strengths', 4, 1),
@@ -79,10 +78,10 @@ VALUES
 
 INSERT INTO steps (step_name, step_start_date, step_end_date, step_status, step_goal, sequence, coaching_program_id)
 VALUES
-    ('Understanding Strengths-Based Leadership', '15-03-2024', '21-03-2024', false, 'Identify leadership style based on strengths', 1, 2),
-    ('Building Effective Communication Skills', '22-03-2024', '28-03-2024', false, 'Develop influence through communication techniques', 2, 2),
-    ('Leading with Emotional Intelligence', '01-04-2024', '07-04-2024', false, 'Apply emotional intelligence to lead teams effectively', 3, 2),
-    ('Strengths-Based Decision Making', '08-04-2024', '14-04-2024', false, 'Use strengths to make confident and impactful decisions', 4, 2),
+    ('Understanding Strengths-Based Leadership', '15-03-2024', '21-03-2024', true, 'Identify leadership style based on strengths', 1, 2),
+    ('Building Effective Communication Skills', '22-03-2024', '28-03-2024', true, 'Develop influence through communication techniques', 2, 2),
+    ('Leading with Emotional Intelligence', '01-04-2024', '07-04-2024', true, 'Apply emotional intelligence to lead teams effectively', 3, 2),
+    ('Strengths-Based Decision Making', '08-04-2024', '14-04-2024', true, 'Use strengths to make confident and impactful decisions', 4, 2),
     ('Sustaining Leadership Growth', '15-04-2024', '21-04-2024', false, 'Create a plan for continuous leadership development', 5, 2);
 
 CREATE TABLE IF NOT EXISTS sessions (

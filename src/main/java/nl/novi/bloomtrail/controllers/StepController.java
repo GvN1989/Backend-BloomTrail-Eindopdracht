@@ -3,6 +3,8 @@ package nl.novi.bloomtrail.controllers;
 import jakarta.validation.Valid;
 import nl.novi.bloomtrail.dtos.StepDto;
 import nl.novi.bloomtrail.dtos.StepInputDto;
+import nl.novi.bloomtrail.helper.AccessValidator;
+import nl.novi.bloomtrail.helper.ValidationHelper;
 import nl.novi.bloomtrail.mappers.StepMapper;
 import nl.novi.bloomtrail.models.Step;
 import nl.novi.bloomtrail.services.StepService;
@@ -21,8 +23,14 @@ public class StepController {
 
     private final StepService stepService;
 
-    public StepController(StepService stepService) {
+    private final ValidationHelper validationHelper;
+
+    private final AccessValidator accessValidator;
+
+    public StepController(StepService stepService, ValidationHelper validationHelper, AccessValidator accessValidator) {
         this.stepService = stepService;
+        this.validationHelper = validationHelper;
+        this.accessValidator = accessValidator;
     }
 
     @GetMapping("/{id}")
@@ -31,19 +39,36 @@ public class StepController {
         return ResponseEntity.ok(StepMapper.toStepDto(step));
     }
 
-    @GetMapping("/steps/{username}/{programId}")
-    public ResponseEntity<List<StepDto>> getStepsForProgram(
-            @PathVariable String username,
-            @PathVariable Long programId
-    ) {
-        List<Step> steps = stepService.getStepsForUserAndProgram(username, programId);
-        List<StepDto> response = steps.stream()
-                .sorted(Comparator.comparingInt(Step::getSequence))
-                .map(StepMapper::toStepDto)
-                .toList();
-        return ResponseEntity.ok(response);
+    @PutMapping("/{id}")
+    public ResponseEntity <StepDto> updateStepDetails (@PathVariable("id") Long stepId, @RequestBody StepInputDto inputDto) {
+        Step updatedStep = stepService.updateStepDetails(stepId, inputDto);
+        StepDto updatedStepDto = StepMapper.toStepDto(updatedStep);
+        return ResponseEntity.ok().body(updatedStepDto);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity <Void> deleteStep(@PathVariable("id") Long stepId) {
+        stepService.deleteStep(stepId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/download-zip")
+    public ResponseEntity<byte[]> downloadFilesForStep(@PathVariable("id") Long stepId) throws IOException {
+        byte[] zipData = stepService.downloadFilesForStep(stepId);
+        if (zipData == null || zipData.length == 0) {
+            return ResponseEntity.noContent().build();
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        headers.setContentDisposition(ContentDisposition.attachment()
+                .filename("step_files_" + stepId + ".zip")
+                .build());
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(zipData);
+    }
     @PostMapping("/{programId}/step")
     public ResponseEntity<List<StepDto>> addStepsToProgram(
             @PathVariable Long programId,
@@ -65,7 +90,7 @@ public class StepController {
     @PostMapping("/{programId}/steps-batch")
     public ResponseEntity<List<StepDto>> addStepsToProgramBatch(
             @PathVariable Long programId,
-            @Valid @RequestBody List<StepInputDto> inputDtos) {
+            @RequestBody @Valid  List<@Valid StepInputDto> inputDtos) {
 
         inputDtos.forEach(dto -> dto.setCoachingProgramId(programId));
 
@@ -76,33 +101,16 @@ public class StepController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-
-    @PutMapping("/{id}")
-    public ResponseEntity <StepDto> updateStepDetails (@PathVariable("id") Long stepId, @RequestBody StepInputDto inputDto) {
-        Step updatedStep = stepService.updateStepDetails(stepId, inputDto);
-        StepDto updatedStepDto = StepMapper.toStepDto(updatedStep);
-        return ResponseEntity.ok().body(updatedStepDto);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity <Void> deleteStep(@PathVariable("id") Long stepId) {
-        stepService.deleteStep(stepId);
-        return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/{id}/download-zip")
-    public ResponseEntity<byte[]> downloadFilesForStep(@PathVariable("id") Long stepId) throws IOException {
-        byte[] zipData = stepService.downloadFilesForStep(stepId);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        headers.setContentDisposition(ContentDisposition.attachment()
-                .filename("step_files_" + stepId + ".zip")
-                .build());
-
-        return ResponseEntity.ok()
-                .headers(headers)
-                .body(zipData);
+    @GetMapping("/coaching-program/{programId}/steps")
+    public ResponseEntity<List<StepDto>> getStepsForProgram(
+            @PathVariable Long programId
+    ) {
+        List<Step> steps = stepService.getStepsForProgram(programId);
+        List<StepDto> response = steps.stream()
+                .sorted(Comparator.comparingInt(Step::getSequence))
+                .map(StepMapper::toStepDto)
+                .toList();
+        return ResponseEntity.ok(response);
     }
 
 }
