@@ -95,6 +95,8 @@ public class SpringSecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/session/{id}/coach-notes").hasAnyAuthority("ADMIN","COACH")
                         .requestMatchers(HttpMethod.GET, "/session/{id}/download-zip").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/session/{id}").hasAnyAuthority("ADMIN","COACH")
+                        .requestMatchers(HttpMethod.DELETE, "/session/{id}/coach-notes-files").hasAnyAuthority("ADMIN","COACH")
+                        .requestMatchers(HttpMethod.DELETE, "/session/{id}/client-reflection-files").hasAnyAuthority("ADMIN","USER")
 
                         .requestMatchers(HttpMethod.GET, "/strength-results/me").authenticated()
                         .requestMatchers(HttpMethod.GET, "/strength-results/user/{username}").hasAnyAuthority("ADMIN", "COACH")

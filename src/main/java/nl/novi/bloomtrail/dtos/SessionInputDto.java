@@ -35,7 +35,7 @@ public class SessionInputDto {
     @Future
     private LocalDateTime updatedAt;
     private SessionInsightInputDto sessionInsight;
-    private Long StepId;
+    private Long stepId;
 
     public Long getSessionId() {
         return sessionId;
@@ -118,11 +118,11 @@ public class SessionInputDto {
     }
 
     public Long getStepId() {
-        return StepId;
+        return stepId;
     }
 
     public void setStepId(Long stepId) {
-        StepId = stepId;
+        this.stepId = stepId;
     }
 
     public SessionInsightInputDto getSessionInsight() {

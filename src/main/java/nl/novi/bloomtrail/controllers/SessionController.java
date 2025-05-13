@@ -97,4 +97,16 @@ public class SessionController {
                 .body(zipData);
     }
 
+    @DeleteMapping("/{id}/client-reflections-files")
+    public ResponseEntity<Void> deleteClientReflections(@PathVariable Long id) {
+        sessionInsightService.deleteClientReflectionFiles(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{id}/coach-notes-files")
+    public ResponseEntity<Void> deleteCoachNotes(@PathVariable Long id) {
+        sessionInsightService.deleteCoachNotesFiles(id);
+        return ResponseEntity.noContent().build();
+    }
+
 }

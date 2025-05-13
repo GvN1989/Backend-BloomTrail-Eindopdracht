@@ -8,6 +8,7 @@ import nl.novi.bloomtrail.mappers.SessionMapper;
 import nl.novi.bloomtrail.models.*;
 import nl.novi.bloomtrail.repositories.CoachingProgramRepository;
 import nl.novi.bloomtrail.repositories.SessionRepository;
+import nl.novi.bloomtrail.repositories.StepRepository;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -18,13 +19,15 @@ import java.util.stream.Collectors;
 public class SessionService {
 
     private final SessionRepository sessionRepository;
+    private final StepRepository stepRepository;
     private final CoachingProgramRepository coachingProgramRepository;
     private final ValidationHelper validationHelper;
     private final AccessValidator accessValidator;
     private final DownloadService downloadService;
 
-    public SessionService(SessionRepository sessionRepository, CoachingProgramRepository coachingProgramRepository, ValidationHelper validationHelper, AccessValidator accessValidator, DownloadService downloadService) {
+    public SessionService(SessionRepository sessionRepository, StepRepository stepRepository, CoachingProgramRepository coachingProgramRepository, ValidationHelper validationHelper, AccessValidator accessValidator, DownloadService downloadService) {
         this.sessionRepository = sessionRepository;
+        this.stepRepository = stepRepository;
         this.coachingProgramRepository = coachingProgramRepository;
         this.validationHelper = validationHelper;
         this.accessValidator = accessValidator;
@@ -57,10 +60,14 @@ public class SessionService {
 
     public Session createSessionAndAddToStep(SessionInputDto inputDto) {
         Step step = validationHelper.validateStep(inputDto.getStepId());
+        validationHelper.validateStepBelongsToClient(step, inputDto.getClient());
 
         Session session = SessionMapper.toSessionEntity(inputDto, step);
 
-        accessValidator.validateCoachOrAdminAccess(session);
+        String resolvedCoach = accessValidator.resolveAndValidateCoachForClient(
+                inputDto.getCoach(), inputDto.getClient());
+        session.setCoach(resolvedCoach);
+
         validationHelper.validateSessionDateAndTime(step, session);
 
         session.setStep(step);
@@ -73,6 +80,19 @@ public class SessionService {
 
         SessionMapper.updateSessionFromDto(session, inputDto);
 
+        String resolvedCoach = accessValidator.resolveAndValidateCoachForClient(
+                inputDto.getCoach(), inputDto.getClient());
+        session.setCoach(resolvedCoach);
+
+        if (inputDto.getStepId() != null && (session.getStep() == null || !session.getStep().getStepId().equals(inputDto.getStepId()))) {
+            Step newStep = stepRepository.findById(inputDto.getStepId())
+                    .orElseThrow(() -> new NotFoundException("Step with ID " + inputDto.getStepId() + " not found"));
+
+            validationHelper.validateStepBelongsToClient(newStep, inputDto.getClient());
+
+            session.setStep(newStep);
+        }
+
         return sessionRepository.save(session);
     }
 
@@ -82,6 +102,7 @@ public class SessionService {
 
         sessionRepository.deleteById(sessionId);
     }
+
 
     public byte[] downloadFilesForSession(Long sessionId) throws IOException {
         Session session = validationHelper.validateSession(sessionId);

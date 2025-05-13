@@ -1,7 +1,9 @@
 package nl.novi.bloomtrail.helper;
 
+import nl.novi.bloomtrail.dtos.SessionInputDto;
 import nl.novi.bloomtrail.dtos.StepInputDto;
 import nl.novi.bloomtrail.exceptions.BadRequestException;
+import nl.novi.bloomtrail.exceptions.ForbiddenException;
 import nl.novi.bloomtrail.exceptions.NotFoundException;
 import nl.novi.bloomtrail.models.*;
 import nl.novi.bloomtrail.repositories.*;
@@ -144,6 +146,13 @@ public class ValidationHelper {
         }
         if (inputDto.getStepEndDate().isBefore(inputDto.getStepStartDate())) {
             throw new BadRequestException("Step end date cannot be before start date.");
+        }
+    }
+
+    public void validateStepBelongsToClient(Step step, String clientUsername) {
+        User stepOwner = step.getCoachingProgram().getClient();
+        if (!stepOwner.getUsername().equals(clientUsername)) {
+            throw new ForbiddenException("The selected step does not belong to the specified client.");
         }
     }
 

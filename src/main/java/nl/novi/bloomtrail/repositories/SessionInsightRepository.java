@@ -12,4 +12,6 @@ public interface SessionInsightRepository extends JpaRepository<SessionInsight, 
     @EntityGraph(attributePaths = {"files"})
     Optional<SessionInsight> findBySession(Session session);
 
+
+
 }

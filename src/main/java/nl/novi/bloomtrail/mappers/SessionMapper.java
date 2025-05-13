@@ -65,6 +65,9 @@ public class SessionMapper {
     }
 
     public static void updateSessionFromDto(Session session, SessionInputDto inputDto) {
+        if (inputDto.getSessionName() != null) {
+            session.setSessionName(inputDto.getSessionName());
+        }
         if (inputDto.getSessionDate() != null) {
             session.setSessionDate(inputDto.getSessionDate());
         }
@@ -77,6 +80,7 @@ public class SessionMapper {
         if (inputDto.getComment() != null) {
             session.setComment(inputDto.getComment());
         }
+
     }
 
 }

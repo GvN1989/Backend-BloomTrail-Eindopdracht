@@ -37,6 +37,16 @@ public class AccessValidator {
         return auth.getName();
     }
 
+    public void validateSelfOrAdminAccess(String targetUsername) {
+        String username = getAuthenticatedUsername();
+        boolean isAdmin = isAdmin();
+        boolean isSelf = username.equals(targetUsername);
+
+        if (!isAdmin && !isSelf) {
+            throw new ForbiddenException("Access denied: You can only access your own data unless you're an admin.");
+        }
+    }
+
     public void validateSelfOrAffiliatedCoachOrAdminAccess(String username, List<CoachingProgram> programs) {
         String currentUsername = getAuthenticatedUsername();
         boolean isAdmin = isAdmin();
@@ -46,28 +56,6 @@ public class AccessValidator {
 
         if (!isAdmin && !isSelf && !isCoach) {
             throw new AccessDeniedException("You are not allowed to access this user's coaching program.");
-        }
-    }
-
-    public void validateCoachOrAdminAccess(Session session) {
-        String username = getAuthenticatedUsername();
-        boolean isAdmin = isAdmin();
-        boolean isCoach = username.equals(session.getCoach());
-
-        if (!isAdmin && !isCoach) {
-            throw new AccessDeniedException("Only the assigned coach or an admin can perform this action.");
-        }
-    }
-
-    public void validateCoachOrClientOrAdminAccess(Session session) {
-        String username = getAuthenticatedUsername();
-        boolean isAdmin = isAdmin();
-
-        boolean isCoach = username.equals(session.getCoach());
-        boolean isClient = username.equals(session.getClient());
-
-        if (!isAdmin && !isCoach && !isClient) {
-            throw new AccessDeniedException("Access denied: You are not allowed to access this session.");
         }
     }
 
@@ -94,16 +82,6 @@ public class AccessValidator {
         }
     }
 
-    public void validateSelfOrAdminAccess(String targetUsername) {
-        String username = getAuthenticatedUsername();
-        boolean isAdmin = isAdmin();
-        boolean isSelf = username.equals(targetUsername);
-
-        if (!isAdmin && !isSelf) {
-            throw new ForbiddenException("Access denied: You can only access your own data unless you're an admin.");
-        }
-    }
-
     public void validateCoachOwnsStepOrAdmin(Step step) {
         String username = getAuthenticatedUsername();
         boolean isAdmin = isAdmin();
@@ -116,6 +94,67 @@ public class AccessValidator {
         }
     }
 
+    public void validateCoachOrAdminAccess(Session session) {
+        String username = getAuthenticatedUsername();
+        boolean isAdmin = isAdmin();
+        boolean isCoach = username.equals(session.getCoach());
+
+        if (!isAdmin && !isCoach) {
+            throw new AccessDeniedException("Only the assigned coach or an admin can perform this action.");
+        }
+    }
+
+    public void validateCoachOrClientOrAdminAccess(Session session) {
+        String username = getAuthenticatedUsername();
+        boolean isAdmin = isAdmin();
+
+        boolean isCoach = username.equals(session.getCoach());
+        boolean isClient = username.equals(session.getClient());
+
+        if (!isAdmin && !isCoach && !isClient) {
+            throw new AccessDeniedException("Access denied: You are not allowed to access this session.");
+        }
+    }
+
+    public void validateCoachOwnsSession(Session session) {
+        String currentUsername = getAuthenticatedUsername();
+        String sessionCoach = session.getCoach();
+
+        if (!currentUsername.equals(sessionCoach) && !isAdmin()) {
+            throw new ForbiddenException("Access denied: You are not the coach of this session.");
+        }
+    }
+
+    public void validateClientOwnsSession(Session session) {
+        String currentUsername = getAuthenticatedUsername();
+        String sessionClient = session.getStep().getCoachingProgram().getClient().getUsername();
+
+        if (!currentUsername.equals(sessionClient) && !isAdmin()) {
+            throw new ForbiddenException("Access denied: You are not the client of this session.");
+        }
+    }
+
+    public String resolveAndValidateCoachForClient(String inputCoachUsername, String clientUsername) {
+        String resolvedCoach;
+
+        if (isAdmin()) {
+            if (inputCoachUsername == null || inputCoachUsername.isBlank()) {
+                throw new BadRequestException("Coach must be provided by admin.");
+            }
+            resolvedCoach = inputCoachUsername;
+        } else if (isCoach()) {
+            resolvedCoach = getAuthenticatedUsername();
+
+            if (!coachingProgramRepository.existsByCoachUsernameAndClientUsername(resolvedCoach, clientUsername)) {
+                throw new ForbiddenException("You are not affiliated with this client.");
+            }
+        } else {
+            throw new ForbiddenException("Only coaches and admins can create or update sessions.");
+        }
+
+        return resolvedCoach;
+    }
+
     private Authentication getAuthOrThrow() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated()) {
@@ -124,7 +163,7 @@ public class AccessValidator {
         return auth;
     }
 
-    private String getAuthenticatedUsername() {
+    public String getAuthenticatedUsername() {
         return getAuthOrThrow().getName();
     }
 

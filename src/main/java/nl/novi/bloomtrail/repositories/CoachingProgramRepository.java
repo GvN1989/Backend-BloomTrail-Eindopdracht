@@ -19,5 +19,11 @@ public interface CoachingProgramRepository extends JpaRepository<CoachingProgram
 
     Optional<CoachingProgram> findByCoachingProgramId(Long coachingProgramId);
 
+    @Query("SELECT COUNT(cp) > 0 FROM CoachingProgram cp " +
+            "WHERE cp.coach.username = :coachUsername AND cp.client.username = :clientUsername")
+    boolean existsByCoachUsernameAndClientUsername(
+            @Param("coachUsername") String coachUsername,
+            @Param("clientUsername") String clientUsername);
+
 
 }
