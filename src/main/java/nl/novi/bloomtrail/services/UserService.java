@@ -6,15 +6,18 @@ import nl.novi.bloomtrail.enums.FileContext;
 import nl.novi.bloomtrail.exceptions.ConflictException;
 import nl.novi.bloomtrail.exceptions.NotFoundException;
 import nl.novi.bloomtrail.exceptions.BadRequestException;
+import nl.novi.bloomtrail.helper.AccessValidator;
 import nl.novi.bloomtrail.helper.ValidationHelper;
 import nl.novi.bloomtrail.mappers.UserMapper;
 import nl.novi.bloomtrail.models.Authority;
 import nl.novi.bloomtrail.models.*;
 import nl.novi.bloomtrail.repositories.AuthorityRepository;
+import nl.novi.bloomtrail.repositories.CoachingProgramRepository;
 import nl.novi.bloomtrail.repositories.FileRepository;
 import nl.novi.bloomtrail.repositories.UserRepository;
 import nl.novi.bloomtrail.utils.RandomStringGenerator;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,25 +36,47 @@ public class UserService {
     private final UserRepository userRepository;
     private final FileRepository fileRepository;
     private final ValidationHelper validationHelper;
+    private final AccessValidator accessValidator;
     private final AuthorityRepository authorityRepository;
     private final FileService fileService;
     private final DownloadService downloadService;
     private final PasswordEncoder passwordEncoder;
+    private final CoachingProgramRepository coachingProgramRepository;
 
-    public UserService(UserRepository userRepository, FileRepository fileRepository, ValidationHelper validationHelper, AuthorityRepository authorityRepository, FileService fileService, DownloadService downloadService, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, FileRepository fileRepository, ValidationHelper validationHelper, AccessValidator accessValidator, AuthorityRepository authorityRepository, FileService fileService, DownloadService downloadService, PasswordEncoder passwordEncoder, CoachingProgramRepository coachingProgramRepository) {
         this.userRepository = userRepository;
         this.fileRepository = fileRepository;
         this.validationHelper = validationHelper;
+        this.accessValidator = accessValidator;
         this.authorityRepository = authorityRepository;
         this.fileService = fileService;
         this.downloadService = downloadService;
         this.passwordEncoder = passwordEncoder;
+        this.coachingProgramRepository = coachingProgramRepository;
     }
 
 
     public List<UserDto> getUsers() {
-        List<User> users = userRepository.findAll();
-        return UserMapper.toUserDtoList(users);
+
+        String requester = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        if (accessValidator.isAdmin()) {
+            List<User> users = userRepository.findAll();
+            return UserMapper.toUserDtoList(users);
+        }
+
+        if (accessValidator.isCoach()) {
+            List<CoachingProgram> programs = coachingProgramRepository.findAllByCoach_Username(requester);
+
+            List<User> clients = programs.stream()
+                    .map(CoachingProgram::getClient)
+                    .distinct()
+                    .toList();
+
+            return UserMapper.toUserDtoList(clients);
+        }
+
+        throw new AccessDeniedException("Only coaches and admins can access user lists.");
     }
 
     public UserDto getUser(String username) {
@@ -61,6 +86,8 @@ public class UserService {
         if (user.getAuthority() == null) {
             throw new BadRequestException("User has no assigned role.");
         }
+
+        accessValidator.validateSelfOrAdminAccess(username);
 
         return UserMapper.toUserDto(user);
     }
@@ -89,6 +116,8 @@ public class UserService {
     }
     @Transactional
     public UserDto updateUserProfile(String username, UserInputDto dto) {
+        accessValidator.validateSelfOrAdminAccess(username);
+
         User user = validationHelper.validateUser(username);
 
         if (dto.getFullName() != null && !dto.getFullName().isEmpty()) {
@@ -119,7 +148,7 @@ public class UserService {
 
     public UserDto updateAuthority(String username, String newAuthority) {
         User user = validationHelper.validateUser(username);
-        validationHelper.validateAuthority(newAuthority);
+        accessValidator.validateAuthority(newAuthority);
 
         if (user.getAuthority() != null) {
             authorityRepository.delete(user.getAuthority());
@@ -151,6 +180,8 @@ public class UserService {
     }
 
     public void uploadProfilePicture(String username, MultipartFile file) {
+        accessValidator.validateSelfOrAdminAccess(username);
+
         if (file == null || file.isEmpty()) {
             throw new BadRequestException("No file uploaded.");
         }
@@ -173,6 +204,8 @@ public class UserService {
         }
 
         File savedFile = fileService.saveFile(file, FileContext.PROFILE_PICTURE, user);
+        fileRepository.flush();
+
         user.setProfilePicture(savedFile);
         userRepository.save(user);
     }
@@ -188,6 +221,8 @@ public class UserService {
     }
 
     public void deleteProfilePicture(String username) {
+        accessValidator.validateSelfOrAdminAccess(username);
+
         User user = validationHelper.validateUser(username);
 
         if (user.getProfilePicture() == null) {

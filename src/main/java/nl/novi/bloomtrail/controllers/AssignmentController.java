@@ -5,14 +5,12 @@ import nl.novi.bloomtrail.dtos.AssignmentDto;
 import nl.novi.bloomtrail.dtos.AssignmentInputDto;
 import nl.novi.bloomtrail.mappers.AssignmentMapper;
 import nl.novi.bloomtrail.models.Assignment;
-import nl.novi.bloomtrail.models.File;
 import nl.novi.bloomtrail.services.AssignmentService;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.List;
 
 @RestController
@@ -34,43 +32,25 @@ public class AssignmentController {
         return ResponseEntity.ok(assignmentDtos);
     }
 
-    @GetMapping("/session/{sessionId}")
-    public ResponseEntity<List<AssignmentDto>> getAssignmentsBySession(@PathVariable Long sessionId) {
-        List<Assignment> assignments = assignmentService.getAssignmentsBySession(sessionId);
-        List<AssignmentDto> assignmentDtos = assignments.stream()
-                .map(AssignmentMapper::toAssignmentDto)
-                .toList();
-        return ResponseEntity.ok(assignmentDtos);
-    }
-
-    @PostMapping
-    public ResponseEntity<Assignment> createAssignment(
-            @RequestPart("data") AssignmentInputDto dto,
-            @RequestPart(value = "file", required = false) MultipartFile file
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<AssignmentDto> createAssignment(
+            @Valid @ModelAttribute AssignmentInputDto inputDto,
+            @RequestPart(value = "files", required = false) MultipartFile[]files
     ) {
-        Assignment assignment = assignmentService.createAssignment(dto, file);
-        return ResponseEntity.status(HttpStatus.CREATED).body(assignment);
+        Assignment assignment = assignmentService.createAssignment(inputDto, files);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(AssignmentMapper.toAssignmentDto(assignment));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<AssignmentDto> updateAssignment(
-            @PathVariable("id") Long assignmentId,
-            @Valid @RequestBody AssignmentInputDto inputDto) {
-
-        Assignment updatedAssignment = assignmentService.updateAssignment(assignmentId, inputDto);
-        AssignmentDto response = AssignmentMapper.toAssignmentDto(updatedAssignment);
-
-        return ResponseEntity.ok(response);
-    }
-
-
-    @PostMapping("/{id}/upload")
-    public ResponseEntity<String> uploadFileForAssignment(
-            @PathVariable("id") Long assignmentId,
-            @RequestPart("file") MultipartFile file
+            @PathVariable Long id,
+            @Valid @ModelAttribute AssignmentInputDto inputDto,
+            @RequestPart(value = "files", required = false) MultipartFile[]files
     ) {
-        assignmentService.uploadFileForAssignment(file, assignmentId);
-        return ResponseEntity.ok("File uploaded successfully for assignment with ID: " + assignmentId);
+        Assignment assignment = assignmentService.updateAssignment(id, inputDto, files);
+
+        return ResponseEntity.ok(AssignmentMapper.toAssignmentDto(assignment));
     }
 
     @DeleteMapping("/{id}")
@@ -79,29 +59,21 @@ public class AssignmentController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{assignmentId}/download")
-    public ResponseEntity<byte[]> downloadSingleAssignmentFiles(@PathVariable Long assignmentId) throws IOException {
-        byte[] fileData = assignmentService.downloadAssignmentFiles(assignmentId);
-
-        List<File> files = assignmentService.getUploadsForAssignment(assignmentId);
+    @GetMapping("/{id}/download-zip")
+    public ResponseEntity<byte[]> downloadSingleAssignmentFiles(@PathVariable ("id") Long assignmentId) throws IOException {
+        byte[] zipData = assignmentService.downloadAssignmentFiles(assignmentId);
+        if (zipData == null || zipData.length == 0) {
+            return ResponseEntity.noContent().build();
+        }
 
         HttpHeaders headers = new HttpHeaders();
-
-        if (files.size() == 1) {
-            File singleFile = files.get(0);
-            headers.setContentType(MediaType.APPLICATION_PDF);
-            headers.setContentDisposition(ContentDisposition.attachment()
-                    .filename(Paths.get(singleFile.getUrl()).getFileName().toString())
-                    .build());
-        } else {
-            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-            headers.setContentDisposition(ContentDisposition.attachment()
-                    .filename("assignment_files_" + assignmentId + ".zip")
-                    .build());
-        }
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        headers.setContentDisposition(ContentDisposition.attachment()
+                .filename("assignment_files_" + assignmentId + ".zip")
+                .build());
 
         return ResponseEntity.ok()
                 .headers(headers)
-                .body(fileData);
+                .body(zipData);
     }
 }

@@ -1,5 +1,7 @@
 package nl.novi.bloomtrail.dtos;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
@@ -9,12 +11,15 @@ public class CoachingProgramDto {
     private Long coachingProgramId;
     private String coachingProgramName;
     private String goal;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private LocalDate startDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private LocalDate endDate;
-    private List<String> strengthResultUrls;
     private List<StepDto> timeline;
     private String clientUsername;
     private String coachUsername;
+    private int stepCount;
+    private double progress;
 
     public Long getCoachingProgramId() {
         return coachingProgramId;
@@ -56,14 +61,6 @@ public class CoachingProgramDto {
         this.endDate = endDate;
     }
 
-    public List<String> getStrengthResultUrls() {
-        return strengthResultUrls;
-    }
-
-    public void setStrengthResultUrls(List<String> strengthResultUrls) {
-        this.strengthResultUrls = strengthResultUrls;
-    }
-
     public List<StepDto> getTimeline() {
         return timeline;
     }
@@ -86,5 +83,21 @@ public class CoachingProgramDto {
 
     public void setCoachUsername(String coachUsername) {
         this.coachUsername = coachUsername;
+    }
+
+    public int getStepCount() {
+        return stepCount;
+    }
+
+    public void setStepCount(int stepCount) {
+        this.stepCount = stepCount;
+    }
+
+    public double getProgress() {
+        return progress;
+    }
+
+    public void setProgress(double progress) {
+        this.progress = progress;
     }
 }

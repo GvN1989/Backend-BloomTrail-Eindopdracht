@@ -54,25 +54,61 @@ public class SpringSecurityConfig {
                         .requestMatchers("/authenticate").permitAll()
                         .requestMatchers(HttpMethod.GET, "/authenticated").authenticated()
 
-                        .requestMatchers(HttpMethod.POST, "/users/").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/users/{username}/authorities").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/users/{username}/authority").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/users/{username}/authority").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/users/{username}/authority").hasAuthority("ADMIN")
+
                         .requestMatchers(HttpMethod.DELETE, "/users/{username}").hasAuthority("ADMIN")
+
+                        .requestMatchers(HttpMethod.GET, "/users/profile").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/users/{username}").hasAnyAuthority("ADMIN","COACH")
+                        .requestMatchers(HttpMethod.PUT, "/users/{username}").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/users/{username}/profile-picture").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/users/{username}/profile-picture").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/users/{username}/profile-picture").authenticated()
+
+                        .requestMatchers(HttpMethod.GET, "/users/clients").hasAuthority("COACH")
+
                         .requestMatchers(HttpMethod.GET, "/users").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/users/{username}").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/users/me").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/users").hasAuthority("ADMIN")
 
-                        .requestMatchers(HttpMethod.POST, "/coaching-programs").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/coaching-programs/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/coaching-programs/clients").hasAuthority("COACH")
+                        .requestMatchers(HttpMethod.GET, "/coaching-programs").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/coaching-programs/{id}").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/coaching-programs/user/{username}").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/coaching-programs").hasAnyAuthority("ADMIN","COACH")
+                        .requestMatchers(HttpMethod.DELETE, "/coaching-programs/{id}").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/coaching-programs/{username}/{id}").hasAnyAuthority("ADMIN","COACH")
 
-                        .requestMatchers(HttpMethod.POST, "/steps", "/sessions", "/assignments").hasAnyAuthority("ADMIN", "COACH")
-                        .requestMatchers(HttpMethod.DELETE, "/steps/**", "/sessions/**","/assignments/**").hasAnyAuthority("ADMIN", "COACH")
+                        .requestMatchers(HttpMethod.GET, "/step/{username}/{programId}").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/step/{programId}/step").hasAnyAuthority("ADMIN","COACH")
+                        .requestMatchers(HttpMethod.POST, "/step/{programId}/steps-batch").hasAnyAuthority("ADMIN","COACH")
+                        .requestMatchers(HttpMethod.GET, "/step/{id}/download-zip").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/step/{id}").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/step/{id}").hasAnyAuthority("ADMIN","COACH")
+                        .requestMatchers(HttpMethod.DELETE, "/step/{id}").hasAnyAuthority("ADMIN","COACH")
 
-                        .requestMatchers(HttpMethod.POST, "/session-insights", "/strength-results").hasAnyAuthority("ADMIN", "COACH", "USER")
-                        .requestMatchers(HttpMethod.DELETE, "/session-insights/**", "/strength-results/**").hasAnyAuthority("ADMIN", "COACH", "USER")
-                        .requestMatchers(HttpMethod.GET, "/session-insights/**", "/strength-results/**").hasAnyAuthority("ADMIN", "COACH", "USER")
+                        .requestMatchers(HttpMethod.GET, "/session/user/{username}").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/session").hasAnyAuthority("ADMIN","COACH")
+                        .requestMatchers(HttpMethod.PUT, "/session/{id}").hasAnyAuthority("ADMIN","COACH")
+                        .requestMatchers(HttpMethod.POST, "/session/{id}/client-reflection").hasAnyAuthority("ADMIN","USER")
+                        .requestMatchers(HttpMethod.POST, "/session/{id}/coach-notes").hasAnyAuthority("ADMIN","COACH")
+                        .requestMatchers(HttpMethod.GET, "/session/{id}/download-zip").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/session/{id}").hasAnyAuthority("ADMIN","COACH")
+                        .requestMatchers(HttpMethod.DELETE, "/session/{id}/coach-notes-files").hasAnyAuthority("ADMIN","COACH")
+                        .requestMatchers(HttpMethod.DELETE, "/session/{id}/client-reflection-files").hasAnyAuthority("ADMIN","USER")
 
-                        .requestMatchers(HttpMethod.GET, "/coaching-programs", "/steps").hasAnyAuthority("ADMIN", "COACH", "USER")
-                        .requestMatchers(HttpMethod.GET, "/coaching-programs/{id}", "/steps/{id}", "/sessions/{id}", "/assignments/{id}").hasAnyAuthority("ADMIN", "COACH")
+                        .requestMatchers(HttpMethod.GET, "/strength-results/me").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/strength-results/user/{username}").hasAnyAuthority("ADMIN", "COACH")
+                        .requestMatchers(HttpMethod.POST, "/strength-results").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/strength-results").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/strength-results/user/{username}").hasAnyAuthority("ADMIN")
+
+                        .requestMatchers(HttpMethod.GET, "/assignment/step/{stepId}").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/assignment").hasAnyAuthority("ADMIN","COACH")
+                        .requestMatchers(HttpMethod.PUT, "/assignment/{id}").hasAnyAuthority("ADMIN","COACH")
+                        .requestMatchers(HttpMethod.DELETE, "/assignment/{id}").hasAnyAuthority("ADMIN","COACH")
+                        .requestMatchers(HttpMethod.GET, "/assignment/{id}/download-zip").authenticated()
 
                         .anyRequest().authenticated()
                 )
@@ -99,7 +135,4 @@ public class SpringSecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-
-
-
 }

@@ -7,10 +7,8 @@ import nl.novi.bloomtrail.models.CoachingProgram;
 import nl.novi.bloomtrail.models.Step;
 import nl.novi.bloomtrail.models.Session;
 import nl.novi.bloomtrail.models.Assignment;
-import nl.novi.bloomtrail.helper.DateConverter;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 public class StepMapper {
@@ -20,24 +18,26 @@ public class StepMapper {
 
         dto.setStepId(step.getStepId());
         dto.setStepName(step.getStepName());
+        dto.setStepGoal(step.getStepGoal());
         dto.setCompleted(step.getCompleted());
         dto.setStepStartDate(step.getStepStartDate());
         dto.setStepEndDate(step.getStepEndDate());
+        dto.setSequence(step.getSequence());
         dto.setCoachingProgramId(step.getCoachingProgram() != null ? step.getCoachingProgram().getCoachingProgramId() : null);
 
-        if (step.getSession() != null) {
+        if (step.getSessions() != null) {
             dto.setSessionIds(
-                    step.getSession().stream()
+                    step.getSessions().stream()
                             .map(Session::getSessionId)
-                            .collect(Collectors.toList())
+                            .toList()
             );
         }
 
-        if (step.getAssignment() != null) {
-            dto.setAssignmentIds(
-                    step.getAssignment().stream()
-                            .map(Assignment::getAssignmentId)
-                            .collect(Collectors.toList())
+        if (step.getAssignments() != null) {
+            dto.setAssignments(
+                    step.getAssignments().stream()
+                            .map(AssignmentMapper::toAssignmentDto)
+                            .toList()
             );
         }
 
@@ -53,18 +53,26 @@ public class StepMapper {
         Step step = new Step();
 
         step.setStepName(inputDto.getStepName());
-        step.setStepStartDate(DateConverter.convertToLocalDate(inputDto.getStepStartDate()));
-        step.setStepEndDate(DateConverter.convertToLocalDate(inputDto.getStepEndDate()));
+        step.setStepStartDate(inputDto.getStepStartDate());
+        step.setStepEndDate(inputDto.getStepEndDate());
         step.setCompleted(inputDto.getCompleted());
         step.setStepGoal(inputDto.getStepGoal());
         step.setCoachingProgram(coachingProgramId);
-        step.setSession(sessions);
-        step.setAssignment(assignments);
+        step.setSessions(sessions);
+        step.setAssignments(assignments);
 
         return step;
-        } catch (Exception e) {
+        }catch (Exception e) {
             throw new ForbiddenException("Error mapping StepInputDto to Step" + e);
         }
 
+    }
+
+    public static void updateStepFromDto(Step step, StepInputDto dto) {
+        if (dto.getStepName() != null) step.setStepName(dto.getStepName());
+        if (dto.getStepGoal() != null) step.setStepGoal(dto.getStepGoal());
+        if (dto.getStepStartDate() != null) {step.setStepStartDate(dto.getStepStartDate());}
+        if (dto.getStepEndDate() != null) {step.setStepEndDate(dto.getStepEndDate());}
+        if (dto.getCompleted() != null) step.setCompleted(dto.getCompleted());
     }
 }

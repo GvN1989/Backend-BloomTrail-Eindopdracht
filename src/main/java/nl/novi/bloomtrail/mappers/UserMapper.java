@@ -6,22 +6,27 @@ import nl.novi.bloomtrail.exceptions.BadRequestException;
 import nl.novi.bloomtrail.models.Authority;
 import nl.novi.bloomtrail.models.User;
 
+import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class UserMapper {
 
     public static UserDto toUserDto(User user) {
-        return new UserDto(
+
+        UserDto dto = new UserDto(
+
                 user.getUsername(),
                 user.getEmail(),
                 user.getFullName(),
                 user.isEnabled(),
                 user.getAuthority() != null ? user.getAuthority().getAuthority() : null,
                 user.getProfilePicture() != null ? user.getProfilePicture().getUrl() : null
-
         );
+
+
+
+        return dto;
     }
 
     public static List<UserDto> toUserDtoList(List<User> users) {

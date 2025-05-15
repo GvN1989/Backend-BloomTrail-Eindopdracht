@@ -2,19 +2,18 @@ package nl.novi.bloomtrail.mappers;
 
 import nl.novi.bloomtrail.dtos.CoachingProgramDto;
 import nl.novi.bloomtrail.dtos.CoachingProgramInputDto;
-import nl.novi.bloomtrail.dtos.CoachingProgramPatchDto;
+import nl.novi.bloomtrail.dtos.CoachingProgramUpdateDto;
+import nl.novi.bloomtrail.dtos.SimpleCoachingProgramDto;
 import nl.novi.bloomtrail.exceptions.ForbiddenException;
 import nl.novi.bloomtrail.models.CoachingProgram;
-import nl.novi.bloomtrail.models.File;
 import nl.novi.bloomtrail.models.User;
-import nl.novi.bloomtrail.helper.DateConverter;
 
 import java.util.Collections;
 import java.util.stream.Collectors;
 
 public class CoachingProgramMapper {
 
-    public static CoachingProgramDto toCoachingProgramDto(CoachingProgram coachingProgram) {
+    public static CoachingProgramDto toCoachingProgramDto(CoachingProgram coachingProgram, int stepCount, double progress) {
         CoachingProgramDto dto = new CoachingProgramDto();
 
         dto.setCoachingProgramId(coachingProgram.getCoachingProgramId());
@@ -25,17 +24,8 @@ public class CoachingProgramMapper {
         dto.setClientUsername(coachingProgram.getClient() != null ? coachingProgram.getClient().getUsername() : null);
         dto.setCoachUsername(coachingProgram.getCoach() != null ? coachingProgram.getCoach().getUsername() : null);
 
-        if (coachingProgram.getStrengthResults() != null) {
-            dto.setStrengthResultUrls(
-                    coachingProgram.getStrengthResults().stream()
-                            .filter(strengthResult -> strengthResult.getFiles() != null)
-                            .flatMap(strengthResult -> strengthResult.getFiles().stream())
-                            .map(File::getUrl)
-                            .collect(Collectors.toList())
-            );
-        } else {
-            dto.setStrengthResultUrls(Collections.emptyList());
-        }
+        dto.setStepCount(stepCount);
+        dto.setProgress(progress);
 
         if (coachingProgram.getTimeline() != null) {
             dto.setTimeline(
@@ -50,6 +40,18 @@ public class CoachingProgramMapper {
         return dto;
     }
 
+    public static SimpleCoachingProgramDto toSimpleDto(CoachingProgram program, int stepCount, double progress) {
+        return new SimpleCoachingProgramDto(
+                program.getCoachingProgramId(),
+                program.getCoachingProgramName(),
+                program.getClient() != null ? program.getClient().getUsername() : null,
+                program.getCoach() != null ? program.getCoach().getUsername() : null,
+                stepCount,
+                progress
+
+        );
+    }
+
     public static CoachingProgram toCoachingProgramEntity(CoachingProgramInputDto inputDto, User client, User coach) {
         if (inputDto == null) {
             throw new ForbiddenException("CoachingProgramInputDto cannot be null");
@@ -60,8 +62,8 @@ public class CoachingProgramMapper {
 
         coachingProgram.setCoachingProgramName(inputDto.getCoachingProgramName());
         coachingProgram.setGoal(inputDto.getGoal());
-        coachingProgram.setStartDate(DateConverter.convertToLocalDate(inputDto.getStartDate()));
-        coachingProgram.setEndDate(DateConverter.convertToLocalDate(inputDto.getEndDate()));
+        coachingProgram.setStartDate(inputDto.getStartDate());
+        coachingProgram.setEndDate(inputDto.getEndDate());
         coachingProgram.setClient(client);
         coachingProgram.setCoach(coach);
 
@@ -71,7 +73,7 @@ public class CoachingProgramMapper {
         }
     }
 
-    public static void updateCoachingProgramFromPatchDto(CoachingProgram program, CoachingProgramPatchDto dto) {
+    public static void updateCoachingProgramDto(CoachingProgram program, CoachingProgramUpdateDto dto) {
 
         if (dto.getCoachingProgramName() != null) {
             program.setCoachingProgramName(dto.getCoachingProgramName());
@@ -82,11 +84,11 @@ public class CoachingProgramMapper {
         }
 
         if (dto.getStartDate() != null) {
-            program.setStartDate(DateConverter.convertToLocalDate(dto.getStartDate()));
+            program.setStartDate(dto.getStartDate());
         }
 
         if (dto.getEndDate() != null) {
-            program.setEndDate(DateConverter.convertToLocalDate(dto.getEndDate()));
+            program.setEndDate(dto.getEndDate());
         }
 
     }

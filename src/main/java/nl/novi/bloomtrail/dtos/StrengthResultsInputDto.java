@@ -3,29 +3,24 @@ package nl.novi.bloomtrail.dtos;
 import jakarta.persistence.ElementCollection;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import nl.novi.bloomtrail.enums.FileContext;
 
 import java.util.List;
 
 public class StrengthResultsInputDto {
-    private String filename;
+    private String username;
     @Size(max = 500)
     private String summary;
     @ElementCollection
+    @NotNull(message = "Top strengths must be provided")
+    @Size(min = 5, max = 15, message = "You must provide between 5 and 15 strengths")
     private List<String> topStrengthNames;
-    @NotNull(message = "CoachingProgram ID is required")
-    private Long coachingProgramId;
 
-    public boolean isValid() {
-        return coachingProgramId != null;
+    public String getUsername() {
+        return username;
     }
 
-    public String getFilename() {
-        return filename;
-    }
-
-    public void setFilename(String filename) {
-        this.filename = filename;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getSummary() {
@@ -44,11 +39,5 @@ public class StrengthResultsInputDto {
         this.topStrengthNames = topStrengthNames;
     }
 
-    public Long getCoachingProgramId() {
-        return coachingProgramId;
-    }
 
-    public void setCoachingProgramId(Long coachingProgramId) {
-        this.coachingProgramId = coachingProgramId;
-    }
 }

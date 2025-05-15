@@ -1,8 +1,11 @@
 package nl.novi.bloomtrail.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -18,6 +21,7 @@ public class User {
     private String password;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private Authority authority;
     @Column(name = "full_name")
     private String fullName;
@@ -34,7 +38,12 @@ public class User {
     @JoinColumn(name = "profile_picture_id")
     private File profilePicture;
 
-    public User() {}
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
+    @JoinColumn(name = "strength_results_id")
+    private StrengthResults strengthResults;
+
+    public User() {
+    }
 
     public User(String username, String password, String fullName, String email, boolean enabled, String authority) {
         this.username = username;
@@ -108,4 +117,13 @@ public class User {
     public void setProfilePicture(File profilePicture) {
         this.profilePicture = profilePicture;
     }
+
+    public StrengthResults getStrengthResults() {
+        return strengthResults;
+    }
+
+    public void setStrengthResults(StrengthResults strengthResults) {
+        this.strengthResults = strengthResults;
+    }
+
 }

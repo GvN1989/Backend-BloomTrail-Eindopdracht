@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.*;
-import nl.novi.bloomtrail.enums.SessionStatus;
 import org.hibernate.annotations.*;
 
 import java.time.LocalDate;
@@ -15,22 +14,24 @@ import java.util.List;
 
 
 @Entity
-@Table(name = "Sessions")
+@Table(name = "sessions")
 public class Session {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "session_id", unique = true, nullable = false)
     private Long sessionId;
-    @Column(name = "Session_Name")
+    @Column(name = "session_name")
     @NotBlank
     private String sessionName;
     @NotBlank
     private String coach;
     @NotBlank
     private String client;
+    @Column(name = "session_date")
     @NotNull
     private LocalDate sessionDate;
+    @Column(name = "session_time")
     @NotNull
     private LocalTime sessionTime;
     @NotBlank
@@ -41,14 +42,11 @@ public class Session {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<SessionInsight> sessionInsights = new ArrayList<>();
-
-    @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Assignment> assignment = new ArrayList<>();
+    @OneToOne(mappedBy = "session", cascade = CascadeType.ALL)
+    private SessionInsight sessionInsight;
 
     @ManyToOne
-    @JoinColumn(name = "step_id", insertable = false, updatable = false)
+    @JoinColumn(name = "step_id")
     private Step step;
 
     public Long getSessionId() {
@@ -131,20 +129,12 @@ public class Session {
         this.sessionName = sessionName;
     }
 
-    public List<SessionInsight> getSessionInsights() {
-        return sessionInsights;
+    public SessionInsight getSessionInsight() {
+        return sessionInsight;
     }
 
-    public void setSessionInsights(List<SessionInsight> sessionInsights) {
-        this.sessionInsights = sessionInsights;
-    }
-
-    public List<Assignment> getAssignment() {
-        return assignment;
-    }
-
-    public void setAssignment(List<Assignment> assignments) {
-        this.assignment = assignment;
+    public void setSessionInsight(SessionInsight sessionInsight) {
+        this.sessionInsight = sessionInsight;
     }
 
     public Step getStep() {

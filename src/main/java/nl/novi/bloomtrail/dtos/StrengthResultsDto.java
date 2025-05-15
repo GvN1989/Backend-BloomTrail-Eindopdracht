@@ -8,16 +8,11 @@ import java.util.List;
 public class StrengthResultsDto {
 
     private Long resultsId;
-    private String filename;
+    private String username;
     private Date createdAt;
     private Date updatedAt;
     private String summary;
-    private String strengthResultsFilePath;
     private List<String> topStrengthNames;
-    private List<String> fileUrls;;
-    private Long coachingProgramId;
-    private String coachingProgramName;
-    private String downloadUrl;
 
     public Long getResultsId() {
         return resultsId;
@@ -25,14 +20,6 @@ public class StrengthResultsDto {
 
     public void setResultsId(Long resultsId) {
         this.resultsId = resultsId;
-    }
-
-    public String getFilename() {
-        return filename;
-    }
-
-    public void setFilename(String filename) {
-        this.filename = filename;
     }
 
     public Date getCreatedAt() {
@@ -59,14 +46,6 @@ public class StrengthResultsDto {
         this.summary = summary;
     }
 
-    public String getStrengthResultsFilePath() {
-        return strengthResultsFilePath;
-    }
-
-    public void setStrengthResultsFilePath(String strengthResultsFilePath) {
-        this.strengthResultsFilePath = strengthResultsFilePath;
-    }
-
     public List<String> getTopStrengthNames() {
         return topStrengthNames;
     }
@@ -75,35 +54,11 @@ public class StrengthResultsDto {
         this.topStrengthNames = topStrengthNames;
     }
 
-    public List<String> getFileUrls() {
-        return fileUrls;
+    public String getUsername() {
+        return username;
     }
 
-    public void setFileUrls(List<String> fileUrls) {
-        this.fileUrls = fileUrls;
-    }
-
-    public String getCoachingProgramName() {
-        return coachingProgramName;
-    }
-
-    public void setCoachingProgramName(String coachingProgramName) {
-        this.coachingProgramName = coachingProgramName;
-    }
-
-    public Long getCoachingProgramId() {
-        return coachingProgramId;
-    }
-
-    public void setCoachingProgramId(Long coachingProgramId) {
-        this.coachingProgramId = coachingProgramId;
-    }
-
-    public String getDownloadUrl() {
-        return downloadUrl;
-    }
-
-    public void setDownloadUrl(String downloadUrl) {
-        this.downloadUrl = downloadUrl;
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

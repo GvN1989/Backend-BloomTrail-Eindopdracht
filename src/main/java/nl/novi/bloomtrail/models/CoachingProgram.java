@@ -34,19 +34,12 @@ public class CoachingProgram {
     @Temporal(TemporalType.DATE)
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
-
-    @Column(name = "progress", nullable = false)
-    private double progress = 0.0;
     @ManyToOne
     @JoinColumn(name = "client_id", nullable = false)
     private User client;
     @ManyToOne
     @JoinColumn(name = "coach_id", nullable = false)
     private User coach;
-
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "strengt_results_id")
-    private List<StrengthResults> strengthResults;
 
     @OneToMany(mappedBy = "coachingProgram", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Step> timeline = new ArrayList<>();
@@ -114,21 +107,5 @@ public class CoachingProgram {
 
     public void setCoach(User coach) {
         this.coach = coach;
-    }
-
-    public List<StrengthResults> getStrengthResults() {
-        return strengthResults;
-    }
-
-    public void setStrengthResults(List<StrengthResults> strengthResults) {
-        this.strengthResults = strengthResults;
-    }
-
-    public double getProgress() {
-        return progress;
-    }
-
-    public void setProgress(double progress) {
-        this.progress = progress;
     }
 }

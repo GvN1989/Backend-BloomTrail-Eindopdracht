@@ -5,12 +5,14 @@ import nl.novi.bloomtrail.dtos.SessionDto;
 import nl.novi.bloomtrail.dtos.SessionInputDto;
 import nl.novi.bloomtrail.mappers.SessionMapper;
 import nl.novi.bloomtrail.models.Session;
+import nl.novi.bloomtrail.services.SessionInsightService;
 import nl.novi.bloomtrail.services.SessionService;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
@@ -21,8 +23,11 @@ public class SessionController {
 
     private final SessionService sessionService;
 
-    public SessionController(SessionService sessionService) {
+    private final SessionInsightService sessionInsightService;
+
+    public SessionController(SessionService sessionService, SessionInsightService sessionInsightService) {
         this.sessionService = sessionService;
+        this.sessionInsightService = sessionInsightService;
     }
 
     @GetMapping("/user/{username}")
@@ -35,7 +40,6 @@ public class SessionController {
 
         return ResponseEntity.ok(sessionDtos);
     }
-
     @PostMapping
     public ResponseEntity<SessionDto> createSessionAndAddToStep(@RequestBody @Valid SessionInputDto inputDto) {
         Session session = sessionService.createSessionAndAddToStep(inputDto);
@@ -51,15 +55,36 @@ public class SessionController {
 
     }
 
+    @PostMapping("/{id}/client-reflection")
+    public ResponseEntity<String> uploadClientReflectionFile(
+            @PathVariable ("id") Long sessionId,
+            @RequestParam("file") MultipartFile file) {
+
+        sessionInsightService.uploadClientReflectionFile(sessionId,file);
+        return ResponseEntity.ok("Client reflection file uploaded successfully.");
+    }
+
+    @PostMapping("/{id}/coach-notes")
+    public ResponseEntity<String> uploadCoachNotesFile(
+            @PathVariable ("id") Long sessionId,
+            @RequestParam("file") MultipartFile file) {
+
+        sessionInsightService.uploadCoachNotesFile(sessionId,file);
+        return ResponseEntity.ok("Coach notes file uploaded successfully.");
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity <Void> deleteSession(@PathVariable("id") Long sessionId) {
         sessionService.deleteSession(sessionId);
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{sessionId}/download-zip")
-    public ResponseEntity<byte[]> downloadFilesForSession(@PathVariable Long sessionId) throws IOException {
+    @GetMapping("/{id}/download-zip")
+    public ResponseEntity<byte[]> downloadFilesForSession(@PathVariable ("id") Long sessionId) throws IOException {
         byte[] zipData = sessionService.downloadFilesForSession(sessionId);
+        if (zipData == null || zipData.length == 0) {
+            return ResponseEntity.noContent().build();
+        }
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
@@ -70,6 +95,18 @@ public class SessionController {
         return ResponseEntity.ok()
                 .headers(headers)
                 .body(zipData);
+    }
+
+    @DeleteMapping("/{id}/client-reflections-files")
+    public ResponseEntity<Void> deleteClientReflections(@PathVariable Long id) {
+        sessionInsightService.deleteClientReflectionFiles(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{id}/coach-notes-files")
+    public ResponseEntity<Void> deleteCoachNotes(@PathVariable Long id) {
+        sessionInsightService.deleteCoachNotesFiles(id);
+        return ResponseEntity.noContent().build();
     }
 
 }

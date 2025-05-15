@@ -1,5 +1,7 @@
 package nl.novi.bloomtrail.dtos;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -11,15 +13,15 @@ public class SessionDto {
     private String sessionName;
     private String coach;
     private String client;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private LocalDate sessionDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
     private LocalTime sessionTime;
     private String location;
     private String comment;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private String status;
-    private List<Long> sessionInsightId;
-    private List<Long> assignmentId;
+    private SessionInsightDto sessionInsight;
     private Long StepId;
 
     public Long getSessionId() {
@@ -102,30 +104,6 @@ public class SessionDto {
         this.updatedAt = updatedAt;
     }
 
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public List<Long> getSessionInsightId() {
-        return sessionInsightId;
-    }
-
-    public void setSessionInsightId(List<Long> sessionInsightId) {
-        this.sessionInsightId = sessionInsightId;
-    }
-
-    public List<Long> getAssignmentId() {
-        return assignmentId;
-    }
-
-    public void setAssignmentId(List<Long> assignmentId) {
-        this.assignmentId = assignmentId;
-    }
-
     public Long getStepId() {
         return StepId;
     }
@@ -133,4 +111,13 @@ public class SessionDto {
     public void setStepId(Long stepId) {
         StepId = stepId;
     }
+
+    public SessionInsightDto getSessionInsight() {
+        return sessionInsight;
+    }
+
+    public void setSessionInsight(SessionInsightDto sessionInsight) {
+        this.sessionInsight = sessionInsight;
+    }
+
 }

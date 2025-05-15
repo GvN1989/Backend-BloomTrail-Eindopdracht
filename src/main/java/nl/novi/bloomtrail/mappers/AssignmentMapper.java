@@ -2,14 +2,16 @@ package nl.novi.bloomtrail.mappers;
 
 import nl.novi.bloomtrail.dtos.AssignmentDto;
 import nl.novi.bloomtrail.dtos.AssignmentInputDto;
+import nl.novi.bloomtrail.dtos.SessionInputDto;
 import nl.novi.bloomtrail.exceptions.ForbiddenException;
 import nl.novi.bloomtrail.models.Assignment;
 import nl.novi.bloomtrail.models.File;
 import nl.novi.bloomtrail.models.Session;
 import nl.novi.bloomtrail.models.Step;
+import org.springframework.web.multipart.MultipartFile;
 
 
-import java.util.stream.Collectors;
+import java.util.Collections;
 
 public class AssignmentMapper {
 
@@ -18,40 +20,42 @@ public class AssignmentMapper {
 
         dto.setAssignmentId(assignment.getAssignmentId());
         dto.setDescription(assignment.getDescription());
-        dto.setSessionId(assignment.getSession() != null ? assignment.getSession().getSessionId() : null);
         dto.setStepId(assignment.getStep() != null ? assignment.getStep().getStepId() : null);
+        dto.setCreatedAt(assignment.getCreatedAt());
+        dto.setUpdatedAt(assignment.getUpdatedAt());
         if (assignment.getFiles() != null && !assignment.getFiles().isEmpty()) {
-            dto.setUploadsIds(
+            dto.setFileUrls(
                     assignment.getFiles().stream()
-                            .map(File::getFileId)
-                            .collect(Collectors.toList())
+                            .map(file -> "/files/"+ file.getFileId())
+                            .toList()
             );
+        } else {
+            dto.setFileUrls(Collections.emptyList());
         }
-
         return dto;
 
     }
 
-    public static Assignment toAssignmentEntity(AssignmentInputDto inputDto, Session session, Step step) {
+    public static Assignment toAssignmentEntity(AssignmentInputDto inputDto, Step step) {
         if (inputDto == null) {
             throw new ForbiddenException("AssignmentInputDto cannot be null");
         }
 
-        try {
-            Assignment assignment = new Assignment();
+        Assignment assignment = new Assignment();
+        assignment.setDescription(inputDto.getDescription());
+        assignment.setStep(step);
 
+        return assignment;
+    }
+
+    public static void updateAssignmentFromDto(Assignment assignment, AssignmentInputDto inputDto, Step newStep) {
+        if (inputDto.getDescription() != null) {
             assignment.setDescription(inputDto.getDescription());
-            if (session != null) {
-                assignment.setSession(session);
-            }
-            if (step != null) {
-                assignment.setStep(step);
-            }
+        }
 
-            return assignment;
-
-        } catch (Exception e) {
-            throw new ForbiddenException("Error mapping AssignmentInputDto to Assignment" + e);
+        if (newStep != null && !newStep.getStepId().equals(assignment.getStep().getStepId())) {
+            assignment.setStep(newStep);
         }
     }
+
 }

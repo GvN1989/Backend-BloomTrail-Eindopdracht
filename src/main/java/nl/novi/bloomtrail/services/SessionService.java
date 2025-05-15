@@ -2,13 +2,13 @@ package nl.novi.bloomtrail.services;
 
 import nl.novi.bloomtrail.dtos.SessionInputDto;
 import nl.novi.bloomtrail.exceptions.NotFoundException;
-import nl.novi.bloomtrail.helper.DateConverter;
+import nl.novi.bloomtrail.helper.AccessValidator;
 import nl.novi.bloomtrail.helper.ValidationHelper;
-import nl.novi.bloomtrail.helper.TimeConverter;
 import nl.novi.bloomtrail.mappers.SessionMapper;
 import nl.novi.bloomtrail.models.*;
 import nl.novi.bloomtrail.repositories.CoachingProgramRepository;
 import nl.novi.bloomtrail.repositories.SessionRepository;
+import nl.novi.bloomtrail.repositories.StepRepository;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -19,24 +19,31 @@ import java.util.stream.Collectors;
 public class SessionService {
 
     private final SessionRepository sessionRepository;
+    private final StepRepository stepRepository;
     private final CoachingProgramRepository coachingProgramRepository;
     private final ValidationHelper validationHelper;
+    private final AccessValidator accessValidator;
     private final DownloadService downloadService;
 
-    public SessionService(SessionRepository sessionRepository, CoachingProgramRepository coachingProgramRepository, ValidationHelper validationHelper, DownloadService downloadService) {
+    public SessionService(SessionRepository sessionRepository, StepRepository stepRepository, CoachingProgramRepository coachingProgramRepository, ValidationHelper validationHelper, AccessValidator accessValidator, DownloadService downloadService) {
         this.sessionRepository = sessionRepository;
+        this.stepRepository = stepRepository;
         this.coachingProgramRepository = coachingProgramRepository;
         this.validationHelper = validationHelper;
+        this.accessValidator = accessValidator;
         this.downloadService = downloadService;
     }
 
     public List<Session> getSessionsForUser(String username) {
         User user = validationHelper.validateUser(username);
 
+
         List<CoachingProgram> programs = coachingProgramRepository.findByUserUsername(username);
         if (programs.isEmpty()) {
             throw new NotFoundException("The user with username " + username + " does not have any coaching programs");
         }
+
+        accessValidator.validateSelfOrAffiliatedCoachOrAdminAccess(username, programs);
 
         List<Step> steps = programs.stream()
                 .flatMap(program -> program.getTimeline().stream())
@@ -47,22 +54,19 @@ public class SessionService {
         }
 
         return steps.stream()
-                .flatMap(step -> step.getSession().stream())
+                .flatMap(step -> step.getSessions().stream())
                 .collect(Collectors.toList());
     }
 
     public Session createSessionAndAddToStep(SessionInputDto inputDto) {
         Step step = validationHelper.validateStep(inputDto.getStepId());
+        validationHelper.validateStepBelongsToClient(step, inputDto.getClient());
 
-        List<SessionInsight> sessionInsights = inputDto.getSessionInsightsId() == null || inputDto.getSessionInsightsId().isEmpty()
-                ? List.of()
-                : validationHelper.validateSessionInsights(inputDto.getSessionInsightsId());
+        Session session = SessionMapper.toSessionEntity(inputDto, step);
 
-        List<Assignment> assignments = inputDto.getAssignmentId() == null || inputDto.getAssignmentId().isEmpty()
-                ? List.of()
-                : validationHelper.validateAssignments(inputDto.getAssignmentId());
-
-        Session session = SessionMapper.toSessionEntity(inputDto, step, sessionInsights, assignments);
+        String resolvedCoach = accessValidator.resolveAndValidateCoachForClient(
+                inputDto.getCoach(), inputDto.getClient());
+        session.setCoach(resolvedCoach);
 
         validationHelper.validateSessionDateAndTime(step, session);
 
@@ -74,31 +78,37 @@ public class SessionService {
         Session session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new NotFoundException("Session with ID " + sessionId + " not found"));
 
-        if (inputDto.getSessionDate() != null) {
-            session.setSessionDate(DateConverter.convertToLocalDate(inputDto.getSessionDate()));
-        }
-        if (inputDto.getSessionTime() != null) {
-            session.setSessionTime(TimeConverter.convertToLocalTime(inputDto.getSessionTime()));
-        }
-        if (inputDto.getLocation() != null) {
-            session.setLocation(inputDto.getLocation());
-        }
-        if (inputDto.getComment() != null) {
-            session.setComment(inputDto.getComment());
+        SessionMapper.updateSessionFromDto(session, inputDto);
+
+        String resolvedCoach = accessValidator.resolveAndValidateCoachForClient(
+                inputDto.getCoach(), inputDto.getClient());
+        session.setCoach(resolvedCoach);
+
+        if (inputDto.getStepId() != null && (session.getStep() == null || !session.getStep().getStepId().equals(inputDto.getStepId()))) {
+            Step newStep = stepRepository.findById(inputDto.getStepId())
+                    .orElseThrow(() -> new NotFoundException("Step with ID " + inputDto.getStepId() + " not found"));
+
+            validationHelper.validateStepBelongsToClient(newStep, inputDto.getClient());
+
+            session.setStep(newStep);
         }
 
         return sessionRepository.save(session);
     }
 
     public void deleteSession(Long sessionId) {
-        if (!sessionRepository.existsById(sessionId)) {
-            throw new NotFoundException("No session found with ID " + sessionId);
-        }
+        Session session = validationHelper.validateSession(sessionId);
+        accessValidator.validateCoachOrAdminAccess(session);
+
         sessionRepository.deleteById(sessionId);
     }
 
+
     public byte[] downloadFilesForSession(Long sessionId) throws IOException {
         Session session = validationHelper.validateSession(sessionId);
+
+        accessValidator.validateCoachOrClientOrAdminAccess(session);
+
         return downloadService.downloadFilesForEntity(session);
     }
 

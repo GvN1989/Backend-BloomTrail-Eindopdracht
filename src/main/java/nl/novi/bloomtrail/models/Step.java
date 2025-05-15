@@ -6,7 +6,6 @@ import jakarta.validation.constraints.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -30,27 +29,24 @@ public class Step {
     @Column(name = "step_end_date")
     private LocalDate stepEndDate;
 
-    @Column(name = "completed")
-    private Boolean completed;
+    @Column(nullable = false,name = "step_status")
+    private Boolean completed = false;
 
     @Column(name = "step_goal")
     private String StepGoal;
 
-    @NotNull
     @Column(name = "sequence")
     private Integer sequence;
 
     @ManyToOne
-    @JoinColumn(name = "coaching_program_id", insertable = false, updatable = false)
+    @JoinColumn(name = "coaching_program_id")
     private CoachingProgram coachingProgram;
 
-    @OneToMany
-    @JoinColumn(name = "session_id", insertable = false, updatable = false)
-    private List<Session> session = new ArrayList<>();
+    @OneToMany(mappedBy = "step", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Session> sessions = new ArrayList<>();
 
-    @OneToMany
-    @JoinColumn(name = "assignment_id", insertable = false, updatable = false)
-    private List<Assignment> assignment = new ArrayList<>();
+    @OneToMany(mappedBy = "step", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Assignment> assignments = new ArrayList<>();
 
     public Long getStepId() {
         return stepId;
@@ -108,20 +104,20 @@ public class Step {
         this.coachingProgram = coachingProgram;
     }
 
-    public List<Session> getSession() {
-        return session;
+    public List<Session> getSessions() {
+        return sessions;
     }
 
-    public void setSession(List<Session> session) {
-        this.session = session;
+    public void setSessions(List<Session> sessions) {
+        this.sessions = sessions;
     }
 
-    public List<Assignment> getAssignment() {
-        return assignment;
+    public List<Assignment> getAssignments() {
+        return assignments;
     }
 
-    public void setAssignment(List<Assignment> assignment) {
-        this.assignment = assignment;
+    public void setAssignments(List<Assignment> assignments) {
+        this.assignments = assignments;
     }
 
     public String getStepName() {

@@ -1,23 +1,31 @@
 package nl.novi.bloomtrail.services;
 
 import nl.novi.bloomtrail.dtos.StepInputDto;
+import nl.novi.bloomtrail.models.Authority;
 import nl.novi.bloomtrail.models.CoachingProgram;
 import nl.novi.bloomtrail.models.Step;
 import nl.novi.bloomtrail.models.User;
 import nl.novi.bloomtrail.repositories.CoachingProgramRepository;
 import nl.novi.bloomtrail.repositories.StepRepository;
 import nl.novi.bloomtrail.repositories.UserRepository;
+import nl.novi.bloomtrail.utils.SecurityTestHelper;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
-import nl.novi.bloomtrail.helper.DateConverter;
+import org.mockito.Mockito;
+import org.junit.jupiter.api.AfterEach;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -43,6 +51,15 @@ public class StepServiceIntegrationTest {
     private CoachingProgram coachingProgram;
     private Step step;
 
+    @BeforeEach
+    void setup() {
+        SecurityTestHelper.authenticateAs("henk", "ADMIN");
+    }
+    @AfterEach
+    void clearSecurityContext() {
+        SecurityContextHolder.clearContext();
+    }
+
     @Test
     void testAddStepsToProgram_Success() {
 
@@ -60,10 +77,12 @@ public class StepServiceIntegrationTest {
         coach.setApikey("CoachKey98765432109876");
         coach = userRepository.save(coach);
 
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
         coachingProgram = new CoachingProgram();
         coachingProgram.setCoachingProgramName("Test Coaching Program");
-        coachingProgram.setStartDate(LocalDate.parse("2025-01-01"));
-        coachingProgram.setEndDate(LocalDate.parse("2025-08-01"));
+        coachingProgram.setStartDate(LocalDate.parse("01-01-2025", formatter));
+        coachingProgram.setEndDate(LocalDate.parse("01-08-2025", formatter));
         coachingProgram.setClient(client);
         coachingProgram.setCoach(coach);
         coachingProgram = coachingProgramRepository.save(coachingProgram);
@@ -71,8 +90,10 @@ public class StepServiceIntegrationTest {
         StepInputDto stepInputDto = new StepInputDto();
         stepInputDto.setCoachingProgramId(coachingProgram.getCoachingProgramId());
         stepInputDto.setStepName("Integration Test Step");
-        stepInputDto.setStepStartDate(DateConverter.convertToDate(LocalDate.parse("2025-01-08")));
-        stepInputDto.setStepEndDate(DateConverter.convertToDate(LocalDate.parse("2025-02-01")));
+        stepInputDto.setStepGoal("confirm if the integration works");
+        stepInputDto.setCompleted(false);
+        stepInputDto.setStepStartDate(LocalDate.parse("08-01-2025", formatter));
+        stepInputDto.setStepEndDate(LocalDate.parse("01-02-2025", formatter));
 
         List<Step> savedSteps = stepService.addStepsToProgram(Collections.singletonList(stepInputDto));
 
@@ -89,7 +110,7 @@ public class StepServiceIntegrationTest {
     void testFindById_Success() {
 
         User client = new User();
-        client.setUsername("testUser");
+        client.setUsername("henk");
         client.setEmail("testuser@example.com");
         client.setPassword("password123");
         client.setApikey("FakeApiKey1234567890");
@@ -102,19 +123,21 @@ public class StepServiceIntegrationTest {
         coach.setApikey("CoachKey98765432109876");
         coach = userRepository.save(coach);
 
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
         coachingProgram = new CoachingProgram();
         coachingProgram.setCoachingProgramName("Test Coaching Program");
-        coachingProgram.setStartDate(LocalDate.parse("2025-01-01"));
-        coachingProgram.setEndDate(LocalDate.parse("2025-08-01"));
+        coachingProgram.setStartDate(LocalDate.parse("01-01-2025", formatter));
+        coachingProgram.setEndDate(LocalDate.parse("01-08-2025", formatter));
         coachingProgram.setClient(client);
         coachingProgram.setCoach(coach);
         coachingProgram = coachingProgramRepository.save(coachingProgram);
 
         step = new Step();
         step.setStepName("Existing Step");
-        step.setSequence(1);
-        step.setStepStartDate(LocalDate.parse("2025-01-08"));
-        step.setStepEndDate(LocalDate.parse("2025-02-01"));
+        step.setStepGoal("Deep dive in goal");
+        step.setStepStartDate(LocalDate.parse("08-01-2025", formatter));
+        step.setStepEndDate(LocalDate.parse("01-02-2025", formatter));
         step.setCoachingProgram(coachingProgram);
         step = stepRepository.save(step);
 
@@ -129,9 +152,12 @@ public class StepServiceIntegrationTest {
     void testDeleteStep_Success() {
         step = new Step();
         step.setStepName("Delete Me");
-        step.setSequence(1);
-        step.setStepStartDate(LocalDate.parse("2025-01-08"));
-        step.setStepEndDate(LocalDate.parse("2025-02-01"));
+        step.setStepGoal("Deep dive in goal");
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+        step.setStepStartDate(LocalDate.parse("08-01-2025", formatter));
+        step.setStepEndDate(LocalDate.parse("01-02-2025", formatter));
         step.setCoachingProgram(coachingProgram);
         step = stepRepository.save(step);
 

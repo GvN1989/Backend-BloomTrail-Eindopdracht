@@ -1,24 +1,26 @@
 package nl.novi.bloomtrail.controllers;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import nl.novi.bloomtrail.dtos.StepDto;
 import nl.novi.bloomtrail.dtos.StepInputDto;
+import nl.novi.bloomtrail.helper.AccessValidator;
+import nl.novi.bloomtrail.helper.ValidationHelper;
 import nl.novi.bloomtrail.mappers.StepMapper;
 import nl.novi.bloomtrail.models.Step;
 import nl.novi.bloomtrail.services.StepService;
 import org.springframework.http.*;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
+
 
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
+
 
 @RestController
 @RequestMapping("/step")
+@Validated
 public class StepController {
 
     private final StepService stepService;
@@ -30,57 +32,11 @@ public class StepController {
     @GetMapping("/{id}")
     public ResponseEntity <StepDto> getStepById (@PathVariable("id") Long stepId) {
         Step step = stepService.findById(stepId);
-        StepDto dto = StepMapper.toStepDto(step);
-        return ResponseEntity.ok(dto);
+        return ResponseEntity.ok(StepMapper.toStepDto(step));
     }
 
-    @GetMapping("/steps/{username}/{programId}")
-    public ResponseEntity<List<StepDto>> getStepsForProgram(
-            @PathVariable String username,
-            @PathVariable Long programId
-    ) {
-        List<Step> steps = stepService.getStepsForUserAndProgram(username, programId);
-        List<StepDto> response = steps.stream()
-                .sorted(Comparator.comparingInt(Step::getSequence))
-                .map(StepMapper::toStepDto)
-                .toList();
-        return ResponseEntity.ok(response);
-    }
-
-    @PostMapping("/coaching-programs/{programId}/steps")
-    public ResponseEntity<List<StepDto>> addStepsToProgram(
-            @PathVariable Long programId,
-            @Valid @RequestBody Object input
-    ) {
-
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        List<StepInputDto> inputDtos;
-
-        if (input instanceof Map) {
-            StepInputDto single = objectMapper.convertValue(input, StepInputDto.class);
-            single.setCoachingProgramId(programId);
-            inputDtos = List.of(single);
-        }
-        else if (input instanceof List) {
-            inputDtos = objectMapper.convertValue(input, new TypeReference<List<StepInputDto>>() {});
-            inputDtos.forEach(dto -> dto.setCoachingProgramId(programId));
-        }
-        else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid input format.");
-        }
-
-        List<StepDto> response = stepService.addStepsToProgram(inputDtos).stream()
-                .map(StepMapper::toStepDto)
-                .toList();
-
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-
-
-    @PatchMapping("/{id}")
-    public ResponseEntity <StepDto> updateStepDetails (@PathVariable("id") Long stepId, @RequestBody StepInputDto inputDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity <StepDto> updateStepDetails (@PathVariable("id") Long stepId, @Valid @RequestBody StepInputDto inputDto) {
         Step updatedStep = stepService.updateStepDetails(stepId, inputDto);
         StepDto updatedStepDto = StepMapper.toStepDto(updatedStep);
         return ResponseEntity.ok().body(updatedStepDto);
@@ -92,9 +48,12 @@ public class StepController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{stepId}/download-zip")
-    public ResponseEntity<byte[]> downloadFilesForStep(@PathVariable Long stepId) throws IOException {
+    @GetMapping("/{id}/download-zip")
+    public ResponseEntity<byte[]> downloadFilesForStep(@PathVariable("id") Long stepId) throws IOException {
         byte[] zipData = stepService.downloadFilesForStep(stepId);
+        if (zipData == null || zipData.length == 0) {
+            return ResponseEntity.noContent().build();
+        }
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
@@ -105,6 +64,49 @@ public class StepController {
         return ResponseEntity.ok()
                 .headers(headers)
                 .body(zipData);
+    }
+    @PostMapping("/{programId}/step")
+    public ResponseEntity<List<StepDto>> addStepsToProgram(
+            @PathVariable Long programId,
+            @Valid @RequestBody StepInputDto inputDto
+    ) {
+
+        inputDto.setCoachingProgramId(programId);
+        List<StepInputDto> inputDtos = List.of(inputDto);
+
+
+        List<StepDto> response = stepService.addStepsToProgram(inputDtos).stream()
+                .map(StepMapper::toStepDto)
+                .toList();
+
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping("/{programId}/steps-batch")
+    public ResponseEntity<List<StepDto>> addStepsToProgramBatch(
+            @PathVariable Long programId,
+            @RequestBody @Valid  List<@Valid StepInputDto> inputDtos) {
+
+        inputDtos.forEach(dto -> dto.setCoachingProgramId(programId));
+
+        List<StepDto> response = stepService.addStepsToProgram(inputDtos).stream()
+                .map(StepMapper::toStepDto)
+                .toList();
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping("/coaching-program/{programId}/steps")
+    public ResponseEntity<List<StepDto>> getStepsForProgram(
+            @PathVariable Long programId
+    ) {
+        List<Step> steps = stepService.getStepsForProgram(programId);
+        List<StepDto> response = steps.stream()
+                .sorted(Comparator.comparingInt(Step::getSequence))
+                .map(StepMapper::toStepDto)
+                .toList();
+        return ResponseEntity.ok(response);
     }
 
 }

@@ -1,6 +1,5 @@
 package nl.novi.bloomtrail.services;
 
-import nl.novi.bloomtrail.exceptions.NotFoundException;
 import nl.novi.bloomtrail.models.User;
 import nl.novi.bloomtrail.repositories.UserRepository;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -26,6 +25,10 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+
+        if (user.getAuthority() == null) {
+            throw new UsernameNotFoundException("User has no assigned authority: " + username);
+        }
 
         SimpleGrantedAuthority grantedAuthority = new SimpleGrantedAuthority(user.getAuthority().getAuthority());
 

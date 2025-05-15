@@ -1,5 +1,10 @@
 package nl.novi.bloomtrail.dtos;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.NotNull;
+import org.springframework.cglib.core.Local;
+import org.springframework.expression.spel.ast.Assign;
+
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
@@ -7,22 +12,18 @@ import java.util.List;
 public class StepDto {
 
     private Long StepId;
-
     private String StepName;
-
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private LocalDate stepStartDate;
-
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private LocalDate stepEndDate;
-
+    @NotNull(message = "Completion status is required.")
     private Boolean completed;
-
     private String stepGoal;
-
     private Integer sequence;
-
     private Long coachingProgramId;
     private List<Long> sessionIds;
-    private List<Long> assignmentIds;
+    private List<AssignmentDto> assignments;
 
     public Long getStepId() {
         return StepId;
@@ -96,11 +97,11 @@ public class StepDto {
         this.sessionIds = sessionIds;
     }
 
-    public List<Long> getAssignmentIds() {
-        return assignmentIds;
+    public List<AssignmentDto> getAssignments() {
+        return assignments;
     }
 
-    public void setAssignmentIds(List<Long> assignmentIds) {
-        this.assignmentIds = assignmentIds;
+    public void setAssignments(List<AssignmentDto> assignments) {
+        this.assignments = assignments;
     }
 }

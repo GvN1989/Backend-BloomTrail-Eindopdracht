@@ -2,9 +2,9 @@ package nl.novi.bloomtrail.services;
 
 import nl.novi.bloomtrail.dtos.StepInputDto;
 import nl.novi.bloomtrail.exceptions.BadRequestException;
+import nl.novi.bloomtrail.helper.AccessValidator;
 import nl.novi.bloomtrail.helper.StepSequenceHelper;
 import nl.novi.bloomtrail.exceptions.NotFoundException;
-import nl.novi.bloomtrail.helper.DateConverter;
 import nl.novi.bloomtrail.helper.ValidationHelper;
 import nl.novi.bloomtrail.models.*;
 import nl.novi.bloomtrail.repositories.CoachingProgramRepository;
@@ -21,10 +21,9 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -36,9 +35,11 @@ import static org.mockito.Mockito.*;
 public class StepServiceUnitTest {
 
     @Mock
-    private StepRepository stepRepository;
-    @Mock
     private ValidationHelper validationHelper;
+    @Mock
+    private AccessValidator accessValidator;
+    @Mock
+    private StepRepository stepRepository;
     @Mock
     private CoachingProgramService coachingProgramService;
     @Mock
@@ -58,14 +59,18 @@ public class StepServiceUnitTest {
     @Mock
     private CoachingProgram mockCoachingProgram;
 
+
     @BeforeEach
     void setUp() {
 
         mockCoachingProgram = new CoachingProgram();
         mockCoachingProgram.setCoachingProgramId(1L);
         mockCoachingProgram.setCoachingProgramName("Test Coaching Program");
-        mockCoachingProgram.setStartDate(LocalDate.parse("2025-01-01"));
-        mockCoachingProgram.setEndDate(LocalDate.parse("2025-06-01"));
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+        mockCoachingProgram.setStartDate(LocalDate.parse("01-01-2025", formatter));
+        mockCoachingProgram.setEndDate(LocalDate.parse("01-06-2025", formatter));
         mockCoachingProgram.setTimeline(new ArrayList<>());
 
         mockStep = new Step();
@@ -78,9 +83,6 @@ public class StepServiceUnitTest {
         mockAssignment = new Assignment();
         mockAssignment .setAssignmentId(1L);
 
-
-        lenient().when(validationHelper.validateStep(1L)).thenReturn(mockStep);
-        lenient().when(validationHelper.validateAssignment(1L)).thenReturn(mockAssignment);
         lenient().doNothing().when(stepSequenceHelper).reorderStepsForProgram(mockCoachingProgram);
     }
 
@@ -88,6 +90,7 @@ public class StepServiceUnitTest {
     @Test
     void testFindStepById_Success() {
         when(validationHelper.validateStep(1L)).thenReturn(mockStep);
+        doNothing().when(accessValidator).validateClientOrCoachOrAdminAccess(any(CoachingProgram.class));
 
         Step result = stepService.findById(1L);
 
@@ -110,8 +113,8 @@ public class StepServiceUnitTest {
     }
     @Tag("unit")
     @Test
-    void testReturnsStepsLinkedToUserAndProgram() {
-        String username = "testuser";
+    void testReturnsStepsLinkedToProgram() {
+
         Long programId = 1L;
 
         CoachingProgram mockProgram = new CoachingProgram();
@@ -120,48 +123,33 @@ public class StepServiceUnitTest {
         Step mockStep = new Step();
         mockStep.setStepId(1L);
         mockStep.setStepName("Step 1");
+        mockStep.setCoachingProgram(mockProgram);
 
-        when(validationHelper.validateUser(username)).thenReturn(new User());
-        when(coachingProgramRepository.findByCoachingProgramIdAndClientUsername(programId, username))
-                .thenReturn(Optional.of(mockProgram));
+        when(validationHelper.validateCoachingProgram(programId)).thenReturn(mockProgram);
+        doNothing().when(accessValidator).validateClientOrCoachOrAdminAccess(mockProgram);
         when(stepRepository.findByCoachingProgram(mockProgram)).thenReturn(List.of(mockStep));
 
-        List<Step> result = stepService.getStepsForUserAndProgram(username, programId);
+        List<Step> result = stepService.getStepsForProgram(programId);
 
         assertEquals(1, result.size());
         assertEquals("Step 1", result.get(0).getStepName());
     }
 
-    @Tag("unit")
-    @Test
-    void throwsNotFound_whenProgramNotFoundForUser() {
-        String username = "ghost";
-        Long programId = 99L;
-
-        when(validationHelper.validateUser(username)).thenReturn(new User());
-        when(coachingProgramRepository.findByCoachingProgramIdAndClientUsername(programId, username))
-                .thenReturn(Optional.empty());
-
-        Assertions.assertThrows(NotFoundException.class, () ->
-                stepService.getStepsForUserAndProgram(username, programId));
-    }
 
     @Tag("unit")
     @Test
     void throwsNotFound_whenNoStepsExistForProgram() {
-        String username = "testuser";
         Long programId = 1L;
 
         CoachingProgram mockProgram = new CoachingProgram();
         mockProgram.setCoachingProgramId(programId);
 
-        when(validationHelper.validateUser(username)).thenReturn(new User());
-        when(coachingProgramRepository.findByCoachingProgramIdAndClientUsername(programId, username))
-                .thenReturn(Optional.of(mockProgram));
+        when(validationHelper.validateCoachingProgram(programId)).thenReturn(mockProgram);
+        doNothing().when(accessValidator).validateClientOrCoachOrAdminAccess(mockProgram);
         when(stepRepository.findByCoachingProgram(mockProgram)).thenReturn(List.of());
 
         Assertions.assertThrows(NotFoundException.class, () ->
-                stepService.getStepsForUserAndProgram(username, programId));
+                stepService.getStepsForProgram(programId));
     }
 
 
@@ -176,8 +164,11 @@ public class StepServiceUnitTest {
         StepInputDto stepDto = new StepInputDto();
         stepDto.setCoachingProgramId(1L);
         stepDto.setStepName("Valid Step");
-        stepDto.setStepStartDate(DateConverter.convertToDate(LocalDate.parse("2025-06-15")));
-        stepDto.setStepEndDate(DateConverter.convertToDate(LocalDate.parse("2025-07-15")));
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+        stepDto.setStepStartDate(LocalDate.parse("15-06-2025", formatter));
+        stepDto.setStepEndDate(LocalDate.parse("15-07-2025", formatter));
 
         Assertions.assertDoesNotThrow(() -> stepService.addStepsToProgram(List.of(stepDto)));
 
@@ -196,17 +187,19 @@ public class StepServiceUnitTest {
         when(stepRepository.save(any(Step.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(coachingProgramRepository.save(any(CoachingProgram.class))).thenReturn(mockCoachingProgram);
 
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
         StepInputDto step1 = new StepInputDto();
         step1.setCoachingProgramId(1L);
         step1.setStepName("Step A");
-        step1.setStepStartDate(DateConverter.convertToDate(LocalDate.parse("2025-01-01")));
-        step1.setStepEndDate(DateConverter.convertToDate(LocalDate.parse("2025-02-01")));
+        step1.setStepStartDate(LocalDate.parse("01-01-2025", formatter));
+        step1.setStepEndDate(LocalDate.parse("01-02-2025", formatter));
 
         StepInputDto step2 = new StepInputDto();
         step2.setCoachingProgramId(1L);
         step2.setStepName("Step B");
-        step2.setStepStartDate(DateConverter.convertToDate(LocalDate.parse("2025-02-02")));
-        step2.setStepEndDate(DateConverter.convertToDate(LocalDate.parse("2025-03-01")));
+        step2.setStepStartDate(LocalDate.parse("02-02-2025", formatter));
+        step2.setStepEndDate(LocalDate.parse("01-03-2025", formatter));
 
         List<Step> result = stepService.addStepsToProgram(List.of(step1, step2));
 
@@ -229,27 +222,10 @@ public class StepServiceUnitTest {
 
     @Tag("unit")
     @Test
-    void testAddStepsToProgram_ThrowsBadRequest_WhenNameOrStartDateIsMissing() {
-        StepInputDto invalidDto = new StepInputDto();
-        invalidDto.setCoachingProgramId(1L);
-
-        List<StepInputDto> inputList = List.of(invalidDto);
-
-        when(validationHelper.validateCoachingProgram(1L)).thenReturn(mockCoachingProgram);
-
-        BadRequestException exception = Assertions.assertThrows(
-                BadRequestException.class,
-                () -> stepService.addStepsToProgram(inputList)
-        );
-
-        assertEquals("Step name and start date are required.", exception.getMessage());
-    }
-
-
-    @Tag("unit")
-    @Test
     void testUpdateStep_Success() {
         mockStepInputDto.setStepName("Updated Step");
+
+        doNothing().when(accessValidator).validateCoachOwnsProgramOrIsAdmin(mockCoachingProgram);
 
         when(validationHelper.validateStep(1L)).thenReturn(mockStep);
         when(stepRepository.save(any(Step.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -267,8 +243,13 @@ public class StepServiceUnitTest {
     @Test
     void testUpdateStep_CoversAllFields() {
         mockStepInputDto.setStepName("Updated Step");
-        mockStepInputDto.setStepStartDate(DateConverter.convertToDate(LocalDate.parse("2025-01-01")));
-        mockStepInputDto.setStepEndDate(DateConverter.convertToDate(LocalDate.parse("2025-01-10")));
+
+        doNothing().when(accessValidator).validateCoachOwnsProgramOrIsAdmin(mockCoachingProgram);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+        mockStepInputDto.setStepStartDate(LocalDate.parse("01-01-2025", formatter));
+        mockStepInputDto.setStepEndDate(LocalDate.parse("10-01-2025", formatter));
         mockStepInputDto.setStepGoal("New Goal");
         mockStepInputDto.setCompleted(true);
 
@@ -282,8 +263,8 @@ public class StepServiceUnitTest {
 
         assertNotNull(result);
         assertEquals("Updated Step", result.getStepName());
-        assertEquals(LocalDate.parse("2025-01-01"), result.getStepStartDate());
-        assertEquals(LocalDate.parse("2025-01-10"), result.getStepEndDate());
+        assertEquals(LocalDate.parse("01-01-2025", formatter), result.getStepStartDate());
+        assertEquals(LocalDate.parse("10-01-2025", formatter), result.getStepEndDate());
         assertEquals("New Goal", result.getStepGoal());
         Assertions.assertTrue(result.getCompleted());
 

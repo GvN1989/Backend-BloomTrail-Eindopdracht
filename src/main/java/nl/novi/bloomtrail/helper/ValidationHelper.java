@@ -1,8 +1,9 @@
 package nl.novi.bloomtrail.helper;
 
+import nl.novi.bloomtrail.dtos.SessionInputDto;
 import nl.novi.bloomtrail.dtos.StepInputDto;
-import nl.novi.bloomtrail.dtos.UserInputDto;
 import nl.novi.bloomtrail.exceptions.BadRequestException;
+import nl.novi.bloomtrail.exceptions.ForbiddenException;
 import nl.novi.bloomtrail.exceptions.NotFoundException;
 import nl.novi.bloomtrail.models.*;
 import nl.novi.bloomtrail.repositories.*;
@@ -23,16 +24,14 @@ public class ValidationHelper {
     private final UserRepository userRepository;
     private final CoachingProgramRepository coachingProgramRepository;
     private final StepRepository stepRepository;
-    private final StrengthResultsRepository strengthResultsRepository;
     private final SessionInsightRepository sessionInsightRepository;
 
-    public ValidationHelper(AssignmentRepository assignmentRepository, SessionRepository sessionRepository, UserRepository userRepository, CoachingProgramRepository coachingProgramRepository, StepRepository stepRepository, StrengthResultsRepository strengthResultsRepository, SessionInsightRepository sessionInsightRepository) {
+    public ValidationHelper(AssignmentRepository assignmentRepository, SessionRepository sessionRepository, UserRepository userRepository, CoachingProgramRepository coachingProgramRepository, StepRepository stepRepository, SessionInsightRepository sessionInsightRepository) {
         this.assignmentRepository = assignmentRepository;
         this.sessionRepository = sessionRepository;
         this.userRepository = userRepository;
         this.coachingProgramRepository = coachingProgramRepository;
         this.stepRepository = stepRepository;
-        this.strengthResultsRepository = strengthResultsRepository;
         this.sessionInsightRepository = sessionInsightRepository;
     }
 
@@ -72,8 +71,9 @@ public class ValidationHelper {
 
     public Step validateStep(Long StepId) {
         return stepRepository.findById(StepId)
-                .orElseThrow(() -> new NotFoundException("Step with ID" + StepId));
+                .orElseThrow(() -> new NotFoundException("Step not found"));
     }
+
 
     public List<Session> validateSessions(List<Long> sessionIds) {
         if (sessionIds == null || sessionIds.isEmpty()) {
@@ -99,11 +99,6 @@ public class ValidationHelper {
         return assignments;
     }
 
-    public StrengthResults validateStrengthResult(Long resultId) {
-        return strengthResultsRepository.findById(resultId)
-                .orElseThrow(() -> new NotFoundException("StrengthResults" + resultId));
-    }
-
     public SessionInsight validateSessionInsight(Long sessionInsightId) {
         return sessionInsightRepository.findById(sessionInsightId)
                 .orElseThrow(() -> new NotFoundException("StrengthResults" + sessionInsightId));
@@ -120,7 +115,7 @@ public class ValidationHelper {
     }
 
     public void validateSessionDateAndTime(Step step, Session session) {
-        boolean hasConflict = step.getSession().stream()
+        boolean hasConflict = step.getSessions().stream()
                 .anyMatch(existingSession ->
                         existingSession.getSessionDate().equals(session.getSessionDate()) &&
                                 existingSession.getSessionTime().equals(session.getSessionTime())
@@ -132,48 +127,39 @@ public class ValidationHelper {
         }
     }
 
-    public void validateAuthority(String authorityName) throws BadRequestException {
-        List<String> validRoles = Arrays.asList("ROLE_USER", "ROLE_COACH", "ROLE_ADMIN");
-        if (!validRoles.contains(authorityName)) {
-            throw new BadRequestException("Invalid role: " + authorityName);
-        }
-    }
-
-    public User getAuthenticatedUser() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        if (principal instanceof UserDetails userDetails) {
-            return userRepository.findByUsername(userDetails.getUsername())
-                    .orElseThrow(() -> new NotFoundException("User not found: " + userDetails.getUsername()));
-        }
-
-        throw new AccessDeniedException("Unable to determine authenticated user.");
-    }
-
-    public void validateCoachOwnsProgramOrIsAdmin(CoachingProgram program) {
-        User currentUser = getAuthenticatedUser();
-
-        boolean isAdmin = currentUser.getAuthority().getAuthority().equals("ADMIN");
-        boolean isCoach = program.getCoach().getUsername().equals(currentUser.getUsername());
-
-        if (!isAdmin && !isCoach) {
-            throw new AccessDeniedException("You do not have permission to modify this coaching program.");
-        }
-    }
-
     public void validateStepCreationInput(StepInputDto inputDto) {
+
         if (inputDto.getStepName() == null || inputDto.getStepName().isBlank()) {
             throw new BadRequestException("Step name is required.");
         }
         if (inputDto.getStepGoal() == null || inputDto.getStepGoal().isBlank()) {
             throw new BadRequestException("Step goal is required.");
         }
+        if (inputDto.getCompleted() == null) {
+            throw new BadRequestException("Field 'completed' must not be null.");
+        }
         if (inputDto.getCoachingProgramId() == null) {
             throw new BadRequestException("Coaching program ID is required.");
         }
-        if (inputDto.getStepStartDate() == null || inputDto.getStepEndDate() == null) {
-            throw new BadRequestException("Step start date and end date cannot be null.");
+        validateStepInputForUpdate(inputDto);
+    }
+
+    public void validateStepInputForUpdate(StepInputDto inputDto) {
+        if (inputDto.getStepStartDate() != null && inputDto.getStepEndDate() != null) {
+            if (inputDto.getStepEndDate().isBefore(inputDto.getStepStartDate())) {
+                throw new BadRequestException("Step end date must be after or equal to start date.");
+            }
         }
     }
+
+
+    public void validateStepBelongsToClient(Step step, String clientUsername) {
+        User stepOwner = step.getCoachingProgram().getClient();
+        if (!stepOwner.getUsername().equals(clientUsername)) {
+            throw new ForbiddenException("The selected step does not belong to the specified client.");
+        }
+    }
+
+
 
 }

@@ -1,10 +1,7 @@
 package nl.novi.bloomtrail.dtos;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.validation.constraints.Future;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.NoArgsConstructor;
 
 
@@ -23,14 +20,14 @@ public class CoachingProgramInputDto {
     private String goal;
 
     @NotNull
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy", timezone = "UTC")
-    @Future
-    private Date startDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
+    @FutureOrPresent(message = "Start date must be today or in the future.")
+    private LocalDate startDate;
 
     @NotNull
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     @Future
-    private Date endDate;
+    private LocalDate endDate;
 
     @NotBlank(message = "Client username is required")
     private String clientUsername;
@@ -62,20 +59,20 @@ public class CoachingProgramInputDto {
     public void setGoal(String goal) {
         this.goal = goal;
     }
-    @NotNull(message = "Start date cannot be null")
-    public Date getStartDate() {
+
+    public LocalDate getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(Date startDate) {
+    public void setStartDate(LocalDate startDate) {
         this.startDate = startDate;
     }
 
-    public Date getEndDate() {
+    public LocalDate getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(Date endDate) {
+    public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
     }
 

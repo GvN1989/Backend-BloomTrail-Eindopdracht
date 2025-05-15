@@ -1,5 +1,7 @@
 package nl.novi.bloomtrail.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
@@ -20,6 +22,7 @@ public class Authority implements Serializable {
     @OneToOne
     @MapsId("username")
     @JoinColumn(name = "username",referencedColumnName = "username")
+    @JsonIgnore
     private User user;
 
     public Authority() {}

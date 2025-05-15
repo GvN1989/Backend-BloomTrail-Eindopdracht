@@ -5,7 +5,6 @@ import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.NoArgsConstructor;
-import nl.novi.bloomtrail.enums.SessionStatus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -23,22 +22,20 @@ public class SessionInputDto {
     @NotBlank
     private String client;
     @NotNull
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     @Future
-    private Date sessionDate;
+    private LocalDate sessionDate;
     @NotNull
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm", timezone = "UTC")
-    @Future
-    private Date sessionTime;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
+    private LocalTime sessionTime;
     private String location;
     private String comment;
     @Future
     private LocalDateTime createdAt;
     @Future
     private LocalDateTime updatedAt;
-    private List<Long> sessionInsightsId;
-    private List<Long> assignmentId;
-    private Long StepId;
+    private SessionInsightInputDto sessionInsight;
+    private Long stepId;
 
     public Long getSessionId() {
         return sessionId;
@@ -72,19 +69,19 @@ public class SessionInputDto {
         this.client = client;
     }
 
-    public Date getSessionDate() {
+    public LocalDate getSessionDate() {
         return sessionDate;
     }
 
-    public void setSessionDate(Date sessionDate) {
+    public void setSessionDate(LocalDate sessionDate) {
         this.sessionDate = sessionDate;
     }
 
-    public Date getSessionTime() {
+    public LocalTime getSessionTime() {
         return sessionTime;
     }
 
-    public void setSessionTime(Date sessionTime) {
+    public void setSessionTime(LocalTime sessionTime) {
         this.sessionTime = sessionTime;
     }
 
@@ -120,27 +117,19 @@ public class SessionInputDto {
         this.updatedAt = updatedAt;
     }
 
-    public List<Long> getSessionInsightsId() {
-        return sessionInsightsId;
-    }
-
-    public void setSessionInsightsId(List<Long> sessionInsightsId) {
-        this.sessionInsightsId = sessionInsightsId;
-    }
-
-    public List<Long> getAssignmentId() {
-        return assignmentId;
-    }
-
-    public void setAssignmentId(List<Long> assignmentId) {
-        this.assignmentId = assignmentId;
-    }
-
     public Long getStepId() {
-        return StepId;
+        return stepId;
     }
 
     public void setStepId(Long stepId) {
-        StepId = stepId;
+        this.stepId = stepId;
+    }
+
+    public SessionInsightInputDto getSessionInsight() {
+        return sessionInsight;
+    }
+
+    public void setSessionInsight(SessionInsightInputDto sessionInsight) {
+        this.sessionInsight = sessionInsight;
     }
 }
