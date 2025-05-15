@@ -9,6 +9,7 @@ import nl.novi.bloomtrail.mappers.StepMapper;
 import nl.novi.bloomtrail.models.Step;
 import nl.novi.bloomtrail.services.StepService;
 import org.springframework.http.*;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -19,18 +20,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/step")
+@Validated
 public class StepController {
 
     private final StepService stepService;
 
-    private final ValidationHelper validationHelper;
-
-    private final AccessValidator accessValidator;
-
-    public StepController(StepService stepService, ValidationHelper validationHelper, AccessValidator accessValidator) {
+    public StepController(StepService stepService) {
         this.stepService = stepService;
-        this.validationHelper = validationHelper;
-        this.accessValidator = accessValidator;
     }
 
     @GetMapping("/{id}")
@@ -40,7 +36,7 @@ public class StepController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity <StepDto> updateStepDetails (@PathVariable("id") Long stepId, @RequestBody StepInputDto inputDto) {
+    public ResponseEntity <StepDto> updateStepDetails (@PathVariable("id") Long stepId, @Valid @RequestBody StepInputDto inputDto) {
         Step updatedStep = stepService.updateStepDetails(stepId, inputDto);
         StepDto updatedStepDto = StepMapper.toStepDto(updatedStep);
         return ResponseEntity.ok().body(updatedStepDto);

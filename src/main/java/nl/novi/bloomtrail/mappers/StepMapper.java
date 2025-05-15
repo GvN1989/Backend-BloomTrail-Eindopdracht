@@ -7,7 +7,6 @@ import nl.novi.bloomtrail.models.CoachingProgram;
 import nl.novi.bloomtrail.models.Step;
 import nl.novi.bloomtrail.models.Session;
 import nl.novi.bloomtrail.models.Assignment;
-import nl.novi.bloomtrail.helper.DateConverter;
 
 import java.util.List;
 
@@ -72,8 +71,8 @@ public class StepMapper {
     public static void updateStepFromDto(Step step, StepInputDto dto) {
         if (dto.getStepName() != null) step.setStepName(dto.getStepName());
         if (dto.getStepGoal() != null) step.setStepGoal(dto.getStepGoal());
-        if (dto.getStepStartDate() != null) step.setStepStartDate(dto.getStepStartDate());
-        if (dto.getStepEndDate() != null) step.setStepEndDate(dto.getStepEndDate());
+        if (dto.getStepStartDate() != null) {step.setStepStartDate(dto.getStepStartDate());}
+        if (dto.getStepEndDate() != null) {step.setStepEndDate(dto.getStepEndDate());}
         if (dto.getCompleted() != null) step.setCompleted(dto.getCompleted());
     }
 }

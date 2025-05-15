@@ -1,6 +1,7 @@
 package nl.novi.bloomtrail.dtos;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.cglib.core.Local;
 import org.springframework.expression.spel.ast.Assign;
 
@@ -16,6 +17,7 @@ public class StepDto {
     private LocalDate stepStartDate;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private LocalDate stepEndDate;
+    @NotNull(message = "Completion status is required.")
     private Boolean completed;
     private String stepGoal;
     private Integer sequence;

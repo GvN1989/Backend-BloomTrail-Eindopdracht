@@ -65,7 +65,6 @@ public class StepService {
             throw new BadRequestException("Step input list must not be empty.");
         }
 
-
         List<Step> savedSteps = new ArrayList<>();
         Long coachingProgramId = inputDtos.get(0).getCoachingProgramId();
 
@@ -103,6 +102,7 @@ public class StepService {
         CoachingProgram coachingProgram = existingStep.getCoachingProgram();
 
         accessValidator.validateCoachOwnsProgramOrIsAdmin(coachingProgram);
+        validationHelper.validateStepInputForUpdate(inputDto);
 
         StepMapper.updateStepFromDto(existingStep, inputDto);
 

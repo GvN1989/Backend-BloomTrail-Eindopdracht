@@ -36,25 +36,16 @@ public class AssignmentMapper {
 
     }
 
-    public static Assignment toAssignmentEntity(AssignmentInputDto inputDto, Session session, Step step) {
+    public static Assignment toAssignmentEntity(AssignmentInputDto inputDto, Step step) {
         if (inputDto == null) {
             throw new ForbiddenException("AssignmentInputDto cannot be null");
         }
 
-        try {
-            Assignment assignment = new Assignment();
+        Assignment assignment = new Assignment();
+        assignment.setDescription(inputDto.getDescription());
+        assignment.setStep(step);
 
-            assignment.setDescription(inputDto.getDescription());
-
-            if (step != null) {
-                assignment.setStep(step);
-            }
-
-            return assignment;
-
-        } catch (Exception e) {
-            throw new ForbiddenException("Error mapping AssignmentInputDto to Assignment" + e);
-        }
+        return assignment;
     }
 
     public static void updateAssignmentFromDto(Assignment assignment, AssignmentInputDto inputDto, Step newStep) {

@@ -55,8 +55,8 @@ public class SpringSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/authenticated").authenticated()
 
                         .requestMatchers(HttpMethod.GET, "/users/{username}/authority").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/users/{username}/authorities").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/users/{username}/authorities").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/users/{username}/authority").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/users/{username}/authority").hasAuthority("ADMIN")
 
                         .requestMatchers(HttpMethod.DELETE, "/users/{username}").hasAuthority("ADMIN")
 

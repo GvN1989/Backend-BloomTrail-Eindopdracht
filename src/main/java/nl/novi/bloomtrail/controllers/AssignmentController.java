@@ -34,30 +34,23 @@ public class AssignmentController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<AssignmentDto> createAssignment(
-            @RequestParam("description") String description,
-            @RequestParam("stepId") Long stepId,
-            @RequestPart(value = "file", required = false) MultipartFile file
+            @Valid @ModelAttribute AssignmentInputDto inputDto,
+            @RequestPart(value = "files", required = false) MultipartFile[]files
     ) {
-        AssignmentInputDto inputDto = buildAssignmentInputDto(description, stepId);
-
-        Assignment assignment = assignmentService.createAssignment(inputDto, file);
-        AssignmentDto responseDto = AssignmentMapper.toAssignmentDto(assignment);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+        Assignment assignment = assignmentService.createAssignment(inputDto, files);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(AssignmentMapper.toAssignmentDto(assignment));
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<AssignmentDto> updateAssignment(
-            @PathVariable ("id") Long assignmentId,
-            @RequestParam("description") String description,
-            @RequestParam("stepId") Long stepId,
-            @RequestPart(value = "file", required = false) MultipartFile file
+            @PathVariable Long id,
+            @Valid @ModelAttribute AssignmentInputDto inputDto,
+            @RequestPart(value = "files", required = false) MultipartFile[]files
     ) {
-        AssignmentInputDto inputDto = buildAssignmentInputDto(description, stepId);
+        Assignment assignment = assignmentService.updateAssignment(id, inputDto, files);
 
-        Assignment assignment = assignmentService.updateAssignment(assignmentId,inputDto, file);
-        AssignmentDto responseDto = AssignmentMapper.toAssignmentDto(assignment);
-        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+        return ResponseEntity.ok(AssignmentMapper.toAssignmentDto(assignment));
     }
 
     @DeleteMapping("/{id}")
@@ -69,23 +62,18 @@ public class AssignmentController {
     @GetMapping("/{id}/download-zip")
     public ResponseEntity<byte[]> downloadSingleAssignmentFiles(@PathVariable ("id") Long assignmentId) throws IOException {
         byte[] zipData = assignmentService.downloadAssignmentFiles(assignmentId);
+        if (zipData == null || zipData.length == 0) {
+            return ResponseEntity.noContent().build();
+        }
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
         headers.setContentDisposition(ContentDisposition.attachment()
-               .filename("assignment_files_" + assignmentId + ".zip")
-               .build());
-
+                .filename("assignment_files_" + assignmentId + ".zip")
+                .build());
 
         return ResponseEntity.ok()
                 .headers(headers)
                 .body(zipData);
-    }
-
-    private AssignmentInputDto buildAssignmentInputDto(String description, Long stepId) {
-        AssignmentInputDto dto = new AssignmentInputDto();
-        dto.setDescription(description);
-        dto.setStepId(stepId);
-        return dto;
     }
 }

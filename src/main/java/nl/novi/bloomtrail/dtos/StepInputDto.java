@@ -1,12 +1,9 @@
 package nl.novi.bloomtrail.dtos;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.validation.constraints.*;
 import lombok.NoArgsConstructor;
-import org.springframework.cglib.core.Local;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 
 @NoArgsConstructor
@@ -21,7 +18,6 @@ public class StepInputDto {
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate stepEndDate;
 
-    @NotNull(message = "Field 'completed' must not be null.")
     private Boolean completed;
 
     private String stepGoal;

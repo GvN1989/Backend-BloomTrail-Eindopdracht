@@ -40,42 +40,53 @@ public class AssignmentService {
         return step.getAssignments();
     }
 
-    public Assignment createAssignment(AssignmentInputDto inputDto, MultipartFile file) {
-        if (!inputDto.isValid()) {
-            throw new IllegalArgumentException("Assignment must be linked to a step.");
-        }
-        Assignment assignment = new Assignment();
-        assignment.setDescription(inputDto.getDescription());
+    public Assignment createAssignment(AssignmentInputDto inputDto, MultipartFile[] files) {
 
         Step step = validationHelper.validateStep(inputDto.getStepId());
-        assignment.setStep(step);
-
         accessValidator.validateCoachOwnsStepOrAdmin(step);
+
+        Assignment assignment = AssignmentMapper.toAssignmentEntity(inputDto,step);
 
         Assignment savedAssignment = assignmentRepository.save(assignment);
         assignmentRepository.flush();
 
-        if (file != null && !file.isEmpty()) {
-            fileService.saveFile(file, FileContext.ASSIGNMENT, savedAssignment);
+        if (files != null) {
+            for (MultipartFile file : files) {
+                if (!file.isEmpty()) {
+                    fileService.saveFile(file, FileContext.ASSIGNMENT, savedAssignment);
+                }
+            }
         }
 
         return assignmentRepository.findByAssignmentId(savedAssignment.getAssignmentId())
                 .orElseThrow(() -> new EntityNotFoundException("Assignment not found after creation"));
     }
 
-    public Assignment updateAssignment(Long assignmentId, AssignmentInputDto inputDto, MultipartFile file) {
+    public Assignment updateAssignment(Long assignmentId, AssignmentInputDto inputDto, MultipartFile[] files) {
         Assignment assignment = validationHelper.validateAssignment(assignmentId);
 
-        Step step = inputDto.getStepId() != null
+        Step currentStep = assignment.getStep();
+        Step newStep = inputDto.getStepId() != null
                 ? validationHelper.validateStep(inputDto.getStepId())
                 : assignment.getStep();
 
-        accessValidator.validateCoachOwnsStepOrAdmin(step);
+        if (!currentStep.equals(newStep)) {
+            accessValidator.validateCoachOwnsStepOrAdmin(currentStep);
+            accessValidator.validateCoachOwnsStepOrAdmin(newStep);
+        } else {
+            accessValidator.validateCoachOwnsStepOrAdmin(currentStep);
+        }
 
-        AssignmentMapper.updateAssignmentFromDto(assignment, inputDto, step);
+        AssignmentMapper.updateAssignmentFromDto(assignment, inputDto, newStep);
 
-        if (file != null && !file.isEmpty()) {
-            fileService.saveFile(file, FileContext.ASSIGNMENT, assignment);
+        if (files != null && files.length > 0) {
+            fileService.deleteFilesForParentEntity(assignment);
+
+            for (MultipartFile file : files) {
+                if (!file.isEmpty()) {
+                    fileService.saveFile(file, FileContext.ASSIGNMENT, assignment);
+                }
+            }
         }
 
         return assignmentRepository.save(assignment);
@@ -83,6 +94,7 @@ public class AssignmentService {
 
     public void deleteAssignment(Long assignmentId) {
         Assignment assignment = validationHelper.validateAssignment(assignmentId);
+        accessValidator.validateClientOrCoachOrAdminAccess(assignment.getStep().getCoachingProgram());
         fileService.deleteFilesForParentEntity(assignment);
         assignmentRepository.delete(assignment);
     }

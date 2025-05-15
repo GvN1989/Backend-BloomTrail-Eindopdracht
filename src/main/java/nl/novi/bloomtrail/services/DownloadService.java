@@ -46,7 +46,7 @@ public class DownloadService {
 
             for (File file : files) {
                 byte[] fileData = fileService.readFileFromStorage(file.getUrl());
-                String fileName= "assignment_" + file.getFileId() + "_" +
+                String fileName= "file_" + file.getFileId() + "_" +
                         (file.getOriginalFilename() != null ? file.getOriginalFilename() : "file_" + file.getFileId());
 
                 ZipEntry zipEntry = new ZipEntry(fileName);

@@ -141,13 +141,17 @@ public class ValidationHelper {
         if (inputDto.getCoachingProgramId() == null) {
             throw new BadRequestException("Coaching program ID is required.");
         }
-        if (inputDto.getStepStartDate() == null || inputDto.getStepEndDate() == null) {
-            throw new BadRequestException("Step start date and end date cannot be null.");
-        }
-        if (inputDto.getStepEndDate().isBefore(inputDto.getStepStartDate())) {
-            throw new BadRequestException("Step end date cannot be before start date.");
+        validateStepInputForUpdate(inputDto);
+    }
+
+    public void validateStepInputForUpdate(StepInputDto inputDto) {
+        if (inputDto.getStepStartDate() != null && inputDto.getStepEndDate() != null) {
+            if (inputDto.getStepEndDate().isBefore(inputDto.getStepStartDate())) {
+                throw new BadRequestException("Step end date must be after or equal to start date.");
+            }
         }
     }
+
 
     public void validateStepBelongsToClient(Step step, String clientUsername) {
         User stepOwner = step.getCoachingProgram().getClient();
