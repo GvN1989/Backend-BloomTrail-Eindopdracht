@@ -66,7 +66,6 @@ public class GlobalExceptionHandler {
         );
     }
 
-
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<Object> handleAccessDenied(AccessDeniedException ex) {
         HttpHeaders headers = new HttpHeaders();

@@ -4,9 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.*;
 import lombok.NoArgsConstructor;
 
-
 import java.time.LocalDate;
-import java.util.Date;
 
 @NoArgsConstructor
 public class CoachingProgramInputDto {

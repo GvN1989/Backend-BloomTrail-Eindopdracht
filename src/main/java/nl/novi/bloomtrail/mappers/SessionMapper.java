@@ -2,15 +2,9 @@ package nl.novi.bloomtrail.mappers;
 
 import nl.novi.bloomtrail.dtos.SessionDto;
 import nl.novi.bloomtrail.dtos.SessionInputDto;
-import nl.novi.bloomtrail.dtos.StepInputDto;
 import nl.novi.bloomtrail.exceptions.ForbiddenException;
-import nl.novi.bloomtrail.models.Assignment;
 import nl.novi.bloomtrail.models.Session;
-import nl.novi.bloomtrail.models.SessionInsight;
 import nl.novi.bloomtrail.models.Step;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class SessionMapper {
 

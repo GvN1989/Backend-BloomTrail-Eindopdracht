@@ -5,8 +5,6 @@ import nl.novi.bloomtrail.dtos.UserInputDto;
 import nl.novi.bloomtrail.exceptions.BadRequestException;
 import nl.novi.bloomtrail.models.Authority;
 import nl.novi.bloomtrail.models.User;
-
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 

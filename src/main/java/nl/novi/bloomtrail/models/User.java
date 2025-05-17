@@ -1,12 +1,10 @@
 package nl.novi.bloomtrail.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
-import java.util.HashSet;
-import java.util.Set;
+
 
 @Entity
 @Table(name = "users")

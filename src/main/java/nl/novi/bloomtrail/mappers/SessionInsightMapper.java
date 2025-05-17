@@ -1,10 +1,8 @@
 package nl.novi.bloomtrail.mappers;
 
 import nl.novi.bloomtrail.dtos.SessionInsightDto;
-import nl.novi.bloomtrail.dtos.SessionInsightInputDto;
 import nl.novi.bloomtrail.enums.FileContext;
 import nl.novi.bloomtrail.models.File;
-import nl.novi.bloomtrail.models.Session;
 import nl.novi.bloomtrail.models.SessionInsight;
 
 import java.util.List;

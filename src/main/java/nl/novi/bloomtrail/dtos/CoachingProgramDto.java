@@ -3,7 +3,6 @@ package nl.novi.bloomtrail.dtos;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 
 public class CoachingProgramDto {

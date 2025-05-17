@@ -1,9 +1,5 @@
 package nl.novi.bloomtrail.dtos;
 
-
-import java.util.List;
-
-
 public class UserDto {
     private String username;
     private String email;

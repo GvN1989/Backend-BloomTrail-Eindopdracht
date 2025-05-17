@@ -1,7 +1,5 @@
 package nl.novi.bloomtrail.dtos;
 
-import nl.novi.bloomtrail.enums.FileContext;
-
 import java.util.Date;
 import java.util.List;
 

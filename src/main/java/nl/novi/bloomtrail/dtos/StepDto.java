@@ -2,11 +2,8 @@ package nl.novi.bloomtrail.dtos;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.cglib.core.Local;
-import org.springframework.expression.spel.ast.Assign;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 
 public class StepDto {

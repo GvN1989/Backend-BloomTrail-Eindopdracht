@@ -1,8 +1,7 @@
 package nl.novi.bloomtrail.dtos;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import nl.novi.bloomtrail.enums.FileContext;
+
 
 import java.util.List;
 

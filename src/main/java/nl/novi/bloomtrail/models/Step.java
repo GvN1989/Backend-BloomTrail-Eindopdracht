@@ -1,6 +1,5 @@
 package nl.novi.bloomtrail.models;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 

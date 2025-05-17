@@ -3,8 +3,6 @@ package nl.novi.bloomtrail.controllers;
 import jakarta.validation.Valid;
 import nl.novi.bloomtrail.dtos.StepDto;
 import nl.novi.bloomtrail.dtos.StepInputDto;
-import nl.novi.bloomtrail.helper.AccessValidator;
-import nl.novi.bloomtrail.helper.ValidationHelper;
 import nl.novi.bloomtrail.mappers.StepMapper;
 import nl.novi.bloomtrail.models.Step;
 import nl.novi.bloomtrail.services.StepService;

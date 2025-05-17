@@ -2,7 +2,6 @@ package nl.novi.bloomtrail.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import nl.novi.bloomtrail.enums.FileContext;
 import org.hibernate.annotations.CreationTimestamp;
 
 

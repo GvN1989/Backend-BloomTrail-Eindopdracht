@@ -10,8 +10,6 @@ import nl.novi.bloomtrail.repositories.StrengthResultsRepository;
 import org.springframework.stereotype.Service;
 import nl.novi.bloomtrail.helper.ValidationHelper;
 
-import java.util.List;
-
 @Service
 public class StrengthResultsService {
     private final StrengthResultsRepository strengthResultsRepository;

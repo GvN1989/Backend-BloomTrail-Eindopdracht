@@ -1,6 +1,5 @@
 package nl.novi.bloomtrail.repositories;
 
-import nl.novi.bloomtrail.enums.FileContext;
 import nl.novi.bloomtrail.models.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
