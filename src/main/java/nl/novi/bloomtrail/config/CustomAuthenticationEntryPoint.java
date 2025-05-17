@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import nl.novi.bloomtrail.helper.ErrorResponseBuilder;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 @Component
