@@ -94,7 +94,7 @@ public class AssignmentService {
 
     public void deleteAssignment(Long assignmentId) {
         Assignment assignment = validationHelper.validateAssignment(assignmentId);
-        accessValidator.validateClientOrCoachOrAdminAccess(assignment.getStep().getCoachingProgram());
+        accessValidator.validateCoachOwnsProgramOrIsAdmin(assignment.getStep().getCoachingProgram());
         fileService.deleteFilesForParentEntity(assignment);
         assignmentRepository.delete(assignment);
     }
